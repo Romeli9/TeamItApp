@@ -1,20 +1,31 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { FIREBASE_AUTH } from '../../FireBaseConfig';
+import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
+import { collection, addDoc } from "firebase/firestore"
 
 const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const auth = FIREBASE_AUTH;
+  const firestore = FIREBASE_DB;
 
   const SignUp = async () => {
     setLoading(true);
     try {
       const response = await createUserWithEmailAndPassword(auth, email, password);
+      const user = response.user;
+      
+      const response2 = await addDoc(collection(firestore, 'users'), {
+        username: username,
+        email: email,
+      });
+
       console.log(response);
+      console.log(response2);
       navigation.navigate('Homepage');
     } catch (error: any) {
       console.log(error);
@@ -34,6 +45,15 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
           autoCapitalize='none'
           onChangeText={(text) => setEmail(text)}
         />
+
+        <TextInput
+          value={username}
+          style={styles.input}
+          placeholder='Username'
+          autoCapitalize='none'
+          onChangeText={(text) => setUsername(text)}
+        />
+
         <TextInput
           secureTextEntry={true}
           value={password}

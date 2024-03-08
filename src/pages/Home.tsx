@@ -7,7 +7,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const handleSignOut = async () => {
     try {
       await FIREBASE_AUTH.signOut();
-      // После выхода из учетной записи, например, перенаправляем на страницу Login
       navigation.navigate('Login');
     } catch (error) {
       console.error('Sign out error:', error);
