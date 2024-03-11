@@ -45,6 +45,7 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
           placeholder='Email'
           autoCapitalize='none'
           onChangeText={(text) => setEmail(text)}
+          keyboardType="email-address"
         />
 
         <TextInput

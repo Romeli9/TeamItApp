@@ -1,25 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, Image } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, getDoc, setDoc, addDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc } from 'firebase/firestore';
 import ProjectWidget from '../widgets/ProjectWidget';
-import ImagePicker, { ImagePickerResponse } from 'react-native-image-picker'; // Import ImagePickerResponse
-
-
 import { loadFonts } from '../shared/fonts/fonts';
-
+import * as ImagePicker from 'react-native-image-picker';
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
-  
   const [username, setUsername] = useState<string | null>(null);
   const [userImgUrl, setUserImgUrl] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [pickerResponse, setPickerResponse] = useState<ImagePicker.ImagePickerResponse | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, async (user) => {
+    const fetchData = async () => {
+      const user = FIREBASE_AUTH.currentUser;
       if (user) {
         const firestore = FIREBASE_DB;
         const usersRef = collection(firestore, 'users');
@@ -31,71 +29,68 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           setUserImgUrl(userData.ImgUrl || '');
         }
       }
+      await loadFonts();
+      setFontsLoaded(true);
+    };
 
-      const loadAppResources = async () => {
-        await loadFonts();
-        setFontsLoaded(true);
-      };
-  
-      loadAppResources();
-    });
-
+    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
     return unsubscribe;
   }, []);
 
   const insets = useSafeAreaInsets();
 
-  if (!fontsLoaded) {
-    return (
-      <SafeAreaProvider>
-        <View style = {{ flex: 1, paddingTop: insets.top}} >
-          <Text>Loading...</Text>
-        </View>
-      </SafeAreaProvider>
-      
-    );
-  }
+  const onImageLibraryPress = useCallback(() => {
+    const options = {
+      selectionLimit: 1,
+      mediaType: 'photo' as ImagePicker.MediaType,
+      includeBase64: false,
+    };
+    ImagePicker.launchImageLibrary(options, setPickerResponse);
+  }, []);
 
-  
-  
-
-  
   const ModalOpen = () => {
     setModalVisible(!isModalVisible);
-  } 
+  };
 
   const ModalClose = () => {
     setModalVisible(false);
   };
 
-  
+  if (!fontsLoaded) {
+    return (
+      <SafeAreaProvider>
+        <View style={{ flex: 1, paddingTop: insets.top }}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#FFFFFF', paddingLeft: 16 }}>
         <Text style={{ fontSize: 28 }}>Hello {username}</Text>
 
-          <Text>Ваши проекты:</Text>
-          <TouchableOpacity style={styles.create__button} onPress={ModalOpen}>
-            <Text style={styles.create__text}>+</Text>
-          </TouchableOpacity>
-        
+        <Text>Ваши проекты:</Text>
+        <TouchableOpacity style={styles.create__button} onPress={ModalOpen}>
+          <Text style={styles.create__text}>+</Text>
+        </TouchableOpacity>
 
-          <Modal visible={isModalVisible} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Создание проекта</Text>
-            <TouchableOpacity style={styles.closeButton} onPress={ModalClose}>
-              <Text style={styles.closeButtonText}>Закрыть</Text>
-            </TouchableOpacity>
+        <Modal visible={isModalVisible} animationType="slide" transparent>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity style={styles.closeButton} onPress={ModalClose}>
+                <Image source={require('../shared/icons/cros.png')} />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Создание проекта</Text>
+              <TouchableOpacity style={styles.add_image__button} onPress={onImageLibraryPress}>
+                <Text style={styles.add_image__text}>+</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
-       
+        </Modal>
       </View>
     </SafeAreaProvider>
-
-    
   );
 };
 
@@ -133,15 +128,30 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 27,
     fontFamily: 'Inter-Bold',
-    marginBottom: 20,
+    marginBottom: 17,
     fontWeight: 'bold',
   },
   closeButton: {
+    marginLeft: '90%',
     marginTop: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
   },
-  closeButtonText: {
-    fontSize: 16,
-    color: 'blue',
+  add_image__button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#D9D9D9',
+    width: 64,
+    height: 75,
+    borderRadius: 20,
+    marginTop: 13,
+    marginBottom: 13,
   },
-
+  add_image__text: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 48,
+    color: '#FFFFFF',
+  },
 });
