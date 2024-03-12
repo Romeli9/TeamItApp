@@ -1,19 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, TextInput } from 'react-native';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import ProjectWidget from '../widgets/ProjectWidget';
 import { loadFonts } from '../shared/fonts/fonts';
-import * as ImagePicker from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [username, setUsername] = useState<string | null>(null);
   const [userImgUrl, setUserImgUrl] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [pickerResponse, setPickerResponse] = useState<ImagePicker.ImagePickerResponse | null>(null);
+  const [pickerResponse, setPickerResponse] = useState<ImagePicker.ImagePickerResult | null>(null);
+
+  const [projectName, setProjectName] = useState('');
+  const [projectDesc, setProjectDesc] = useState('');
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,13 +43,25 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const insets = useSafeAreaInsets();
 
-  const onImageLibraryPress = useCallback(() => {
-    const options = {
-      selectionLimit: 1,
-      mediaType: 'photo' as ImagePicker.MediaType,
-      includeBase64: false,
-    };
-    ImagePicker.launchImageLibrary(options, setPickerResponse);
+  const onImageLibraryPress = useCallback(async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Извините, но нам нужно разрешение на доступ к вашей камере, чтобы это работало!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      selectionLimit: 1, // Установка лимита на одно изображение
+    });
+
+    if (!result.canceled) {
+      console.log(result);
+      setPickerResponse(result);
+    }
   }, []);
 
   const ModalOpen = () => {
@@ -86,6 +102,14 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
               <TouchableOpacity style={styles.add_image__button} onPress={onImageLibraryPress}>
                 <Text style={styles.add_image__text}>+</Text>
               </TouchableOpacity>
+              <TextInput
+                value={projectName}
+                placeholder='Введите название'
+                autoCapitalize='none'
+                textColor="white"
+                onChangeText={(text) => setProjectName(text)}
+                style={styles.project_name__placeholder}
+                />
             </View>
           </View>
         </Modal>
@@ -128,7 +152,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 27,
     fontFamily: 'Inter-Bold',
-    marginBottom: 17,
     fontWeight: 'bold',
   },
   closeButton: {
@@ -146,7 +169,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 75,
     borderRadius: 20,
-    marginTop: 13,
+    marginTop: 11,
     marginBottom: 13,
   },
   add_image__text: {
@@ -154,4 +177,17 @@ const styles = StyleSheet.create({
     fontSize: 48,
     color: '#FFFFFF',
   },
+  project_name__placeholder: {
+    backgroundColor: '#EDEDED',
+    marginTop: 11,
+    fontSize: 18,
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    color: '#A8A8A8',
+    borderRadius: 30,
+    paddingVertical: 9,
+    paddingLeft: 18,
+    width: 274,
+    height: 42,
+  }
 });

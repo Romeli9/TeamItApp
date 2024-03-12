@@ -7,11 +7,11 @@
 #define TIMEOUT_SECONDS 600
 #define TEXT_TO_LOOK_FOR @"Welcome to React"
 
-@interface react_native_image_avatar_pickerTests : XCTestCase
+@interface TEAMITAPPTests : XCTestCase
 
 @end
 
-@implementation react_native_image_avatar_pickerTests
+@implementation TEAMITAPPTests
 
 - (BOOL)findSubviewInView:(UIView *)view matching:(BOOL(^)(UIView *view))test
 {
