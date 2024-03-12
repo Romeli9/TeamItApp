@@ -106,10 +106,23 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
                 value={projectName}
                 placeholder='Введите название'
                 autoCapitalize='none'
-                textColor="white"
+                placeholderTextColor="#A8A8A8" 
                 onChangeText={(text) => setProjectName(text)}
                 style={styles.project_name__placeholder}
                 />
+                <View style={styles.project__about__container}>
+                  <Text style={styles.project__text}>О проекте:</Text>
+                  <TextInput
+                    value={projectDesc}
+                    placeholder='Описание'
+                    autoCapitalize='none'
+                    placeholderTextColor="#A8A8A8"
+                    onChangeText={(text) => setProjectDesc(text)}
+                    style={styles.project_name__placeholder_about}
+                  />
+                  
+                </View>
+                
             </View>
           </View>
         </Modal>
@@ -189,5 +202,33 @@ const styles = StyleSheet.create({
     paddingLeft: 18,
     width: 274,
     height: 42,
+  },
+  project_name__placeholder_about: {
+    backgroundColor: '#EDEDED',
+    marginTop: 11,
+    fontSize: 18,
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    color: '#A8A8A8',
+    borderRadius: 30,
+    paddingVertical: 9,
+    paddingLeft: 18,
+    width: 274,
+    height: 185,
+    alignItems: "flex-start",
+    alignSelf: "flex-start"
+  },
+  project__about__container: {
+    width: 274,
+    height: 217,
+    
+  },
+  project__text: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 18,
+    marginLeft: 12,
+    marginTop: 15,
+    marginBottom: 10,
+    
   }
 });
