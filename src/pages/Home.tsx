@@ -17,7 +17,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const [projectName, setProjectName] = useState('');
   const [projectDesc, setProjectDesc] = useState('');
-
+  const [projectDescRaw, setProjectDescRaw] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,6 +72,18 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     setModalVisible(false);
   };
 
+  const formatProjectDesc = (text: string) => {
+    const maxLength = 50; // Максимальная длина строки описания проекта
+    let formattedText = '';
+    for (let i = 0; i < text.length; i++) {
+      formattedText += text[i];
+      if ((i + 1) % maxLength === 0 && i !== 0) {
+        formattedText += '\n';
+      }
+    }
+    return formattedText;
+  };
+
   if (!fontsLoaded) {
     return (
       <SafeAreaProvider>
@@ -109,20 +121,36 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
                 placeholderTextColor="#A8A8A8" 
                 onChangeText={(text) => setProjectName(text)}
                 style={styles.project_name__placeholder}
+              />
+              <View style={styles.project__about__container}>
+                <Text style={styles.project__text}>О проекте:</Text>
+                <TextInput
+                  value={formatProjectDesc(projectDescRaw)} // Используем отформатированный текст
+                  placeholder='Описание'
+                  autoCapitalize='none'
+                  placeholderTextColor="#A8A8A8"
+                  onChangeText={(text) => setProjectDescRaw(text)} // Сохраняем описание без форматирования
+                  style={styles.project_name__placeholder_about}
+                  multiline={true} // Разрешаем многострочный ввод
                 />
-                <View style={styles.project__about__container}>
-                  <Text style={styles.project__text}>О проекте:</Text>
-                  <TextInput
-                    value={projectDesc}
-                    placeholder='Описание'
-                    autoCapitalize='none'
-                    placeholderTextColor="#A8A8A8"
-                    onChangeText={(text) => setProjectDesc(text)}
-                    style={styles.project_name__placeholder_about}
-                  />
-                  
-                </View>
-                
+              </View>
+
+              <View style={styles.project__container_with_plus}>
+                <Text style={styles.project__text}>Требуются:</Text>
+                <TouchableOpacity style={styles.project__button_plus} >
+                  <Image source={require('../shared/icons/plus1.png')} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.project__container_with_plus}>
+                <Text style={styles.project__text}>Категории:</Text>
+                <TouchableOpacity style={styles.project__button_plus} >
+                  <Image source={require('../shared/icons/plus1.png')} />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity style={styles.project__button_create} >
+                <Text style={styles.project__text_create}>Создать</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -199,7 +227,7 @@ const styles = StyleSheet.create({
     color: '#A8A8A8',
     borderRadius: 30,
     paddingVertical: 9,
-    paddingLeft: 18,
+    paddingHorizontal: 18,
     width: 274,
     height: 42,
   },
@@ -212,11 +240,12 @@ const styles = StyleSheet.create({
     color: '#A8A8A8',
     borderRadius: 30,
     paddingVertical: 9,
-    paddingLeft: 18,
+    paddingHorizontal: 18,
     width: 274,
     height: 185,
     alignItems: "flex-start",
-    alignSelf: "flex-start"
+    alignSelf: "flex-start",
+    textAlignVertical: 'top',
   },
   project__about__container: {
     width: 274,
@@ -230,5 +259,74 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
     
-  }
+    
+  },
+  project__container_with_plus: {
+    minHeight: 53,
+    minWidth: 104,
+    marginTop: 18,
+    alignSelf: "flex-start",
+  },
+
+
+  project__button_plus: {
+    backgroundColor: "#BE9DE8",
+    width: 34,
+    height: 21,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12,
+    
+
+  },
+
+  project__button_create: {
+    backgroundColor: "#9260D1",
+    width: 177,
+    height: 46,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  project__text_create: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 18,
+    color: "#FFFFFF",
+  },
+
+  project__container: {
+    marginTop: 18,
+    alignSelf: 'stretch',
+  },
+  itemsContainer: {
+    marginTop: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  item: {
+    backgroundColor: '#EDEDED',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginRight: 10,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  newItemInput: {
+    backgroundColor: '#EDEDED',
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    flex: 1,
+    marginRight: 10,
+  },
+  addNewItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
 });
+
