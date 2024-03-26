@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
-import { collection, addDoc } from "firebase/firestore"
+import { collection, addDoc, doc, setDoc } from "firebase/firestore"
 
 const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
 
@@ -18,14 +18,15 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
       const response = await createUserWithEmailAndPassword(auth, email, password);
       const user = response.user;
-      
-      const response2 = await addDoc(collection(firestore, 'users'), {
+
+      // Create user record in 'users' collection with user's uid as document ID
+      const userDocRef = doc(collection(firestore, 'users'), user.uid);
+      await setDoc(userDocRef, {
         username: username,
         email: email,
       });
 
-      console.log(response);
-      console.log(response2);
+      console.log('User registered:', user.uid);
       navigation.navigate('Homepage');
     } catch (error: any) {
       console.log(error);
@@ -44,6 +45,7 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
           placeholder='Email'
           autoCapitalize='none'
           onChangeText={(text) => setEmail(text)}
+          keyboardType="email-address"
         />
 
         <TextInput
