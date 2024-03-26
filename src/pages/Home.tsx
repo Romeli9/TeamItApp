@@ -7,6 +7,7 @@ import { collection, doc, getDoc } from 'firebase/firestore';
 import ProjectWidget from '../widgets/ProjectWidget';
 import { loadFonts } from '../shared/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
+import { MultipleSelectList } from 'react-native-dropdown-select-list'
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [username, setUsername] = useState<string | null>(null);
@@ -18,6 +19,18 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [projectName, setProjectName] = useState('');
   const [projectDesc, setProjectDesc] = useState('');
   const [projectDescRaw, setProjectDescRaw] = useState('');
+
+  const [selected, setSelected] = React.useState([]);
+  
+  const data = [
+      {key:'1', value:'Mobiles', disabled:true},
+      {key:'2', value:'Appliances'},
+      {key:'3', value:'Cameras'},
+      {key:'4', value:'Computers', disabled:true},
+      {key:'5', value:'Vegetables'},
+      {key:'6', value:'Diary Products'},
+      {key:'7', value:'Drinks'},
+  ]
 
   useEffect(() => {
     const fetchData = async () => {
@@ -288,6 +301,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 40
   },
 
   project__text_create: {
@@ -296,37 +310,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
 
-  project__container: {
-    marginTop: 18,
-    alignSelf: 'stretch',
-  },
-  itemsContainer: {
-    marginTop: 10,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  item: {
-    backgroundColor: '#EDEDED',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 10,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  newItemInput: {
-    backgroundColor: '#EDEDED',
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    flex: 1,
-    marginRight: 10,
-  },
-  addNewItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-});
+  
 
+});
