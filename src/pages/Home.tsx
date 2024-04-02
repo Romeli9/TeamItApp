@@ -1,5 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  PanResponder,
+  Animated,
+  ScrollView,
+} from 'react-native';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -7,7 +21,6 @@ import { collection, doc, getDoc } from 'firebase/firestore';
 import ProjectWidget from '../widgets/ProjectWidget';
 import { loadFonts } from '../shared/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
-import { MultipleSelectList } from 'react-native-dropdown-select-list'
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [username, setUsername] = useState<string | null>(null);
@@ -21,6 +34,43 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [projectDescRaw, setProjectDescRaw] = useState('');
 
   const [selected, setSelected] = React.useState([]);
+
+  const [requiredOpen, setRequiredOpen] = useState(false);
+  const [requiredSelected, setRequiredSelected] = useState<string[]>([]);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
+
+  const toggleRequired = () => {
+    setRequiredOpen(!requiredOpen);
+    setCategoriesOpen(false);
+  };
+  
+  const toggleCategory = () => {
+    setCategoriesOpen(!categoriesOpen);
+    setRequiredOpen(false);
+  };
+  
+  const handleRequiredSelect = (value: string) => {
+    if (requiredSelected.includes(value)) {
+      setRequiredSelected(requiredSelected.filter((item) => item !== value));
+    } else {
+      setRequiredSelected([...requiredSelected, value]);
+    }
+  };
+  
+  const handleCategorySelect = (value: string) => {
+    if (categoriesSelected.includes(value)) {
+      setCategoriesSelected(categoriesSelected.filter((item) => item !== value));
+    } else {
+      setCategoriesSelected([...categoriesSelected, value]);
+    }
+  };
+  
+  const hideDropdowns = () => {
+    setCategoriesOpen(false);
+    setRequiredOpen(false);
+    Keyboard.dismiss();
+  };
   
   const data = [
       {key:'1', value:'Mobiles', disabled:true},
@@ -85,17 +135,19 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     setModalVisible(false);
   };
 
-  const formatProjectDesc = (text: string) => {
-    const maxLength = 50; // Максимальная длина строки описания проекта
-    let formattedText = '';
-    for (let i = 0; i < text.length; i++) {
-      formattedText += text[i];
-      if ((i + 1) % maxLength === 0 && i !== 0) {
-        formattedText += '\n';
-      }
-    }
-    return formattedText;
-  };
+  // const formatProjectDesc = (text: string) => {
+  //   const maxLength = 50; // Максимальная длина строки описания проекта
+  //   let formattedText = '';
+  //   for (let i = 0; i < text.length; i++) {
+  //     formattedText += text[i];
+  //     if ((i + 1) % maxLength === 0 && i !== 0) {
+  //       formattedText += '\n';
+  //     }
+  //   }
+  //   return formattedText;
+  // };
+
+  
 
   if (!fontsLoaded) {
     return (
@@ -118,8 +170,13 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         </TouchableOpacity>
 
         <Modal visible={isModalVisible} animationType="slide" transparent>
+        
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
+            <ScrollView 
+              contentContainerStyle={styles.scrollViewContainer} 
+              keyboardShouldPersistTaps="handled"
+            >
               <TouchableOpacity style={styles.closeButton} onPress={ModalClose}>
                 <Image source={require('../shared/icons/cros.png')} />
               </TouchableOpacity>
@@ -138,33 +195,117 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
               <View style={styles.project__about__container}>
                 <Text style={styles.project__text}>О проекте:</Text>
                 <TextInput
-                  value={formatProjectDesc(projectDescRaw)} // Используем отформатированный текст
+                  value={(projectDescRaw)} // Используем отформатированный текст
                   placeholder='Описание'
                   autoCapitalize='none'
                   placeholderTextColor="#A8A8A8"
                   onChangeText={(text) => setProjectDescRaw(text)} // Сохраняем описание без форматирования
                   style={styles.project_name__placeholder_about}
                   multiline={true} // Разрешаем многострочный ввод
+                  keyboardType="default"
                 />
               </View>
 
               <View style={styles.project__container_with_plus}>
-                <Text style={styles.project__text}>Требуются:</Text>
-                <TouchableOpacity style={styles.project__button_plus} >
+                <Text style={styles.project__text_2}>Требуются:</Text>
+                <View style={styles.fdrow}>
+                <TouchableOpacity style={styles.project__button_plus} onPress={toggleRequired}>
                   <Image source={require('../shared/icons/plus1.png')} />
                 </TouchableOpacity>
+                
+                {/* <View style={styles.selectedItemsContainer}> */}
+                  {requiredSelected.map((item) => (
+                    <View key={item} style={styles.selectedItem}>
+                      <Text style={styles.selectedItemText}>{item}</Text>
+                      <TouchableOpacity onPress={() => handleRequiredSelect(item)} style={styles.removeSelectedItem}>
+                        <View style={styles.removeSelectedItemTextContainer}>
+                        <Image source={require('../shared/icons/cros2.png')} />
+                          {/* <Text style={styles.removeSelectedItemText}>✕</Text> */}
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                {/* </View> */}
+                
+                </View>
+                {requiredOpen && (
+                  <ScrollView style={styles.dropdownContainer}>
+                    <View style = {styles.dropdownWrapper}>
+                    {data.map((item) => (
+                      <TouchableOpacity
+                        key={item.key}
+                        style={[styles.dropdownItem, requiredSelected.includes(item.value) && styles.dropdownItemSelected]}
+                        onPress={() => handleRequiredSelect(item.value)}
+                      >
+                        <View style={styles.dropdownItemContainer}>
+                          <View style={styles.dropdownItem_icon}>
+                            <Image source={require('../shared/icons/plus2.png')} />
+                          </View>
+                          <Text style={styles.dropdownItemText}>{item.value}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                    </View>
+                  </ScrollView>
+                )}
+                
               </View>
 
               <View style={styles.project__container_with_plus}>
-                <Text style={styles.project__text}>Категории:</Text>
-                <TouchableOpacity style={styles.project__button_plus} >
+                <Text style={styles.project__text_2}>Категории:</Text>
+                <View style={styles.fdrow}>
+                <TouchableOpacity style={styles.project__button_plus} onPress={toggleCategory}>
                   <Image source={require('../shared/icons/plus1.png')} />
                 </TouchableOpacity>
+
+                {/* <View style={styles.selectedItemsContainer}> */}
+                  {categoriesSelected.map((item) => (
+                    <View key={item} style={styles.selectedItem}>
+                      <Text style={styles.selectedItemText}>{item}</Text>
+                      <TouchableOpacity onPress={() => handleCategorySelect(item)} style={styles.removeSelectedItem}>
+                        <View style={styles.removeSelectedItemTextContainer}>
+                          <Image source={require('../shared/icons/cros2.png')} />
+                          {/* <Text style={styles.removeSelectedItemText}>✕</Text> */}
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                {/* </View> */}
+                </View>
+
+                {categoriesOpen && (
+                  <ScrollView style={styles.dropdownContainer}>
+                    <View style = {styles.dropdownWrapper}>
+                    {data.map((item) => (
+                      <TouchableOpacity
+                        key={item.key}
+                        style={[
+                          styles.dropdownItem,
+                          categoriesSelected.includes(item.value) && styles.dropdownItemSelected,
+                        ]}
+                        onPress={() => handleCategorySelect(item.value)}
+                      >
+                        <View style={styles.dropdownItemContainer}>
+                          <View style={styles.dropdownItem_icon}>
+                            <Image source={require('../shared/icons/plus2.png')} />
+                          </View>
+                          <Text style={styles.dropdownItemText}>{item.value}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                    </View>
+                  </ScrollView>
+                )}
+
+                
               </View>
               <TouchableOpacity style={styles.project__button_create} >
                 <Text style={styles.project__text_create}>Создать</Text>
               </TouchableOpacity>
+              </ScrollView>
+              
             </View>
+            
           </View>
         </Modal>
       </View>
@@ -194,6 +335,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    //zIndex: 5,
   },
   modalContent: {
     width: 316,
@@ -208,9 +350,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
     fontWeight: 'bold',
   },
+  
+  scrollViewContainer: {
+    flexGrow: 1,
+    //justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   closeButton: {
     marginLeft: '90%',
-    marginTop: 10,
+    marginTop: 5,
     width: 20,
     height: 20,
     alignItems: 'flex-end',
@@ -233,7 +382,7 @@ const styles = StyleSheet.create({
   },
   project_name__placeholder: {
     backgroundColor: '#EDEDED',
-    marginTop: 11,
+    //marginTop: 11,
     fontSize: 18,
     fontFamily: 'Inter-Medium',
     fontWeight: '500',
@@ -246,7 +395,7 @@ const styles = StyleSheet.create({
   },
   project_name__placeholder_about: {
     backgroundColor: '#EDEDED',
-    marginTop: 11,
+    //marginTop: 11,
     fontSize: 18,
     fontFamily: 'Inter-Medium',
     fontWeight: '500',
@@ -255,14 +404,15 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     paddingHorizontal: 18,
     width: 274,
-    height: 185,
+    minHeight: 100,
+    maxHeight: 185,
     alignItems: "flex-start",
     alignSelf: "flex-start",
     textAlignVertical: 'top',
   },
   project__about__container: {
     width: 274,
-    height: 217,
+    minHeight: 100,
     
   },
   project__text: {
@@ -271,14 +421,30 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginTop: 15,
     marginBottom: 10,
-    
-    
+    //zIndex: 1,
   },
+
+  project__text_2: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 18,
+    //marginLeft: 12,
+    marginTop: 15,
+    marginBottom: 10,
+    //zIndex: 1,
+  },
+
   project__container_with_plus: {
-    minHeight: 53,
-    minWidth: 104,
-    marginTop: 18,
+    alignItems: "flex-start",
     alignSelf: "flex-start",
+    //alignSelf: "flex-start",
+    marginLeft: 12,
+  },
+
+  fdrow: {
+    flexDirection: 'row',
+    flexWrap: "wrap",
+    gap: 15,
+    margin: 0
   },
 
 
@@ -289,8 +455,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 12,
     
+    flexDirection: "row",
+    gap: 15,
 
   },
 
@@ -301,7 +468,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 40
+    marginTop: 85,
   },
 
   project__text_create: {
@@ -309,7 +476,99 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#FFFFFF",
   },
+ 
 
+  selectedItemsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    //marginLeft: 15,
+    gap: 15,
+    flexWrap: "wrap"
+  },
+
+  selectedItem: {
+    backgroundColor: '#BE9DE8',
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 21,
+    paddingVertical: 3,
+    paddingHorizontal: 3
+  },
+
+  selectedItemText: {
+    color: 'white',
+    fontFamily: "Inter-SemiBold",
+    fontSize: 12,
+  },
+
+  removeSelectedItem: {
+    marginLeft: 5,
+  },
+
+  removeSelectedItemTextContainer: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 6.5,
+    paddingVertical: 2.5,
+    borderRadius: 20,
+    height: 12,
+  },
+
+  removeSelectedItemText: {
+    color: '#BBBBBB',
+    textAlign: "center",
+  },
+
+  dropdownContainer: {
+    position: 'relative',
+    maxHeight: 150,
+    width: 150,
+    backgroundColor: '#BE9DE8',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 15,
+    zIndex: 999,
+    marginTop: 15,
+  },
+
+  dropdownWrapper: {
+    paddingTop: 13,
+    paddingLeft: 11,
+    paddingRight: 13,
+    paddingBottom: 5,
+  },
+
+  dropdownItem: {
+    marginBottom: 10,
+    color: 'white',
+    fontFamily: "Inter-SemiBold",
+  },
+
+  dropdownItem_icon: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  dropdownItemContainer: {
+    flex: 1,
+    paddingLeft: 11,
+    flexDirection: 'row',
+  },
+  dropdownItemText: {
+    marginLeft: 5,
+    color: 'white',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 12,
+  },
+  dropdownItemSelected: {
+    //backgroundColor: '#F2F2F2',
+  },
+
+  
   
 
 });
