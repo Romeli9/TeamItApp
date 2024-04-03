@@ -14,10 +14,11 @@ import {
   Animated,
   ScrollView,
 } from 'react-native';
-import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
+import { FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
+import { ref, uploadString, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, getDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, addDoc } from 'firebase/firestore';
 import ProjectWidget from '../widgets/ProjectWidget';
 import { loadFonts } from '../shared/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
@@ -39,6 +40,8 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [requiredSelected, setRequiredSelected] = useState<string[]>([]);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
+
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const toggleRequired = () => {
     setRequiredOpen(!requiredOpen);
@@ -106,6 +109,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const insets = useSafeAreaInsets();
 
+
   const onImageLibraryPress = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -121,10 +125,11 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       selectionLimit: 1, // Установка лимита на одно изображение
     });
 
-    if (!result.canceled) {
-      console.log(result);
+    if(result.canceled === false){
       setPickerResponse(result);
+      console.log(result);
     }
+
   }, []);
 
   const ModalOpen = () => {
@@ -134,6 +139,60 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const ModalClose = () => {
     setModalVisible(false);
   };
+
+  const uploadImageToFirebase = async (uri: string) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+  
+      const storageRef = ref(FIREBASE_STORAGE, `images/${username}_${Date.now()}`);
+      await uploadBytes(storageRef, blob);
+  
+      const url = await getDownloadURL(storageRef);
+      return url;
+    } catch (error) {
+      console.error('Error uploading image: ', error);
+      return null;
+    }
+  };
+
+  const CreateProject = async () => {
+    try {
+      let imageUrl = null;
+      if (pickerResponse && !pickerResponse.canceled) {
+        const uploadedImageUrl = await uploadImageToFirebase(pickerResponse.assets[0].uri);
+        if (uploadedImageUrl) {
+          imageUrl = uploadedImageUrl;
+        }
+      }
+  
+      const projectData = {
+        photo: imageUrl,
+        name: projectName,
+        description: projectDescRaw,
+        required: requiredSelected,
+        categories: categoriesSelected,
+        creator: username,
+        members: []
+      };
+  
+      const firestore = FIREBASE_DB;
+      const projectsRef = collection(firestore, 'projects');
+  
+      const docRef = await addDoc(projectsRef, projectData);
+      console.log('Project created with ID: ', docRef.id);
+  
+      setProjectName('');
+      setProjectDescRaw('');
+      setRequiredSelected([]);
+      setCategoriesSelected([]);
+      setPickerResponse(null);
+      ModalClose();
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  };
+  
 
   // const formatProjectDesc = (text: string) => {
   //   const maxLength = 50; // Максимальная длина строки описания проекта
@@ -299,7 +358,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
                 
               </View>
-              <TouchableOpacity style={styles.project__button_create} >
+              <TouchableOpacity style={styles.project__button_create} onPress={CreateProject} >
                 <Text style={styles.project__text_create}>Создать</Text>
               </TouchableOpacity>
               </ScrollView>
