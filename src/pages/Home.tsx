@@ -52,11 +52,13 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const toggleRequired = () => {
     setRequiredOpen(!requiredOpen);
     setCategoriesOpen(false);
+    Keyboard.dismiss();
   };
   
   const toggleCategory = () => {
     setCategoriesOpen(!categoriesOpen);
     setRequiredOpen(false);
+    Keyboard.dismiss();
   };
   
   const handleRequiredSelect = (value: string) => {
@@ -102,9 +104,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           const userData = docSnap.data();
           setUsername(userData.username);
           setUserImgUrl(userData.ImgUrl || '');
+          fetchUserProjects();
         }
       }
-      fetchUserProjects();
+      
       await loadFonts();
       setFontsLoaded(true);
       
@@ -168,6 +171,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const CreateProject = async () => {
     try {
+
+      if (!projectName.trim() || !projectDescRaw.trim() || !requiredSelected.length || !categoriesSelected.length || !pickerResponse) {
+        alert('Пожалуйста, заполните все поля.');
+        return;
+      }
+
       let imageUrl = null;
       if (pickerResponse && !pickerResponse.canceled) {
         const uploadedImageUrl = await uploadImageToFirebase(pickerResponse.assets[0].uri);
@@ -192,11 +201,20 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       const docRef = await addDoc(projectsRef, projectData);
       console.log('Project created with ID: ', docRef.id);
   
+
+    // Обновляем список проектов пользователя в состоянии
+    const newProject = {
+      id: docRef.id,
+      ...projectData,
+    };
+    setUserProjects([...userProjects, newProject]);
+
       setProjectName('');
       setProjectDescRaw('');
       setRequiredSelected([]);
       setCategoriesSelected([]);
       setPickerResponse(null);
+      setSelectedImage("");
       ModalClose();
     } catch (error) {
       console.error('Error adding document: ', error);
@@ -209,8 +227,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
       const user = FIREBASE_AUTH.currentUser;
       if (user) {
-        const firestore = FIREBASE_DB;
-        const projectsRef = collection(firestore, 'projects');
+        const projectsRef = collection(FIREBASE_DB, 'projects');
         const querySnapshot = await getDocs(
           query(projectsRef, where('creator', '==', username))
         );
@@ -220,7 +237,16 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           
         }));
         setUserProjects(projectsData);
-        
+        if (querySnapshot.docs.length > 0) {
+          const projectsData = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          //console.log('User projects:', projectsData);
+          setUserProjects(projectsData);
+        } else {
+          //console.log('У пользователя нет проектов');
+        }
       }
     } catch (error) {
       console.error('Error fetching user projects: ', error);
@@ -228,7 +254,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
   
   const OpenProject = (projectID : string) => {
-    console.log("В процессе...");
+    // в разработке
   };
 
   if (!fontsLoaded) {
@@ -426,8 +452,8 @@ const styles = StyleSheet.create({
     width: 82,
     height: 120,
     borderRadius: 20,
-    marginTop: 13,
-    marginBottom: 13,
+    // marginTop: 13,
+    // marginBottom: 13,
   },
   create__text: {
     fontSize: 64,
@@ -679,19 +705,21 @@ const styles = StyleSheet.create({
   
   userProjectsContainer: {
     flexDirection: 'row',
-    paddingVertical: 10,
-    paddingHorizontal: 5,
+    marginTop: 13,
+    paddingLeft: 10,
+    paddingRight: 25,
+    //width: ''
   },
   projectItem: {
-    marginRight: 10,
-    marginBottom: 10,
-    borderRadius: 10,
+    marginLeft: 13,
+    //marginBottom: 10,
+    //borderRadius: 10,
     //overflow: 'hidden',
   },
   projectImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 10,
+    width: 82,
+    height: 120,
+    borderRadius: 20,
   },
 
 });
