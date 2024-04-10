@@ -18,7 +18,7 @@ import { FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConf
 import { ref, uploadString, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, getDoc, addDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, addDoc, getDocs, query, where } from 'firebase/firestore';
 import ProjectWidget from '../widgets/ProjectWidget';
 import { loadFonts } from '../shared/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
@@ -42,6 +42,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const [userProjects, setUserProjects] = useState<any[]>([]);
+
+
 
   const toggleRequired = () => {
     setRequiredOpen(!requiredOpen);
@@ -89,8 +95,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     const fetchData = async () => {
       const user = FIREBASE_AUTH.currentUser;
       if (user) {
-        const firestore = FIREBASE_DB;
-        const usersRef = collection(firestore, 'users');
+        const usersRef = collection(FIREBASE_DB, 'users');
         const userDoc = doc(usersRef, user.uid);
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
@@ -99,8 +104,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           setUserImgUrl(userData.ImgUrl || '');
         }
       }
+      fetchUserProjects();
       await loadFonts();
       setFontsLoaded(true);
+      
     };
 
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
@@ -127,8 +134,11 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     if(result.canceled === false){
       setPickerResponse(result);
+      setSelectedImage(result.assets[0].uri);
       console.log(result);
     }
+    
+    //pickerResponse.assets[0].uri
 
   }, []);
 
@@ -194,19 +204,32 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
   
 
-  // const formatProjectDesc = (text: string) => {
-  //   const maxLength = 50; // Максимальная длина строки описания проекта
-  //   let formattedText = '';
-  //   for (let i = 0; i < text.length; i++) {
-  //     formattedText += text[i];
-  //     if ((i + 1) % maxLength === 0 && i !== 0) {
-  //       formattedText += '\n';
-  //     }
-  //   }
-  //   return formattedText;
-  // };
 
+  const fetchUserProjects = async () => {
+    try {
+      const user = FIREBASE_AUTH.currentUser;
+      if (user) {
+        const firestore = FIREBASE_DB;
+        const projectsRef = collection(firestore, 'projects');
+        const querySnapshot = await getDocs(
+          query(projectsRef, where('creator', '==', username))
+        );
+        const projectsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          
+        }));
+        setUserProjects(projectsData);
+        
+      }
+    } catch (error) {
+      console.error('Error fetching user projects: ', error);
+    }
+  };
   
+  const OpenProject = (projectID : string) => {
+    console.log("В процессе...");
+  };
 
   if (!fontsLoaded) {
     return (
@@ -218,16 +241,33 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
   }
 
+  
+
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#FFFFFF', paddingLeft: 16 }}>
         <Text style={{ fontSize: 28 }}>Hello {username}</Text>
 
         <Text>Ваши проекты:</Text>
-        <TouchableOpacity style={styles.create__button} onPress={ModalOpen}>
-          <Text style={styles.create__text}>+</Text>
-        </TouchableOpacity>
-
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.userProjectsContainer}
+        >
+          <TouchableOpacity style={styles.create__button} onPress={ModalOpen}>
+            <Text style={styles.create__text}>+</Text>
+          </TouchableOpacity>
+          {userProjects.map((project) => (
+            <TouchableOpacity
+              key={project.id}
+              style={styles.projectItem}
+              onPress={() => OpenProject(project.id)}
+            >
+              <Image source={{ uri: project.photo }} style={styles.projectImage} />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        
         <Modal visible={isModalVisible} animationType="slide" transparent>
         
           <View style={styles.modalContainer}>
@@ -241,7 +281,11 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
               </TouchableOpacity>
               <Text style={styles.modalTitle}>Создание проекта</Text>
               <TouchableOpacity style={styles.add_image__button} onPress={onImageLibraryPress}>
-                <Text style={styles.add_image__text}>+</Text>
+                {selectedImage ? (
+                  <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+                ) : (
+                  <Text style={styles.add_image__text}>+</Text>
+                )}
               </TouchableOpacity>
               <TextInput
                 value={projectName}
@@ -627,7 +671,27 @@ const styles = StyleSheet.create({
     //backgroundColor: '#F2F2F2',
   },
 
+  selectedImage: {
+    width: 64,
+    height: 75,
+    borderRadius: 20,
+  },
   
-  
+  userProjectsContainer: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+  },
+  projectItem: {
+    marginRight: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    //overflow: 'hidden',
+  },
+  projectImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+  },
 
 });
