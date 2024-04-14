@@ -47,7 +47,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const [userProjects, setUserProjects] = useState<any[]>([]);
 
-
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   const toggleRequired = () => {
     setRequiredOpen(!requiredOpen);
@@ -84,10 +84,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
   
   const data = [
-      {key:'1', value:'Mobiles', disabled:true},
+      {key:'1', value:'Mobiles'},
       {key:'2', value:'Appliances'},
       {key:'3', value:'Cameras'},
-      {key:'4', value:'Computers', disabled:true},
+      {key:'4', value:'Computers'},
       {key:'5', value:'Vegetables'},
       {key:'6', value:'Diary Products'},
       {key:'7', value:'Drinks'},
@@ -104,18 +104,21 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           const userData = docSnap.data();
           setUsername(userData.username);
           setUserImgUrl(userData.ImgUrl || '');
-          fetchUserProjects();
+          await fetchUserProjects(); // Перенесено сюда
         }
       }
-      
+  
       await loadFonts();
       setFontsLoaded(true);
-      
+      setDataLoaded(true);
     };
-
+  
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
+    
     return unsubscribe;
   }, []);
+  
+  
 
   const insets = useSafeAreaInsets();
 
@@ -171,12 +174,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const CreateProject = async () => {
     try {
-
+  
       if (!projectName.trim() || !projectDescRaw.trim() || !requiredSelected.length || !categoriesSelected.length || !pickerResponse) {
         alert('Пожалуйста, заполните все поля.');
         return;
       }
-
+  
       let imageUrl = null;
       if (pickerResponse && !pickerResponse.canceled) {
         const uploadedImageUrl = await uploadImageToFirebase(pickerResponse.assets[0].uri);
@@ -201,14 +204,13 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       const docRef = await addDoc(projectsRef, projectData);
       console.log('Project created with ID: ', docRef.id);
   
-
-    // Обновляем список проектов пользователя в состоянии
-    const newProject = {
-      id: docRef.id,
-      ...projectData,
-    };
-    setUserProjects([...userProjects, newProject]);
-
+      // Обновляем список проектов пользователя в состоянии
+      const newProject = {
+        id: docRef.id,
+        ...projectData,
+      };
+      setUserProjects([...userProjects, newProject]); // Обновлено
+  
       setProjectName('');
       setProjectDescRaw('');
       setRequiredSelected([]);
@@ -227,25 +229,28 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
       const user = FIREBASE_AUTH.currentUser;
       if (user) {
-        const projectsRef = collection(FIREBASE_DB, 'projects');
-        const querySnapshot = await getDocs(
-          query(projectsRef, where('creator', '==', username))
-        );
-        const projectsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
+        const usersRef = collection(FIREBASE_DB, 'users');
+        const userDoc = doc(usersRef, user.uid);
+        const docSnap = await getDoc(userDoc);
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+  
+          const projectsRef = collection(FIREBASE_DB, 'projects');
+          const querySnapshot = await getDocs(
+            query(projectsRef, where('creator', '==', userData.username))
+          );
           
-        }));
-        setUserProjects(projectsData);
-        if (querySnapshot.docs.length > 0) {
-          const projectsData = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          //console.log('User projects:', projectsData);
-          setUserProjects(projectsData);
-        } else {
-          //console.log('У пользователя нет проектов');
+          if (querySnapshot.docs.length > 0) {
+            const projectsData = querySnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            console.log('User projects:', projectsData);
+            setUserProjects(projectsData);
+          } else {
+            console.log('У пользователя нет проектов');
+          }
+          setDataLoaded(true); // Перенесено сюда
         }
       }
     } catch (error) {
@@ -253,11 +258,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   };
   
+  
   const OpenProject = (projectID : string) => {
     // в разработке
   };
 
-  if (!fontsLoaded) {
+  if (!dataLoaded || !fontsLoaded) {
     return (
       <SafeAreaProvider>
         <View style={{ flex: 1, paddingTop: insets.top }}>
@@ -293,6 +299,11 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        <View>
+          <Text>123123</Text>
+
+        </View>
         
         <Modal visible={isModalVisible} animationType="slide" transparent>
         
@@ -468,7 +479,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: 316,
-    height: 730,
+    height: '91.25%',
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 30,
@@ -708,6 +719,7 @@ const styles = StyleSheet.create({
     marginTop: 13,
     paddingLeft: 10,
     paddingRight: 25,
+    height: 120,
     //width: ''
   },
   projectItem: {
