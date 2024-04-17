@@ -13,6 +13,7 @@ import { User, onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FireBaseConfig';
 import Profile from 'pages/Profile';
 import Messenger from 'pages/Messenger';
+import Project from 'pages/Project';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -92,6 +93,7 @@ export default function App() {
             <Stack.Screen name='RegisterPage' component={Register} options={{ headerShown: false }} />
           </>
         )}
+        <Stack.Screen name="Project" component={Project} options={{ headerShown: false }} />
       </Stack.Navigator>
       <StatusBar style='auto' />
     </NavigationContainer>

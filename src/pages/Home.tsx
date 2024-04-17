@@ -3,23 +3,17 @@ import {
   View,
   Text,
   StyleSheet,
-  Modal,
   TouchableOpacity,
   Image,
-  TextInput,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
   Keyboard,
-  PanResponder,
-  Animated,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
-import { ref, uploadString, getDownloadURL, uploadBytes } from 'firebase/storage';
+import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc, addDoc, getDocs, query, where } from 'firebase/firestore';
-import ProjectWidget from '../widgets/ProjectWidget';
 import { loadFonts } from '../shared/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
 import ProjectModal from 'widgets/ModalWindowProject';
@@ -39,6 +33,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [userProjects, setUserProjects] = useState<any[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [userId, setUserId] = useState('');
 
   const toggleRequired = () => {
     setRequiredOpen(!requiredOpen);
@@ -68,22 +63,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   };
   
-  const hideDropdowns = () => {
-    setCategoriesOpen(false);
-    setRequiredOpen(false);
-    Keyboard.dismiss();
-  };
-  
-  const data = [
-      {key:'1', value:'Mobiles'},
-      {key:'2', value:'Appliances'},
-      {key:'3', value:'Cameras'},
-      {key:'4', value:'Computers'},
-      {key:'5', value:'Vegetables'},
-      {key:'6', value:'Diary Products'},
-      {key:'7', value:'Drinks'},
-  ]
-
   useEffect(() => {
     const fetchData = async () => {
       const user = FIREBASE_AUTH.currentUser;
@@ -95,6 +74,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           const userData = docSnap.data();
           setUsername(userData.username);
           setUserImgUrl(userData.ImgUrl || '');
+          setUserId(user.uid);
           await fetchUserProjects(); // Перенесено сюда
         }
       }
@@ -109,10 +89,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     return unsubscribe;
   }, []);
   
-  
-
   const insets = useSafeAreaInsets();
-
 
   const onImageLibraryPress = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -186,7 +163,8 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         required: requiredSelected,
         categories: categoriesSelected,
         creator: username,
-        members: []
+        creatorId: userId,
+        members: [],
       };
   
       const firestore = FIREBASE_DB;
@@ -248,16 +226,14 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
   
   const OpenProject = (projectID : string) => {
-    // в разработке
+    navigation.navigate('Project', { projectId: projectID });
   };
 
   if (!dataLoaded || !fontsLoaded) {
     return (
-      <SafeAreaProvider>
-        <View style={{ flex: 1, paddingTop: insets.top }}>
-          <Text>Loading...</Text>
-        </View>
-      </SafeAreaProvider>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
     );
   }
 
@@ -311,8 +287,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           CreateProject={CreateProject}
         />
         
-
-      
       </View>
     </SafeAreaProvider>
   );
