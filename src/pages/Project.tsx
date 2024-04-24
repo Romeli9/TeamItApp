@@ -4,6 +4,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import { doc, getDoc } from 'firebase/firestore';
 import { FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
 import { getUserById } from '../services/getUserById';
+import { required } from '../shared/consts/Required';
 
 const MemberAvatar: React.FC<{ userId: string, num: number }> = ({ userId, num }) => {
   const [user, setUser] = useState<any>(null);
@@ -45,7 +46,8 @@ const Project: React.FC<any> = ({ route, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false); // Состояние для видимости модального окна
   const [confirmationVisible, setConfirmationVisible] = useState(false); // Состояние для отображения подтверждения
   const [confirmationTimer, setConfirmationTimer] = useState<any>(null); // Таймер для автоматического скрытия подтверждения
-
+  const [requiredOpen, setRequiredOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState("");
 
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
@@ -81,9 +83,7 @@ const Project: React.FC<any> = ({ route, navigation }) => {
 
 
 
-  const toggleRequired = () => {
-    // Дополнительная логика, если нужно
-  }
+
 
   const sendApplication = (index: number) => {
     const updatedApplications = [...applications];
@@ -103,17 +103,6 @@ const Project: React.FC<any> = ({ route, navigation }) => {
     setModalVisible(false); // Закрываем модальное окно при нажатии на кнопку "Отмена"
   }
 
-  const openModal = () => {
-    setModalVisible(true);
-    setConfirmationVisible(false); // Скрываем подтверждение, если оно было видно ранее
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-    if (confirmationTimer) {
-      clearTimeout(confirmationTimer); // Очищаем таймер, если он еще активен
-    }
-  };
 
   const showConfirmation = () => {
     setConfirmationVisible(true);
@@ -123,6 +112,20 @@ const Project: React.FC<any> = ({ route, navigation }) => {
     }, 2000);
     setConfirmationTimer(timer);
   };
+
+  const toggleRequired = () => {
+    setRequiredOpen(!requiredOpen);
+    console.log(requiredOpen);
+    setSelectedItem("");
+  }
+
+  const HandleApplicationSend = (value: string) => {
+    setSelectedItem(value);
+    //setSelectedItem("");
+    //console.log(selectedItem);
+    //setRequiredOpen(false);
+  }
+
 
 
   return (
@@ -154,7 +157,7 @@ const Project: React.FC<any> = ({ route, navigation }) => {
                   </TouchableOpacity>
                   <Text style={styles.required_text}>Предложить</Text>
                 </View>
-                <Image source={require('../shared/icons/slash.png')} style={{height: 50, marginLeft: 5.5, marginRight: 11.5}} />
+                <Image source={require('../shared/icons/slash.png')} style={{ height: 50, marginLeft: 5.5, marginRight: 11.5 }} />
                 {projectData.required.map((required: string, index: number) => (
                   <View style={styles.required_offer_container} key={index}>
                     {projectData.members[index] === "-" ? (
@@ -198,10 +201,54 @@ const Project: React.FC<any> = ({ route, navigation }) => {
 
                         </View>
                       </Modal>
+
                     )}
+
                   </View>
                 ))}
+
               </ScrollView>
+              {requiredOpen && (
+                <Modal
+                  transparent={true}
+                  visible={requiredOpen}
+                  onRequestClose={toggleRequired}
+                >
+                  <View style={styles.modalContainer_2}>
+                    {selectedItem !== "" ? (
+                      <View style={styles.modalContent}>
+                        <Text style={styles.application_text}>Вы хотите подать заявку на "{selectedItem}"?</Text>
+                        <TouchableOpacity onPress={toggleRequired}>
+                          <Image source={require('../shared/icons/check.png')} style={styles.application_ok_button} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={toggleRequired}>
+                          <Image source={require('../shared/icons/p.png')} style={styles.application_not_ok_button} />
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <ScrollView style={styles.dropdownContainer}>
+                        <View style={styles.dropdownWrapper}>
+                          {required.map((item) => (
+                            <TouchableOpacity
+                              key={item.key}
+                              style={[styles.dropdownItem, styles.dropdownItemSelected]}
+                              onPress={() => HandleApplicationSend(item.value)}>
+                              <View style={styles.dropdownItemContainer}>
+                                <View style={styles.dropdownItem_icon}>
+                                  <Image source={require('../shared/icons/plus2.png')} />
+                                </View>
+                                <Text style={styles.dropdownItemText}>{item.value}</Text>
+                              </View>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </ScrollView>
+                    )}
+                  </View>
+                </Modal>
+              )}
+
+
             </View>
           </View>
 
@@ -323,7 +370,7 @@ const styles = StyleSheet.create({
   required_offer_container: {
     marginRight: 9,
     width: 71,
-    
+
     //height: 80,
     flexDirection: 'column',
     alignItems: 'center',
@@ -444,6 +491,12 @@ const styles = StyleSheet.create({
     left: 120
   },
 
+  modalContainer_2: {
+    position: 'absolute',
+    top: 560,
+    left: 20
+  },
+
   modalContent: {
     flexDirection: 'row',
 
@@ -460,7 +513,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'rgba(0, 0, 0, 0.71)',
     // width: 158,
-    
+
     paddingHorizontal: 7,
     paddingBottom: 10,
     paddingTop: 8,
@@ -495,7 +548,7 @@ const styles = StyleSheet.create({
   },
 
   application_text_2: {
-    
+
     color: 'rgba(255,255,255,0.76)',
     fontSize: 11,
     fontFamily: 'Inter-SemiBold',
@@ -503,6 +556,50 @@ const styles = StyleSheet.create({
 
   buttonsContainer: {
     flexDirection: 'row',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    maxHeight: 150,
+    width: 160,
+    backgroundColor: '#BE9DE8',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 15,
+    zIndex: 999,
+    marginTop: 15,
+  },
+  dropdownWrapper: {
+    paddingTop: 13,
+    paddingLeft: 6,
+    paddingRight: 13,
+    paddingBottom: 5,
+  },
+  dropdownItem: {
+    marginBottom: 10,
+    color: 'white',
+    fontFamily: "Inter-SemiBold",
+  },
+  dropdownItem_icon: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dropdownItemContainer: {
+    flex: 1,
+    paddingLeft: 11,
+    flexDirection: 'row',
+  },
+  dropdownItemText: {
+    marginLeft: 5,
+    color: 'white',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 12,
+  },
+  dropdownItemSelected: {
+    //backgroundColor: '#F2F2F2',
   },
 });
 
