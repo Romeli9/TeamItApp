@@ -5,6 +5,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
 import { getUserById } from '../services/getUserById';
 import { required } from '../shared/consts/Required';
+import OK from "../shared/svg/OK.svg"
+import MySVGComponent from "../shared/svg/MySVGComponent"
 
 const MemberAvatar: React.FC<{ userId: string, num: number }> = ({ userId, num }) => {
   const [user, setUser] = useState<any>(null);
@@ -130,8 +132,13 @@ const Project: React.FC<any> = ({ route, navigation }) => {
 
   return (
     <SafeAreaProvider>
+       
       <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#EAEAEA' }}>
         <ScrollView contentContainerStyle={styles.container}>
+        <OK />
+        <OK />
+        <OK />
+        <OK />
 
           <Image source={{ uri: projectData.photo }} style={styles.projectImage} />
 
@@ -191,7 +198,9 @@ const Project: React.FC<any> = ({ route, navigation }) => {
                             <View style={styles.modalContent}>
                               <Text style={styles.application_text}>Подать заявку?</Text>
                               <TouchableOpacity onPress={showConfirmation}>
-                                <Image source={require('../shared/icons/check.png')} style={styles.application_ok_button} />
+                                //<Image source={require('../shared/icons/check.png')} style={styles.application_ok_button} />
+                                 
+                                 <MySVGComponent />
                               </TouchableOpacity>
                               <TouchableOpacity onPress={closeApplicationModal}>
                                 <Image source={require('../shared/icons/p.png')} style={styles.application_not_ok_button} />
