@@ -4,6 +4,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import { doc, getDoc } from 'firebase/firestore';
 import { FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
 import { getUserById } from '../services/getUserById';
+import { required } from '../shared/consts/Required';
 
 const MemberAvatar: React.FC<{ userId: string, num: number }> = ({ userId, num }) => {
   const [user, setUser] = useState<any>(null);
@@ -42,7 +43,12 @@ const Project: React.FC<any> = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<string[]>([]);
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null); // Индекс роли для подачи заявки
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); // Состояние для видимости модального окна
+  const [confirmationVisible, setConfirmationVisible] = useState(false); // Состояние для отображения подтверждения
+  const [confirmationTimer, setConfirmationTimer] = useState<any>(null); // Таймер для автоматического скрытия подтверждения
+  const [requiredOpen, setRequiredOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState("");
+  
 
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
@@ -76,17 +82,8 @@ const Project: React.FC<any> = ({ route, navigation }) => {
     );
   }
 
-  const toggleRequired = () => {
-    // Дополнительная логика, если нужно
-  }
 
-  const sendApplication = (index: number) => {
-    const updatedApplications = [...applications];
-    updatedApplications[index] = 'sent';
-    setApplications(updatedApplications);
-    setOpenSendIndex(null);
-    setModalVisible(false); // Закрываем модальное окно после подачи заявки
-  }
+
 
   const openApplicationModal = (index: number) => {
     setOpenSendIndex(index);
@@ -99,116 +96,194 @@ const Project: React.FC<any> = ({ route, navigation }) => {
   }
 
 
+  const showConfirmation = () => {
+    setConfirmationVisible(true);
+    const timer = setTimeout(() => {
+      setModalVisible(false); // Закрываем модальное окно через 3 секунды
+      setConfirmationVisible(false); // Скрываем подтверждение
+    }, 2000);
+    setConfirmationTimer(timer);
+  };
+
+  const toggleRequired = () => {
+    setRequiredOpen(!requiredOpen);
+    setSelectedItem("");
+  }
+
+  const HandleApplicationSend = (value: string) => {
+    setSelectedItem(value);
+  }
+
+
+
   return (
     <SafeAreaProvider>
-        <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#EAEAEA' }}>
-          <View style={styles.container}>
-            <Image source={{ uri: projectData.photo }} style={styles.projectImage} />
+       
+      <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#EAEAEA' }}>
+        <ScrollView contentContainerStyle={styles.container}>
+        
 
-            <View style={styles.about_project_container}>
-              {/* <Text style = {styles.about_project_name} >{projectData.name}</Text> */}
-              <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text>
+          <Image source={{ uri: projectData.photo }} style={styles.projectImage} />
 
-              {/* <Text style = {styles.about_project_desc}>{projectData.description}</Text> */}
-              <Text style={styles.about_project_desc}>Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.</Text>
-            </View>
+          <View style={styles.about_project_container}>
+            <Text style = {styles.about_project_name} >{projectData.name}</Text>
+            {/* <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text> */}
 
-            <View style={styles.required_container}>
-              <Text style={styles.requider_name}>Требуются:</Text>
-              <View style={{ width: '95%', marginLeft: 8 }}>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.required_contnainer_2}
-                >
-                  <View style={styles.required_offer_container}>
-                    <TouchableOpacity onPress={toggleRequired} style={styles.required_button_wrapper}>
-                      <Image source={require('../shared/icons/plus3.png')} style={styles.required_image} />
-                    </TouchableOpacity>
-                    <Text style={styles.required_text}>Предложить</Text>
-                  </View>
-                  {projectData.required.map((required: string, index: number) => (
-                    <View style={styles.required_offer_container} key={index}>
-                      {projectData.members[index] === "-" ? (
-                        <TouchableOpacity
-                          ref={buttonRef}
-                          onPress={() => {
-                            openApplicationModal(index);
-                          }}
-                          style={styles.required_button_wrapper}
-                        >
-                          <Image source={require('../shared/icons/plus3.png')} style={styles.required_image} />
-                        </TouchableOpacity>
-                      ) : (
-                        <MemberAvatar userId={projectData.members[index]} num={1} />
-                      )}
-                      <Text style={styles.required_text}>{required}</Text>
-                      {openSendIndex === index && (
-                        <Modal
-                          animationType='slide'
-                          transparent={true}
-                          visible={modalVisible}
-                          onRequestClose={closeApplicationModal}
-                        >
-                          <View style={[styles.modalContainer]}>
+            <Text style = {styles.about_project_desc}>{projectData.description}</Text>
+            {/* <Text style={styles.about_project_desc}>Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.</Text> */}
+          </View>
+
+          <View style={styles.required_container}>
+            <Text style={styles.requider_name}>Требуются:</Text>
+            <View style={{ width: '95%', marginLeft: 8 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.required_contnainer_2}
+              >
+                <View style={styles.required_offer_container}>
+                  <TouchableOpacity onPress={toggleRequired} style={styles.required_button_wrapper}>
+                    <Image source={require('../shared/icons/plus3.png')} style={styles.required_image} />
+                  </TouchableOpacity>
+                  <Text style={styles.required_text}>Предложить</Text>
+                </View>
+                <Image source={require('../shared/icons/slash.png')} style={{ height: 50, marginLeft: 5.5, marginRight: 11.5 }} />
+                {projectData.required.map((required: string, index: number) => (
+                  <View style={styles.required_offer_container} key={index}>
+                    {projectData.members[index] === "-" ? (
+                      <TouchableOpacity
+                        ref={buttonRef}
+                        onPress={() => {
+                          openApplicationModal(index);
+                        }}
+                        style={styles.required_button_wrapper}
+                      >
+                        <Image source={require('../shared/icons/plus3.png')} style={styles.required_image} />
+                      </TouchableOpacity>
+                    ) : (
+                      <MemberAvatar userId={projectData.members[index]} num={1} />
+                    )}
+                    <Text style={styles.required_text}>{required}</Text>
+                    {openSendIndex === index && (
+                      <Modal
+                        animationType='slide'
+                        transparent={true}
+                        visible={modalVisible}
+                        onRequestClose={closeApplicationModal}
+                      >
+                        <View style={styles.modalContainer}>
+
+                          {confirmationVisible ? (
+                            <View style={styles.modalContent_2}>
+                              <Text style={styles.application_text_2}>Заявка отправлена</Text>
+                            </View>
+                          ) : (
                             <View style={styles.modalContent}>
                               <Text style={styles.application_text}>Подать заявку?</Text>
-                              <TouchableOpacity onPress={() => sendApplication(openSendIndex)}>
-                                <Image source={require('../shared/icons/check.png')} style={styles.application_ok_button}></Image>
+                              <TouchableOpacity onPress={showConfirmation}>
+                                <Image source={require('../shared/icons/check.png')} style={styles.application_ok_button} />
+                                 
+                                 
                               </TouchableOpacity>
                               <TouchableOpacity onPress={closeApplicationModal}>
-                                <Image source={require('../shared/icons/p.png')} style={styles.application_not_ok_button}></Image>
+                                <Image source={require('../shared/icons/p.png')} style={styles.application_not_ok_button} />
                               </TouchableOpacity>
                             </View>
-                          </View>
-                        </Modal>
-                      )}
-                    </View>
-                  ))}
-                </ScrollView>
-              </View>
-            </View>
+                          )}
 
-            <View style={styles.categories_container}>
-              <Text style={styles.categories_name}>Категории:</Text>
-              <View style={{ width: '96%', marginLeft: 10 }}>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.categories_container_2}
+                        </View>
+                      </Modal>
+
+                    )}
+
+                  </View>
+                ))}
+
+              </ScrollView>
+              {requiredOpen && (
+                <Modal
+                  transparent={true}
+                  visible={requiredOpen}
+                  onRequestClose={toggleRequired}
                 >
-                  {projectData.categories.map((categories: string) => (
-                    <View style={styles.categoires_wrapper}>
-                      <Text style={styles.categoires_text}>{categories}</Text>
-                    </View>
-                  ))}
-                </ScrollView>
-              </View>
+                  <View style={styles.modalContainer_2}>
+                    {selectedItem !== "" ? (
+                      <View style={styles.modalContent}>
+                        <Text style={styles.application_text}>Вы хотите подать заявку на "{selectedItem}"?</Text>
+                        <TouchableOpacity onPress={toggleRequired}>
+                          <Image source={require('../shared/icons/check.png')} style={styles.application_ok_button} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={toggleRequired}>
+                          <Image source={require('../shared/icons/p.png')} style={styles.application_not_ok_button} />
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <ScrollView style={styles.dropdownContainer}>
+                        <View style={styles.dropdownWrapper}>
+                          {required.map((item) => (
+                            <TouchableOpacity
+                              key={item.key}
+                              style={[styles.dropdownItem, styles.dropdownItemSelected]}
+                              onPress={() => HandleApplicationSend(item.value)}>
+                              <View style={styles.dropdownItemContainer}>
+                                <View style={styles.dropdownItem_icon}>
+                                  <Image source={require('../shared/icons/plus2.png')} />
+                                </View>
+                                <Text style={styles.dropdownItemText}>{item.value}</Text>
+                              </View>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </ScrollView>
+                    )}
+                  </View>
+                </Modal>
+              )}
+
+
             </View>
+          </View>
 
+          <View style={styles.categories_container}>
+            <Text style={styles.categories_name}>Категории:</Text>
 
-
-            <View style={styles.author_container}>
-              <Text style={styles.author_name}>Автор идеи:</Text>
-              <View style={styles.author_wrapper}>
-                <MemberAvatar userId={projectData.creatorId} num={2}></MemberAvatar>
-                <Text style={styles.author_text}>{projectData.creator}</Text>
-              </View>
+            <View
+              style={styles.categories_container_2}
+            >
+              {projectData.categories.map((categories: string) => (
+                <View style={styles.categoires_wrapper}>
+                  <Text style={styles.categoires_text}>{categories}</Text>
+                </View>
+              ))}
             </View>
-
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.goback}>
-              <Image source={require('../shared/icons/arrow.png')} />
-            </TouchableOpacity>
 
           </View>
-        </View>
+
+
+
+          <View style={styles.author_container}>
+            <Text style={styles.author_name}>Автор идеи:</Text>
+            <View style={styles.author_wrapper}>
+              <MemberAvatar userId={projectData.creatorId} num={2}></MemberAvatar>
+              <Text style={styles.author_text}>{projectData.creator}</Text>
+            </View>
+
+          </View>
+          <View style={{ height: 20, marginTop: 20 }}></View>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.goback}>
+            <Image source={require('../shared/icons/arrow.png')} />
+          </TouchableOpacity>
+
+
+        </ScrollView>
+      </View>
     </SafeAreaProvider >
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+
     backgroundColor: '#EAEAEA',
     alignItems: 'center',
   },
@@ -285,8 +360,9 @@ const styles = StyleSheet.create({
   },
 
   required_offer_container: {
-    marginLeft: 19,
+    marginRight: 9,
     width: 71,
+
     //height: 80,
     flexDirection: 'column',
     alignItems: 'center',
@@ -320,15 +396,18 @@ const styles = StyleSheet.create({
 
   categories_container: {
     width: '94%',
-    height: 71,
+    height: 'auto',
     backgroundColor: '#FFFFFF',
     borderRadius: 30,
+    paddingBottom: 15,
   },
 
   categories_container_2: {
-    //flex: 1,
-    //flexDirection: "row",
-    //marginLeft: 19,
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: 'wrap',
+    marginLeft: 19,
+    gap: 6,
     marginTop: 4,
     width: 'auto',
   },
@@ -338,7 +417,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'rgba(0, 0, 0, 0.9)',
     textAlign: 'left',
-    marginTop: 11,
+
     marginLeft: 19,
     //marginBottom: 5,
   },
@@ -348,8 +427,10 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     height: 23,
     paddingHorizontal: 8,
-    paddingTop: 2,
+    //marginTop: 11,
     marginRight: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   categoires_text: {
@@ -365,6 +446,7 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: '#FFFFFF',
     borderRadius: 30,
+
   },
 
   author_name: {
@@ -401,6 +483,12 @@ const styles = StyleSheet.create({
     left: 120
   },
 
+  modalContainer_2: {
+    position: 'absolute',
+    top: 560,
+    left: 20
+  },
+
   modalContent: {
     flexDirection: 'row',
 
@@ -410,6 +498,17 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 7.5,
     backgroundColor: '#BE9DE8',
+    borderRadius: 40,
+  },
+
+  modalContent_2: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.71)',
+    // width: 158,
+
+    paddingHorizontal: 7,
+    paddingBottom: 10,
+    paddingTop: 8,
     borderRadius: 40,
   },
 
@@ -429,7 +528,7 @@ const styles = StyleSheet.create({
   },
 
   application_not_ok_button: {
-    opacity: 0.79,
+
     marginLeft: 9,
     marginTop: -3,
   },
@@ -438,6 +537,61 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.76)',
     fontSize: 11,
     fontFamily: 'Inter-SemiBold',
+  },
+
+  application_text_2: {
+
+    color: 'rgba(255,255,255,0.76)',
+    fontSize: 11,
+    fontFamily: 'Inter-SemiBold',
+  },
+
+  buttonsContainer: {
+    flexDirection: 'row',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    maxHeight: 150,
+    width: 160,
+    backgroundColor: '#BE9DE8',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 15,
+    zIndex: 999,
+    marginTop: 15,
+  },
+  dropdownWrapper: {
+    paddingTop: 13,
+    paddingLeft: 6,
+    paddingRight: 13,
+    paddingBottom: 5,
+  },
+  dropdownItem: {
+    marginBottom: 10,
+    color: 'white',
+    fontFamily: "Inter-SemiBold",
+  },
+  dropdownItem_icon: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dropdownItemContainer: {
+    flex: 1,
+    paddingLeft: 11,
+    flexDirection: 'row',
+  },
+  dropdownItemText: {
+    marginLeft: 5,
+    color: 'white',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 12,
+  },
+  dropdownItemSelected: {
+    //backgroundColor: '#F2F2F2',
   },
 });
 
