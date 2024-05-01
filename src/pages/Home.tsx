@@ -8,7 +8,9 @@ import {
   Keyboard,
   ScrollView,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
+
 import { FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
 import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +19,10 @@ import { collection, doc, getDoc, addDoc, getDocs, query, where } from 'firebase
 import { loadFonts } from '../shared/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
 import ProjectModal from 'widgets/ModalWindowProject';
+
+import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
+
+import ProjectCarouselItem from 'widgets/ProjectCarouselItem';
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [username, setUsername] = useState<string | null>(null);
@@ -32,21 +38,24 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [userProjects, setUserProjects] = useState<any[]>([]);
+  const [allProjects, setAllProjects] = useState<any[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [userId, setUserId] = useState('');
+
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   const toggleRequired = () => {
     setRequiredOpen(!requiredOpen);
     setCategoriesOpen(false);
     Keyboard.dismiss();
   };
-  
+
   const toggleCategory = () => {
     setCategoriesOpen(!categoriesOpen);
     setRequiredOpen(false);
     Keyboard.dismiss();
   };
-  
+
   const handleRequiredSelect = (value: string) => {
     if (requiredSelected.includes(value)) {
       setRequiredSelected(requiredSelected.filter((item) => item !== value));
@@ -54,7 +63,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setRequiredSelected([...requiredSelected, value]);
     }
   };
-  
+
   const handleCategorySelect = (value: string) => {
     if (categoriesSelected.includes(value)) {
       setCategoriesSelected(categoriesSelected.filter((item) => item !== value));
@@ -62,7 +71,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setCategoriesSelected([...categoriesSelected, value]);
     }
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
       const user = FIREBASE_AUTH.currentUser;
@@ -78,17 +87,17 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           await fetchUserProjects(); // Перенесено сюда
         }
       }
-  
+
       await loadFonts();
       setFontsLoaded(true);
       setDataLoaded(true);
     };
-  
+
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
-    
+
     return unsubscribe;
   }, []);
-  
+
   const insets = useSafeAreaInsets();
 
   const onImageLibraryPress = useCallback(async () => {
@@ -106,12 +115,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       selectionLimit: 1, // Установка лимита на одно изображение
     });
 
-    if(result.canceled === false){
+    if (result.canceled === false) {
       setPickerResponse(result);
       setSelectedImage(result.assets[0].uri);
       console.log(result);
     }
-    
+
     //pickerResponse.assets[0].uri
 
   }, []);
@@ -128,10 +137,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
-  
+
       const storageRef = ref(FIREBASE_STORAGE, `images/${username}_${Date.now()}`);
       await uploadBytes(storageRef, blob);
-  
+
       const url = await getDownloadURL(storageRef);
       return url;
     } catch (error) {
@@ -142,12 +151,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const CreateProject = async () => {
     try {
-  
+
       if (!projectName.trim() || !projectDescRaw.trim() || !requiredSelected.length || !categoriesSelected.length || !pickerResponse) {
         alert('Пожалуйста, заполните все поля.');
         return;
       }
-  
+
       let imageUrl = null;
       if (pickerResponse && !pickerResponse.canceled) {
         const uploadedImageUrl = await uploadImageToFirebase(pickerResponse.assets[0].uri);
@@ -155,7 +164,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           imageUrl = uploadedImageUrl;
         }
       }
-  
+
       const projectData = {
         photo: imageUrl,
         name: projectName,
@@ -166,20 +175,20 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         creatorId: userId,
         members: [],
       };
-  
+
       const firestore = FIREBASE_DB;
       const projectsRef = collection(firestore, 'projects');
-  
+
       const docRef = await addDoc(projectsRef, projectData);
       console.log('Project created with ID: ', docRef.id);
-  
+
       // Обновляем список проектов пользователя в состоянии
       const newProject = {
         id: docRef.id,
         ...projectData,
       };
       setUserProjects([...userProjects, newProject]); // Обновлено
-  
+
       setProjectName('');
       setProjectDescRaw('');
       setRequiredSelected([]);
@@ -191,7 +200,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       console.error('Error adding document: ', error);
     }
   };
-  
+
   const fetchUserProjects = async () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
@@ -201,33 +210,72 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
           const userData = docSnap.data();
-  
+
           const projectsRef = collection(FIREBASE_DB, 'projects');
           const querySnapshot = await getDocs(
             query(projectsRef, where('creator', '==', userData.username))
           );
-          
+
+          const querySnapshot2 = await getDocs(
+            query(projectsRef, where('creator', '!=', userData.username))
+          );
+
           if (querySnapshot.docs.length > 0) {
             const projectsData = querySnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
-            console.log('User projects:', projectsData);
+
             setUserProjects(projectsData);
-          } else {
-            console.log('У пользователя нет проектов');
           }
-          setDataLoaded(true); // Перенесено сюда
+
+          if (querySnapshot2.docs.length > 0) {
+            const projectsData = querySnapshot2.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+
+            setAllProjects(projectsData);
+            console.log(projectsData);
+          }
+          setDataLoaded(true);
         }
       }
     } catch (error) {
-      console.error('Error fetching user projects: ', error);
+      console.error('Error fetching projects: ', error);
     }
   };
-  
-  const OpenProject = (projectID : string) => {
+
+  const OpenProject = (projectID: string) => {
     navigation.navigate('Project', { projectId: projectID });
   };
+
+  const search = () => {
+  };
+
+  const carouselItems = allProjects.map((project) => ({
+    id: project.id,
+    title: project.name,
+    image: { uri: project.photo },
+    description: project.description,
+  }));
+
+  const renderCarouselItem = ({ item, index }: { item: any; index: number }) => {
+    // Определяем стили для центрального элемента и боковых элементов
+    const itemStyle = index === carouselIndex ? styles.centeredItem : styles.sideItem;
+    const centeredItemStyle = index === carouselIndex ? styles.centeredItem : {};
+
+    return (
+      <View style={[styles.carouselItem, itemStyle]}>
+        <TouchableOpacity onPress={() => OpenProject(item.id)}>
+          <Image source={{ uri: item.image.uri }} style={[styles.image, itemStyle]} />
+        </TouchableOpacity>
+        {index === carouselIndex && <Text style={styles.projectTitle}>{item.title}</Text>}
+        {/* {index === carouselIndex && <Text style={styles.projectTitle}>РАЗРАБОТКА САЙТА ДЛЯ ПОИСКА ДОРАМ ПО ОПИСАНИЮ</Text>} */}
+      </View>
+    );
+  };
+
 
   if (!dataLoaded || !fontsLoaded) {
     return (
@@ -262,8 +310,24 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           ))}
         </ScrollView>
 
-        <View>
-          <Text>123123</Text>
+        <View style={styles.workWithProjectsContainer}>
+          <Text style={styles.workWithProjectsText}>С какими проектами вы хотите поработать?</Text>
+          <TouchableOpacity style={styles.searchButton} onPress={search}>
+            <Image source={require('../shared/icons/search.png')} />
+          </TouchableOpacity>
+
+
+          <View style={styles.carousel}>
+            <Carousel
+              layout="default"
+              data={carouselItems}
+              renderItem={renderCarouselItem}
+              sliderWidth={400} 
+              itemWidth={165} 
+              onSnapToItem={(index) => setCarouselIndex(index)}
+            />
+            {/* <Text style={styles.projectDescription}>{carouselItems[carouselIndex].description}</Text>  */}
+          </View>
 
         </View>
 
@@ -286,7 +350,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           selectedImage={selectedImage}
           CreateProject={CreateProject}
         />
-        
+
+
+
+
       </View>
     </SafeAreaProvider>
   );
@@ -315,14 +382,14 @@ const styles = StyleSheet.create({
     height: 75,
     borderRadius: 20,
   },
-  
+
   userProjectsContainer: {
     flexDirection: 'row',
     marginTop: 13,
     paddingLeft: 10,
     paddingRight: 25,
-    height: 120,
-    //width: ''
+    height: 155,
+
   },
   projectItem: {
     marginLeft: 13,
@@ -330,6 +397,81 @@ const styles = StyleSheet.create({
   projectImage: {
     width: 82,
     height: 120,
+    borderRadius: 20,
+  },
+
+
+  workWithProjectsContainer: {
+    position: 'absolute',
+    top: 270,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    //borderRadius: 30,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    backgroundColor: '#BE9DE8',
+
+  },
+  workWithProjectsText: {
+    marginTop: 21,
+    marginLeft: 21,
+    fontSize: 21,
+    fontFamily: 'Inter-Bold',
+    textAlign: 'left',
+    color: '#FFFFFF',
+    lineHeight: 27,
+    width: 220,
+    // height: 72
+  },
+
+  searchButton: {
+    position: 'absolute',
+    top: 23,
+    right: 28,
+  },
+
+  carousel: {
+    marginTop: 18,
+    width: '100%', // Занимает всю доступную ширину
+    height: 400, // Высота карусели
+  },
+  imageContainer: {
+    width: '100%',
+    height: 321, // Высота изображения
+  },
+  projectTitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-ExtraBold',
+    //marginTop: 24,
+    textTransform: 'uppercase',
+    color: '#FFFFFF',
+    position: 'absolute',
+    width: 314,
+    bottom: -90,
+    textAlign: 'center',
+  },
+
+  carouselItem: {
+    //marginTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centeredItem: {
+    
+    width: 165, // Увеличиваем ширину центрального элемента
+    height: 259, // Высота центрального элемента
+    
+  },
+  sideItem: {
+    width: 134.23,
+    height: 227.41,
+    
+    
+  },
+  image: {
+    width: 165,
+    height: 259,
     borderRadius: 20,
   },
 
