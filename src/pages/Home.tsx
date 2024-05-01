@@ -20,6 +20,7 @@ import { loadFonts } from '../shared/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
 import ProjectModal from 'widgets/ModalWindowProject';
 
+
 import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
 
 import ProjectCarouselItem from 'widgets/ProjectCarouselItem';
@@ -41,6 +42,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [allProjects, setAllProjects] = useState<any[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [userId, setUserId] = useState('');
+  const [members, setMembers] = useState<string[]>([]);
 
   const [carouselIndex, setCarouselIndex] = useState(0);
 
@@ -57,12 +59,21 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   const handleRequiredSelect = (value: string) => {
-    if (requiredSelected.includes(value)) {
-      setRequiredSelected(requiredSelected.filter((item) => item !== value));
-    } else {
       setRequiredSelected([...requiredSelected, value]);
-    }
+
+      setMembers([...members, "-"]);
+      
+   
   };
+
+
+  // const handleRequiredSelect = (value: string) => {
+  //    if (requiredSelected.includes(value)) {
+  //      setRequiredSelected(requiredSelected.filter((item) => item !== value));
+  //    } else {
+  //      setRequiredSelected([...requiredSelected, value]);
+  //    }
+  //  };
 
   const handleCategorySelect = (value: string) => {
     if (categoriesSelected.includes(value)) {
@@ -173,7 +184,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         categories: categoriesSelected,
         creator: username,
         creatorId: userId,
-        members: [],
+        members: members,
       };
 
       const firestore = FIREBASE_DB;
@@ -195,6 +206,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setCategoriesSelected([]);
       setPickerResponse(null);
       setSelectedImage("");
+      setMembers([]);
       ModalClose();
     } catch (error) {
       console.error('Error adding document: ', error);
@@ -310,7 +322,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           ))}
         </ScrollView>
 
-        <View style={styles.workWithProjectsContainer}>
+        <View style={[styles.workWithProjectsContainer, { top: insets.top + 260 }]}>
           <Text style={styles.workWithProjectsText}>С какими проектами вы хотите поработать?</Text>
           <TouchableOpacity style={styles.searchButton} onPress={search}>
             <Image source={require('../shared/icons/search.png')} />
@@ -322,8 +334,8 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
               layout="default"
               data={carouselItems}
               renderItem={renderCarouselItem}
-              sliderWidth={400} 
-              itemWidth={165} 
+              sliderWidth={400}
+              itemWidth={165}
               onSnapToItem={(index) => setCarouselIndex(index)}
             />
             {/* <Text style={styles.projectDescription}>{carouselItems[carouselIndex].description}</Text>  */}
@@ -349,6 +361,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           handleCategorySelect={handleCategorySelect}
           selectedImage={selectedImage}
           CreateProject={CreateProject}
+          members={members}
         />
 
 
@@ -403,18 +416,15 @@ const styles = StyleSheet.create({
 
   workWithProjectsContainer: {
     position: 'absolute',
-    top: 270,
     left: 0,
     right: 0,
     bottom: 0,
-    //borderRadius: 30,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     backgroundColor: '#BE9DE8',
-
+    paddingTop: 21,
   },
   workWithProjectsText: {
-    marginTop: 21,
     marginLeft: 21,
     fontSize: 21,
     fontFamily: 'Inter-Bold',
@@ -432,9 +442,10 @@ const styles = StyleSheet.create({
   },
 
   carousel: {
-    marginTop: 18,
-    width: '100%', // Занимает всю доступную ширину
-    height: 400, // Высота карусели
+    marginTop: 20,
+    width: '100%',
+    height: 321,
+    marginBottom: 18,
   },
   imageContainer: {
     width: '100%',
@@ -443,31 +454,29 @@ const styles = StyleSheet.create({
   projectTitle: {
     fontSize: 16,
     fontFamily: 'Inter-ExtraBold',
-    //marginTop: 24,
+    marginTop: 18,
     textTransform: 'uppercase',
     color: '#FFFFFF',
-    position: 'absolute',
     width: 314,
-    bottom: -90,
     textAlign: 'center',
   },
 
   carouselItem: {
-    //marginTop: 20,
+    marginTop: 25,
     justifyContent: 'center',
     alignItems: 'center',
   },
   centeredItem: {
-    
+
     width: 165, // Увеличиваем ширину центрального элемента
     height: 259, // Высота центрального элемента
-    
+
   },
   sideItem: {
     width: 134.23,
     height: 227.41,
-    
-    
+
+
   },
   image: {
     width: 165,

@@ -32,6 +32,7 @@ interface ProjectModalProps {
   categoriesSelected: string[];
   handleCategorySelect: (value: string) => void;
   CreateProject: () => void;
+  members: string[];
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({
@@ -52,6 +53,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   categoriesSelected,
   handleCategorySelect,
   CreateProject,
+  members
 }) => {
 
    
