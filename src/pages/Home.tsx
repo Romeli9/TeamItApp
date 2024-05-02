@@ -9,6 +9,9 @@ import {
   ScrollView,
   ActivityIndicator,
   FlatList,
+  Animated,
+  Easing,
+  ImageBackground
 } from 'react-native';
 
 import { FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
@@ -22,12 +25,12 @@ import ProjectModal from 'widgets/ModalWindowProject';
 
 
 import Carousel, { ParallaxImage } from 'react-native-snap-carousel';
+import { LinearGradient } from 'expo-linear-gradient';
 
-import ProjectCarouselItem from 'widgets/ProjectCarouselItem';
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [username, setUsername] = useState<string | null>(null);
-  const [userImgUrl, setUserImgUrl] = useState<string | null>(null);
+  const [userImgUrl, setUserImgUrl] = useState<string>('');
   const [isModalVisible, setModalVisible] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [pickerResponse, setPickerResponse] = useState<ImagePicker.ImagePickerResult | null>(null);
@@ -59,11 +62,11 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   const handleRequiredSelect = (value: string) => {
-      setRequiredSelected([...requiredSelected, value]);
+    setRequiredSelected([...requiredSelected, value]);
 
-      setMembers([...members, "-"]);
-      
-   
+    setMembers([...members, "-"]);
+
+
   };
 
 
@@ -93,15 +96,16 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         if (docSnap.exists()) {
           const userData = docSnap.data();
           setUsername(userData.username);
-          setUserImgUrl(userData.ImgUrl || '');
+          setUserImgUrl(userData.avatar);
           setUserId(user.uid);
-          await fetchUserProjects(); // Перенесено сюда
+          await fetchUserProjects();
         }
       }
 
       await loadFonts();
       setFontsLoaded(true);
       setDataLoaded(true);
+      console.log(userImgUrl);
     };
 
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
@@ -198,7 +202,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         id: docRef.id,
         ...projectData,
       };
-      setUserProjects([...userProjects, newProject]); // Обновлено
+      setUserProjects([...userProjects, newProject]);
 
       setProjectName('');
       setProjectDescRaw('');
@@ -272,21 +276,68 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     description: project.description,
   }));
 
+  const animatedWidth = new Animated.Value(165);
+  const animatedHeight = new Animated.Value(259);
+
+
+  // const renderCarouselItem = ({ item, index }: { item: any; index: number }) => {
+  //   // Определяем стили для центрального элемента и боковых элементов
+  //   const itemStyle = index === carouselIndex ? styles.centeredItem : styles.sideItem;
+  //   const centeredItemStyle = index === carouselIndex ? styles.centeredItem : {};
+
+  //   return (
+  //     <Animated.View style={[styles.carouselItem, itemStyle, { width: animatedWidth, height: animatedHeight }]}>
+  //       <TouchableOpacity onPress={() => OpenProject(item.id)}>
+  //         <Animated.Image source={{ uri: item.image.uri }} style={[styles.image, itemStyle, { width: animatedWidth, height: animatedHeight }]} />
+  //       </TouchableOpacity>
+  //       {/* {index === carouselIndex && <Text style={styles.projectTitle}>{item.title}</Text>} */}
+  //       {/* {index === carouselIndex && <Text style={styles.projectTitle}>РАЗРАБОТКА САЙТА ДЛЯ ПОИСКА ДОРАМ ПО ОПИСАНИЮ</Text>} */}
+  //     </Animated.View>
+  //   );
+  // };
+
   const renderCarouselItem = ({ item, index }: { item: any; index: number }) => {
     // Определяем стили для центрального элемента и боковых элементов
     const itemStyle = index === carouselIndex ? styles.centeredItem : styles.sideItem;
     const centeredItemStyle = index === carouselIndex ? styles.centeredItem : {};
-
+  
     return (
-      <View style={[styles.carouselItem, itemStyle]}>
+      <Animated.View style={[styles.carouselItem, itemStyle, { width: animatedWidth, height: animatedHeight }]}>
         <TouchableOpacity onPress={() => OpenProject(item.id)}>
-          <Image source={{ uri: item.image.uri }} style={[styles.image, itemStyle]} />
+          <LinearGradient
+            colors={['rgba(0, 0, 0, 0.5)', 'transparent']} // Цвета градиента
+            style={[styles.imageGradient, itemStyle, { width: animatedWidth, height: animatedHeight }]}>
+            <Animated.Image
+              source={{ uri: item.image.uri }}
+              style={[styles.image, { width: animatedWidth, height: animatedHeight }]}
+            />
+          </LinearGradient>
         </TouchableOpacity>
-        {index === carouselIndex && <Text style={styles.projectTitle}>{item.title}</Text>}
-        {/* {index === carouselIndex && <Text style={styles.projectTitle}>РАЗРАБОТКА САЙТА ДЛЯ ПОИСКА ДОРАМ ПО ОПИСАНИЮ</Text>} */}
-      </View>
+      </Animated.View>
     );
   };
+
+
+  const onSnapToItem = (index: number) => {
+    setCarouselIndex(index);
+
+    // Анимируем изменение размеров элементов
+    Animated.parallel([
+      Animated.timing(animatedWidth, {
+        toValue: index === carouselIndex ? 165 : 134.23, // Указываем конечное значение ширины
+        duration: 300, // Длительность анимации
+        easing: Easing.linear, // Линейное изменение
+        useNativeDriver: false, // Используемый драйвер
+      }),
+      Animated.timing(animatedHeight, {
+        toValue: index === carouselIndex ? 259 : 227.41, // Указываем конечное значение высоты
+        duration: 300, // Длительность анимации
+        easing: Easing.linear, // Линейное изменение
+        useNativeDriver: false, // Используемый драйвер
+      }),
+    ]).start();
+  };
+
 
 
   if (!dataLoaded || !fontsLoaded) {
@@ -300,27 +351,48 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#FFFFFF', paddingLeft: 16 }}>
-        <Text style={{ fontSize: 28 }}>Hello {username}</Text>
 
-        <Text>Ваши проекты:</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.userProjectsContainer}
-        >
-          <TouchableOpacity style={styles.create__button} onPress={ModalOpen}>
-            <Text style={styles.create__text}>+</Text>
-          </TouchableOpacity>
-          {userProjects.map((project) => (
-            <TouchableOpacity
-              key={project.id}
-              style={styles.projectItem}
-              onPress={() => OpenProject(project.id)}
-            >
-              <Image source={{ uri: project.photo }} style={styles.projectImage} />
+        <View style={styles.topContainer}>
+          <Image source={{ uri: userImgUrl }} style={styles.userImage} />
+          <View style={styles.TextContainer}>
+
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={styles.TextContainer__text1}>Добро пожаловать!</Text>
+              <Image style={styles.TextContainer__text1_img} source={require('../shared/icons/handshake.png')}></Image>
+            </View>
+            <Text style={styles.TextContainer__text2}>{username}</Text>
+          </View>
+        </View>
+
+        <View style={{ position: 'absolute', top: insets.top + 76, left: 16 }}>
+          <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 18, color: '#808080' }}>Ваши проекты:</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.userProjectsContainer}
+          >
+            <TouchableOpacity style={styles.create__button} onPress={ModalOpen}>
+              <Text style={styles.create__text}>+</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+            {userProjects.map((project) => (
+              <TouchableOpacity
+                key={project.id}
+                style={styles.projectItem}
+                onPress={() => OpenProject(project.id)}
+              >
+                <Image source={{ uri: project.photo }} style={styles.projectImage} />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+
+
+
+
+
+
+
 
         <View style={[styles.workWithProjectsContainer, { top: insets.top + 260 }]}>
           <Text style={styles.workWithProjectsText}>С какими проектами вы хотите поработать?</Text>
@@ -336,9 +408,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
               renderItem={renderCarouselItem}
               sliderWidth={400}
               itemWidth={165}
-              onSnapToItem={(index) => setCarouselIndex(index)}
+              // onSnapToItem={(index) => setCarouselIndex(index)}
+              onSnapToItem={onSnapToItem}
             />
-            {/* <Text style={styles.projectDescription}>{carouselItems[carouselIndex].description}</Text>  */}
+            <Text style={styles.projectTitle}>{carouselItems[carouselIndex].title}</Text>
           </View>
 
         </View>
@@ -401,7 +474,8 @@ const styles = StyleSheet.create({
     marginTop: 13,
     paddingLeft: 10,
     paddingRight: 25,
-    height: 155,
+    //height: 155,
+    marginLeft: -9,
 
   },
   projectItem: {
@@ -444,25 +518,26 @@ const styles = StyleSheet.create({
   carousel: {
     marginTop: 20,
     width: '100%',
-    height: 321,
-    marginBottom: 18,
+    height: 300,
   },
   imageContainer: {
     width: '100%',
-    height: 321, // Высота изображения
+    height: 300, // Высота изображения
   },
   projectTitle: {
     fontSize: 16,
     fontFamily: 'Inter-ExtraBold',
-    marginTop: 18,
+    marginLeft: 'auto',
+    marginRight: 'auto',
     textTransform: 'uppercase',
     color: '#FFFFFF',
     width: 314,
     textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   carouselItem: {
-    marginTop: 25,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -482,6 +557,49 @@ const styles = StyleSheet.create({
     width: 165,
     height: 259,
     borderRadius: 20,
+  },
+
+  topContainer: {
+    flex: 1,
+    flexDirection: 'row'
+  },
+
+  TextContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    marginTop: 7,
+  },
+
+  TextContainer__text1: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 12,
+    color: '#808080',
+  },
+
+  TextContainer__text1_img: {
+    marginLeft: 3,
+
+  },
+
+  TextContainer__text2: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 18,
+    color: '#000000',
+  },
+
+  userImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginTop: -10
+  },
+
+  imageGradient: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
   },
 
 });
