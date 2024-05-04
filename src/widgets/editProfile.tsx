@@ -3,16 +3,17 @@ import React, { useEffect, useState } from "react";
 import { Modal, View, StyleSheet, TouchableOpacity, Text, TextInput } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { FIREBASE_AUTH, FIREBASE_DB } from "../../FireBaseConfig";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { DocumentReference, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { loadFonts } from "shared/fonts/fonts";
 
 type EditProfileProps = {
     onModalClose: () => void;
-    onProjectDataChange: (projectData: any) => void;
+    onProfileDataChange: (projectData: any) => void;
+    userDocRef: DocumentReference<any, any> | undefined;
 };
 
-const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProjectDataChange }) => {
+const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProfileDataChange, userDocRef }) => {
     const [isModalVisible, setModalVisible] = React.useState(true); // Устанавливаем true, чтобы модальное окно было видимым
     const [aboutMe, setAboutMe] = useState('');
     const [experience, setExperience] = useState('');
@@ -30,63 +31,73 @@ const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProjectDataCh
     useEffect(() => {
         const fetchData = async () => {
             const user = FIREBASE_AUTH.currentUser;
-            if (user) 
-            {
+            if (user) {
                 const usersRef = collection(FIREBASE_DB, 'users');
                 const userDoc = doc(usersRef, user.uid);
                 const docSnap = await getDoc(userDoc);
-                if (docSnap.exists()) 
-                {
-                  const userData = docSnap.data();
-                  setUsername(userData.username);
-                  setUserImgUrl(userData.ImgUrl || '');
-                  fetchUserProjects();
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    setUsername(userData.username);
+                    fetchUserProjects();
                 }
             }
-              
-              await loadFonts();
-              setFontsLoaded(true);
-              
+            await loadFonts();
+            setFontsLoaded(true);
         };
-        
-            const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
-            return unsubscribe;
-          }, []);
-
-    const dataProfile = async () => 
-    {
-        try 
-        {
-            if (!aboutMe.trim() || !experience.trim() || !skills.trim() || !telegramm.trim()) {
-                alert('Пожалуйста, заполните все поля.');
-                return;
+        const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
+        return unsubscribe;
+    }, []);
+    const dataProfile = async () => {
+        try {
+            const user = FIREBASE_AUTH.currentUser;
+            if (user) {
+                if (userDocRef) {
+                    const profileData = {
+                        AboutMe: aboutMe,
+                        Experience: experience,
+                        Skills: skills,
+                        Telegramm: telegramm
+                    };
+                    interface UserProfile {
+                        AboutMe: string;
+                        Experience: string;
+                        Skills: string;
+                        Telegramm: string;
+                    }
+                    const docSnapshot = await getDoc(userDocRef);
+                    if (docSnapshot.exists()) {
+                        const userData = docSnapshot.data();
+                        const updatedProfileData: Partial<UserProfile> = {};
+                        if (aboutMe !== userData?.AboutMe && aboutMe !== '') {
+                            updatedProfileData.AboutMe = aboutMe;
+                        }
+                        if (experience !== userData?.Experience && experience !== '') {
+                            updatedProfileData.Experience = experience;
+                        }
+                        if (skills !== userData?.Skills && skills !== '') {
+                            updatedProfileData.Skills = skills;
+                        }
+                        if (telegramm !== userData?.Telegramm && telegramm !== '') {
+                            updatedProfileData.Telegramm = telegramm;
+                        }
+                        if (Object.keys(updatedProfileData).length > 0) {
+                            await updateDoc(userDocRef, updatedProfileData);
+                            onProfileDataChange(updatedProfileData);
+                            console.log('Profile data successfully updated in Firebase:', updatedProfileData);
+                        } else {
+                            console.log('No fields to update');
+                        }
+                    }
+                }
             }
-    
-            const profileData = {
-                AboutMe: aboutMe,
-                Experience: experience,
-                Skills: skills,
-                Telegramm: telegramm
-            };
-    
-            // Отправляем все данные профиля в базу данных Firebase
-            const firestore = FIREBASE_DB;
-            const profileRef = collection(firestore, 'profile');
-            await addDoc(profileRef, profileData);
-    
-            // Вызываем колбэк, чтобы обновить данные профиля в родительском компоненте
-            onProjectDataChange(profileData);
-            console.log('Profile data successfully saved to Firebase:', profileData);
         }
-        catch (error) 
-        {
+        catch (error) {
             console.error('Error edit profile: ', error);
         }
     }
     return (
         <SafeAreaProvider>
             <View style={styles.container}>
-                
                 <Modal visible={isModalVisible} animationType="slide" transparent>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
@@ -101,7 +112,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProjectDataCh
                                     value={aboutMe}
                                     placeholder='Напишите о себе'
                                     autoCapitalize='none'
-                                    placeholderTextColor="#A8A8A8" 
+                                    placeholderTextColor="#A8A8A8"
                                     onChangeText={(text) => setAboutMe(text)}
                                     style={styles.project_name__placeholder}
                                 />
@@ -114,7 +125,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProjectDataCh
                                     value={experience}
                                     placeholder='Ваш опыт'
                                     autoCapitalize='none'
-                                    placeholderTextColor="#A8A8A8" 
+                                    placeholderTextColor="#A8A8A8"
                                     onChangeText={(text) => setExperience(text)}
                                     style={styles.project_name__placeholder}
                                 />
@@ -127,7 +138,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProjectDataCh
                                     value={skills}
                                     placeholder='Ваши навыки'
                                     autoCapitalize='none'
-                                    placeholderTextColor="#A8A8A8" 
+                                    placeholderTextColor="#A8A8A8"
                                     onChangeText={(text) => setSkills(text)}
                                     style={styles.project_name__placeholder}
                                 />
@@ -140,7 +151,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProjectDataCh
                                     value={telegramm}
                                     placeholder='Ссылка на телеграмм'
                                     autoCapitalize='none'
-                                    placeholderTextColor="#A8A8A8" 
+                                    placeholderTextColor="#A8A8A8"
                                     onChangeText={(text) => setTelegramm(text)}
                                     style={styles.project_name__placeholder}
                                 />
@@ -151,11 +162,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProjectDataCh
                         </View>
                     </View>
                 </Modal>
-                
             </View>
         </SafeAreaProvider>
     )
-     
+
 }
 
 const styles = StyleSheet.create({
@@ -184,28 +194,28 @@ const styles = StyleSheet.create({
         height: 42,
     },
     modalContent: {
-        width: 316, // Уменьшаем ширину модального окна
-        height: 450, // Уменьшаем высоту модального окна
+        width: 316, 
+        height: 450, 
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 20,
         position: 'relative',
     },
     project__button_create: {
-      backgroundColor: "#9260D1",
-      width: 177,
-      height: 46,
-      left: 50,
-      borderRadius: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 15,
-      },
+        backgroundColor: "#9260D1",
+        width: 177,
+        height: 46,
+        left: 50,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 15,
+    },
     project__text_create: {
         fontFamily: 'Inter-Bold',
         fontSize: 18,
         color: "#FFFFFF",
-      },
+    },
     closeButton: {
         position: 'absolute',
         top: 10,
@@ -230,31 +240,28 @@ const styles = StyleSheet.create({
         height: 27,
     },
     project__about__container1: {
-        width: 274, // Вот здесь добавлено свойство marginTop
+        width: 274, 
     },
     project__about__container2: {
-        width: 274, // Вот здесь добавлено свойство marginTop
+        width: 274, 
     },
-    
+
 });
 
 export default EditProfile;
+
 function setEditProfileVisible(arg0: boolean) {
     throw new Error("Function not implemented.");
 }
-
 function setFontsLoaded(arg0: boolean) {
     throw new Error("Function not implemented.");
 }
-
 function fetchUserProjects() {
     throw new Error("Function not implemented.");
 }
-
 function setUserImgUrl(arg0: any) {
     throw new Error("Function not implemented.");
 }
-
 function setUsername(username: any) {
     throw new Error("Function not implemented.");
 }

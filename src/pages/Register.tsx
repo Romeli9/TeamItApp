@@ -3,9 +3,10 @@ import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, Activi
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
 import { collection, addDoc, doc, setDoc } from "firebase/firestore"
+import EditProfile from 'widgets/editProfile';
 
 const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
-
+  const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -36,7 +37,9 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
       setLoading(false);
     }
   };
-
+  const handleModalClose = () => {
+    setEditProfileVisible(false);
+  };
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior='padding'>
@@ -71,9 +74,10 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
         ) : (
           <Button title='Register' onPress={SignUp} />
         )}
-
+        
         <Button title='Go to Login' onPress={() => navigation.navigate('Login')} />
       </KeyboardAvoidingView>
+      
     </View>
   );
 };
