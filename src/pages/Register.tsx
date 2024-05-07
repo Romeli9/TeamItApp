@@ -3,10 +3,9 @@ import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, Activi
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
 import { collection, addDoc, doc, setDoc } from "firebase/firestore"
-import EditProfile from 'widgets/editProfile';
 
 const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [isEditProfileVisible, setEditProfileVisible] = useState(false);
+
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +24,6 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
       await setDoc(userDocRef, {
         username: username,
         email: email,
-        avatar: 'https://firebasestorage.googleapis.com/v0/b/teamit-fd85a.appspot.com/o/empty%2Fimages.jpg?alt=media&token=997b132a-0902-4b26-8e97-81dfdfd3b44b'
       });
 
       console.log('User registered:', user.uid);
@@ -37,9 +35,7 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
       setLoading(false);
     }
   };
-  const handleModalClose = () => {
-    setEditProfileVisible(false);
-  };
+
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior='padding'>
@@ -74,10 +70,9 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
         ) : (
           <Button title='Register' onPress={SignUp} />
         )}
-        
+
         <Button title='Go to Login' onPress={() => navigation.navigate('Login')} />
       </KeyboardAvoidingView>
-      
     </View>
   );
 };

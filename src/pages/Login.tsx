@@ -29,6 +29,7 @@ const LoginPage: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+        
       <KeyboardAvoidingView behavior='padding'>
         <TextInput
           value={email}
