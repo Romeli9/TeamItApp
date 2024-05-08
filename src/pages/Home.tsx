@@ -304,14 +304,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     return (
       <Animated.View style={[styles.carouselItem, itemStyle, { width: animatedWidth, height: animatedHeight }]}>
         <TouchableOpacity onPress={() => OpenProject(item.id)}>
-          <LinearGradient
-            colors={['rgba(0, 0, 0, 0.5)', 'transparent']} // Цвета градиента
-            style={[styles.imageGradient, itemStyle, { width: animatedWidth, height: animatedHeight }]}>
+          
             <Animated.Image
               source={{ uri: item.image.uri }}
               style={[styles.image, { width: animatedWidth, height: animatedHeight }]}
             />
-          </LinearGradient>
+          
         </TouchableOpacity>
       </Animated.View>
     );
