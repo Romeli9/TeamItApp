@@ -13,7 +13,7 @@ const messageIcon = require('shared/icons/message.png'); // Путь к ваше
 const [followersCount, setFollowersCount] = useState<number>(0);
 const [projectsCount, setProjectsCount] = useState<number>(0);
 const [subscriptionsCount, setSubscriptionsCount] = useState<number>(0);
-const userInfoIcon = require('shared/icons/userinfo');
+const userInfoIcon = require('shared/icons/userinfo.png');
 
 
 const [expanded, setExpanded] = useState<boolean>(false);
