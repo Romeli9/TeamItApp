@@ -80,6 +80,8 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   //    }
   //  };
 
+
+  
   const handleCategorySelect = (value: string) => {
     if (categoriesSelected.includes(value)) {
       setCategoriesSelected(categoriesSelected.filter((item) => item !== value));
