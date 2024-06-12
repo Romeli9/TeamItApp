@@ -21,7 +21,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { loadFonts } from '../shared/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
-import ProjectModal from 'widgets/ModalWindowProject';
+import ProjectModal from '../widgets/ModalWindowProject';
 
 
 import { LinearGradient } from 'expo-linear-gradient';
