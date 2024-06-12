@@ -55,6 +55,8 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     Keyboard.dismiss();
   };
 
+  
+
   const toggleCategory = () => {
     setCategoriesOpen(!categoriesOpen);
     setRequiredOpen(false);
