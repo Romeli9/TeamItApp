@@ -45,7 +45,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [allProjects, setAllProjects] = useState<any[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [userId, setUserId] = useState('');
-  const [members, setMembers] = useState<string[]>([]);
+  const [members, setMembers] = useState<string[]>([]);23
 
   const [carouselIndex, setCarouselIndex] = useState(0);
 
@@ -55,7 +55,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     Keyboard.dismiss();
   };
 
-  
+
 
   const toggleCategory = () => {
     setCategoriesOpen(!categoriesOpen);
@@ -81,7 +81,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   //  };
 
 
-  
+
   const handleCategorySelect = (value: string) => {
     if (categoriesSelected.includes(value)) {
       setCategoriesSelected(categoriesSelected.filter((item) => item !== value));
@@ -286,7 +286,20 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     return (
       <View style={[styles.carouselItem]}>
         <TouchableOpacity onPress={() => OpenProject(item.id)}>
-          <Image source={{ uri: item.image.uri }} style={[styles.image]} />
+
+          <ImageBackground source={{ uri: item.image.uri }} style={[styles.image]}>
+            <LinearGradient
+              colors={[
+                'rgba(242,240,255, 0)',
+                'rgba(158,115,198, 0.38)',
+                'rgba(82,0,146, 0.4)',
+              ]}
+              style={styles.gradient}
+            >
+            </LinearGradient>
+
+          </ImageBackground>
+
         </TouchableOpacity>
         {index === carouselIndex && <Text style={styles.projectTitle}>{item.title}</Text>}
       </View>
@@ -297,16 +310,16 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   //   // Определяем стили для центрального элемента и боковых элементов
   //   const itemStyle = index === carouselIndex ? styles.centeredItem : styles.sideItem;
   //   const centeredItemStyle = index === carouselIndex ? styles.centeredItem : {};
-  
+
   //   return (
   //     <Animated.View style={[styles.carouselItem, itemStyle, { width: animatedWidth, height: animatedHeight }]}>
   //       <TouchableOpacity onPress={() => OpenProject(item.id)}>
-          
+
   //           <Animated.Image
   //             source={{ uri: item.image.uri }}
   //             style={[styles.image, { width: animatedWidth, height: animatedHeight }]}
   //           />
-          
+
   //       </TouchableOpacity>
   //     </Animated.View>
   //   );
@@ -397,19 +410,26 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 
           <View style={styles.carousel}>
-            { <Carousel
-              layout="default" 
+
+            <Image source={require('../shared/icons/Group1.png')} style={styles.effect}></Image>
+
+            {<Carousel
+              layout="default"
               data={carouselItems}
               renderItem={renderCarouselItem}
               sliderWidth={400}
               itemWidth={165}
               //onSnapToItem={onSnapToItem}
               onSnapToItem={(index) => setCarouselIndex(index)}
-            /> }
-            
+            />}
+
           </View>
 
+          {/* <ImageBackground source={require('../shared/icons/effect.png')}></ImageBackground> */}
+
         </View>
+
+
 
         <ProjectModal
           isModalVisible={isModalVisible}
@@ -528,11 +548,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 15,
   },
 
   carouselItem: {
     justifyContent: 'center',
     alignItems: 'center',
+
   },
 
   centeredItem: {
@@ -541,6 +563,11 @@ const styles = StyleSheet.create({
     height: 259, // Высота центрального элемента
 
   },
+
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
   sideItem: {
     width: 134.23,
     height: 227.41,
@@ -551,6 +578,7 @@ const styles = StyleSheet.create({
     width: 165,
     height: 259,
     borderRadius: 20,
+    overflow: 'hidden',
   },
 
   topContainer: {
@@ -595,5 +623,13 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+
+  effect: {
+    //zIndex: -10,
+    position: 'absolute',
+    bottom: -130,
+    left: -240
+    //width: '100%',
+  }
 
 });

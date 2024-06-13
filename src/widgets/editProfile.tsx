@@ -51,12 +51,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ onModalClose, onProfileDataCh
             const user = FIREBASE_AUTH.currentUser;
             if (user) {
                 if (userDocRef) {
-                    const profileData = {
-                        AboutMe: aboutMe,
-                        Experience: experience,
-                        Skills: skills,
-                        Telegramm: telegramm
-                    };
+
                     interface UserProfile {
                         AboutMe: string;
                         Experience: string;
@@ -193,8 +188,8 @@ const styles = StyleSheet.create({
         height: 42,
     },
     modalContent: {
-        width: 316, 
-        height: 450, 
+        width: 316,
+        height: 450,
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 20,
@@ -239,10 +234,10 @@ const styles = StyleSheet.create({
         height: 27,
     },
     project__about__container1: {
-        width: 274, 
+        width: 274,
     },
     project__about__container2: {
-        width: 274, 
+        width: 274,
     },
 
 });

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Image, StyleSheet, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Image, StyleSheet, ScrollView, Modal, TouchableWithoutFeedback, ImageBackground } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { doc, getDoc } from 'firebase/firestore';
 import { FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
 import { getUserById } from '../services/getUserById';
 import { required } from '../shared/consts/Required';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const MemberAvatar: React.FC<{ userId: string, num: number }> = ({ userId, num }) => {
   const [user, setUser] = useState<any>(null);
@@ -123,7 +124,21 @@ const Project: React.FC<any> = ({ route, navigation }) => {
         <ScrollView contentContainerStyle={styles.container}>
         
 
-          <Image source={{ uri: projectData.photo }} style={styles.projectImage} />
+          
+
+
+          <ImageBackground source={{ uri: projectData.photo }} style={[styles.projectImage]}>
+            <LinearGradient
+              colors={[
+                'rgba(0,0,0, 0)',
+                'rgba(228,193,255, 0.3)',
+                'rgba(228,193,255, 0.75)',
+              ]}
+              style={styles.gradient}
+            >
+            </LinearGradient>
+
+          </ImageBackground>
 
           <View style={styles.about_project_container}>
             <Text style = {styles.about_project_name} >{projectData.name}</Text>
@@ -305,6 +320,12 @@ const styles = StyleSheet.create({
     height: 236,
     borderRadius: 40,
     marginBottom: 5,
+    overflow: 'hidden',
+  },
+
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 40,
   },
 
   about_project_container: {
@@ -419,7 +440,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
 
     marginLeft: 19,
-    //marginBottom: 5,
+    marginTop: 5,
   },
 
   categoires_wrapper: {
@@ -593,6 +614,10 @@ const styles = StyleSheet.create({
   dropdownItemSelected: {
     //backgroundColor: '#F2F2F2',
   },
+
+
+  
+
 });
 
 export default Project;
