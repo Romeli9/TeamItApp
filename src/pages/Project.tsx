@@ -49,7 +49,7 @@ const Project: React.FC<any> = ({ route, navigation }) => {
   const [confirmationTimer, setConfirmationTimer] = useState<any>(null); // Таймер для автоматического скрытия подтверждения
   const [requiredOpen, setRequiredOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState("");
-  
+
 
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
@@ -119,15 +119,17 @@ const Project: React.FC<any> = ({ route, navigation }) => {
 
   return (
     <SafeAreaProvider>
-       
+
       <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#EAEAEA' }}>
         <ScrollView contentContainerStyle={styles.container}>
-        
 
-          
+
+
 
 
           <ImageBackground source={{ uri: projectData.photo }} style={[styles.projectImage]}>
+
+            <Image source={require('../shared/icons/effect2.png')} style={styles.effect__top}></Image>
             <LinearGradient
               colors={[
                 'rgba(0,0,0, 0)',
@@ -141,11 +143,11 @@ const Project: React.FC<any> = ({ route, navigation }) => {
           </ImageBackground>
 
           <View style={styles.about_project_container}>
-            <Text style = {styles.about_project_name} >{projectData.name}</Text>
-            {/* <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text> */}
+            <Text style={styles.about_project_name} >{projectData.name}</Text>
+            <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text>
 
-            <Text style = {styles.about_project_desc}>{projectData.description}</Text>
-            {/* <Text style={styles.about_project_desc}>Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.</Text> */}
+            <Text style={styles.about_project_desc}>{projectData.description}</Text>
+            <Text style={styles.about_project_desc}>Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.</Text>
           </View>
 
           <View style={styles.required_container}>
@@ -197,8 +199,8 @@ const Project: React.FC<any> = ({ route, navigation }) => {
                               <Text style={styles.application_text}>Подать заявку?</Text>
                               <TouchableOpacity onPress={showConfirmation}>
                                 <Image source={require('../shared/icons/check.png')} style={styles.application_ok_button} />
-                                 
-                                 
+
+
                               </TouchableOpacity>
                               <TouchableOpacity onPress={closeApplicationModal}>
                                 <Image source={require('../shared/icons/p.png')} style={styles.application_not_ok_button} />
@@ -282,16 +284,21 @@ const Project: React.FC<any> = ({ route, navigation }) => {
               <MemberAvatar userId={projectData.creatorId} num={2}></MemberAvatar>
               <Text style={styles.author_text}>{projectData.creator}</Text>
             </View>
-
+            
           </View>
+
+          
+
           <View style={{ height: 20, marginTop: 20 }}></View>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.goback}>
             <Image source={require('../shared/icons/arrow.png')} />
           </TouchableOpacity>
 
 
+
         </ScrollView>
       </View>
+
     </SafeAreaProvider >
   );
 };
@@ -615,8 +622,18 @@ const styles = StyleSheet.create({
     //backgroundColor: '#F2F2F2',
   },
 
+  effect__top: {
+    //zIndex: -10,
+    position: 'absolute',
+    top: -175,
+    left: -65
+    //width: '100%',
+  },
 
   
+
+
+
 
 });
 

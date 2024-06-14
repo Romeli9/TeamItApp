@@ -14,6 +14,7 @@ import Home from './src/pages/Home';
 import Profile from './src/pages/Profile';
 import Messenger from './src/pages/Messenger';
 import Project from './src/pages/Project';
+import Search from './src/pages/Search'
 
 
 
@@ -96,6 +97,7 @@ export default function App() {
           </>
         )}
         <Stack.Screen name="Project" component={Project} options={{ headerShown: false }} />
+        <Stack.Screen name="Search" component={Search} options={{ headerShown: false }} />
       </Stack.Navigator>
       <StatusBar style='auto' />
     </NavigationContainer>
