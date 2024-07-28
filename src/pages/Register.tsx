@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
 import { collection, addDoc, doc, setDoc } from "firebase/firestore"
@@ -32,7 +32,7 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
       navigation.navigate('Homepage');
     } catch (error: any) {
       console.log(error);
-      alert('Sign Up failed: ' + error.message);
+      Alert.alert('Sign Up failed: ' + error.message);
     } finally {
       setLoading(false);
     }

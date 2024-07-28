@@ -11,7 +11,8 @@ import {
   FlatList,
   Animated,
   Easing,
-  ImageBackground
+  ImageBackground,
+  Alert
 } from 'react-native';
 
 import { FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
@@ -122,7 +123,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const onImageLibraryPress = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Извините, но нам нужно разрешение на доступ к вашей камере, чтобы это работало!');
+      Alert.alert('Извините, но нам нужно разрешение на доступ к вашей камере, чтобы это работало!');
       return;
     }
 
@@ -172,7 +173,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
 
       if (!projectName.trim() || !projectDescRaw.trim() || !requiredSelected.length || !categoriesSelected.length || !pickerResponse) {
-        alert('Пожалуйста, заполните все поля.');
+        Alert.alert('Пожалуйста, заполните все поля.');
         return;
       }
 

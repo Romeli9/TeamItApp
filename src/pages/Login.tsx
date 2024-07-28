@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator, Alert } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../../FireBaseConfig';
 
@@ -17,7 +17,7 @@ const LoginPage: React.FC<{ navigation: any }> = ({ navigation }) => {
       navigation.navigate('Homepage');
     } catch (error: any) {
       console.log(error);
-      alert('Sign In failed: ' + error.message);
+      Alert.alert('Sign In failed: ' + error.message);
     } finally {
       setLoading(false);
     }
