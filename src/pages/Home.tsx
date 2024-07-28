@@ -11,7 +11,8 @@ import {
   FlatList,
   Animated,
   Easing,
-  ImageBackground
+  ImageBackground,
+  Alert
 } from 'react-native';
 
 import { FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
@@ -122,7 +123,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const onImageLibraryPress = useCallback(async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Извините, но нам нужно разрешение на доступ к вашей камере, чтобы это работало!');
+      Alert.alert('Извините, но нам нужно разрешение на доступ к вашей камере, чтобы это работало!');
       return;
     }
 
@@ -172,7 +173,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     try {
 
       if (!projectName.trim() || !projectDescRaw.trim() || !requiredSelected.length || !categoriesSelected.length || !pickerResponse) {
-        alert('Пожалуйста, заполните все поля.');
+        Alert.alert('Пожалуйста, заполните все поля.');
         return;
       }
 
@@ -306,47 +307,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
   };
 
-  // const renderCarouselItem = ({ item, index }: { item: any; index: number }) => {
-  //   // Определяем стили для центрального элемента и боковых элементов
-  //   const itemStyle = index === carouselIndex ? styles.centeredItem : styles.sideItem;
-  //   const centeredItemStyle = index === carouselIndex ? styles.centeredItem : {};
-
-  //   return (
-  //     <Animated.View style={[styles.carouselItem, itemStyle, { width: animatedWidth, height: animatedHeight }]}>
-  //       <TouchableOpacity onPress={() => OpenProject(item.id)}>
-
-  //           <Animated.Image
-  //             source={{ uri: item.image.uri }}
-  //             style={[styles.image, { width: animatedWidth, height: animatedHeight }]}
-  //           />
-
-  //       </TouchableOpacity>
-  //     </Animated.View>
-  //   );
-  // };
-
-
-  // const onSnapToItem = (index: number) => {
-  //   setCarouselIndex(index);
-
-  //   // Анимируем изменение размеров элементов
-  //   Animated.parallel([
-  //     Animated.timing(animatedWidth, {
-  //       toValue: index === carouselIndex ? 165 : 134.23, // Указываем конечное значение ширины
-  //       duration: 300, // Длительность анимации
-  //       easing: Easing.linear, // Линейное изменение
-  //       useNativeDriver: false, // Используемый драйвер
-  //     }),
-  //     Animated.timing(animatedHeight, {
-  //       toValue: index === carouselIndex ? 259 : 227.41, // Указываем конечное значение высоты
-  //       duration: 300, // Длительность анимации
-  //       easing: Easing.linear, // Линейное изменение
-  //       useNativeDriver: false, // Используемый драйвер
-  //     }),
-  //   ]).start();
-  // };
-
-
 
   if (!dataLoaded || !fontsLoaded) {
     return (
@@ -419,7 +379,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
               renderItem={renderCarouselItem}
               sliderWidth={400}
               itemWidth={165}
-              //onSnapToItem={onSnapToItem}
               onSnapToItem={(index) => setCarouselIndex(index)}
             />}
 

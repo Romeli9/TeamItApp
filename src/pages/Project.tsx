@@ -13,7 +13,7 @@ const MemberAvatar: React.FC<{ userId: string, num: number }> = ({ userId, num }
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await getUserById(userId); // Загрузка данных пользователя по ID
+        const userData = await getUserById(userId); 
         setUser(userData);
       } catch (error) {
         console.error('Ошибка при загрузке данных пользователя:', error);
@@ -129,8 +129,8 @@ const Project: React.FC<any> = ({ route, navigation }) => {
 
           <ImageBackground source={{ uri: projectData.photo }} style={[styles.projectImage]}>
 
-            <Image source={require('../shared/icons/effect2.png')} style={styles.effect__top}></Image>
-            <LinearGradient
+            {/* <Image source={require('../shared/icons/effect2.png')} style={styles.effect__top}></Image> */}
+            {/* <LinearGradient
               colors={[
                 'rgba(0,0,0, 0)',
                 'rgba(228,193,255, 0.3)',
@@ -138,16 +138,16 @@ const Project: React.FC<any> = ({ route, navigation }) => {
               ]}
               style={styles.gradient}
             >
-            </LinearGradient>
+            </LinearGradient> */}
 
           </ImageBackground>
 
           <View style={styles.about_project_container}>
             <Text style={styles.about_project_name} >{projectData.name}</Text>
-            <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text>
+            {/* <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text> */}
 
             <Text style={styles.about_project_desc}>{projectData.description}</Text>
-            <Text style={styles.about_project_desc}>Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.</Text>
+            {/* <Text style={styles.about_project_desc}>Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.</Text> */}
           </View>
 
           <View style={styles.required_container}>
@@ -165,23 +165,23 @@ const Project: React.FC<any> = ({ route, navigation }) => {
                   <Text style={styles.required_text}>Предложить</Text>
                 </View>
                 <Image source={require('../shared/icons/slash.png')} style={{ height: 50, marginLeft: 5.5, marginRight: 11.5 }} />
-                {projectData.required.map((required: string, index: number) => (
-                  <View style={styles.required_offer_container} key={index}>
-                    {projectData.members[index] === "-" ? (
+                {projectData.required.map((required: string, ix: number) => (
+                  <View style={styles.required_offer_container} key={ix}>
+                    {projectData.members[ix] === "-" ? (
                       <TouchableOpacity
                         ref={buttonRef}
                         onPress={() => {
-                          openApplicationModal(index);
+                          openApplicationModal(ix);
                         }}
                         style={styles.required_button_wrapper}
                       >
                         <Image source={require('../shared/icons/plus3.png')} style={styles.required_image} />
                       </TouchableOpacity>
                     ) : (
-                      <MemberAvatar userId={projectData.members[index]} num={1} />
+                      <MemberAvatar userId={projectData.members[ix]} num={1} />
                     )}
                     <Text style={styles.required_text}>{required}</Text>
-                    {openSendIndex === index && (
+                    {openSendIndex === ix && (
                       <Modal
                         animationType='slide'
                         transparent={true}
@@ -237,9 +237,9 @@ const Project: React.FC<any> = ({ route, navigation }) => {
                     ) : (
                       <ScrollView style={styles.dropdownContainer}>
                         <View style={styles.dropdownWrapper}>
-                          {required.map((item) => (
+                          {required.map((item, ix) => (
                             <TouchableOpacity
-                              key={item.key}
+                              key={ix}
                               style={[styles.dropdownItem, styles.dropdownItemSelected]}
                               onPress={() => HandleApplicationSend(item.value)}>
                               <View style={styles.dropdownItemContainer}>
@@ -267,8 +267,8 @@ const Project: React.FC<any> = ({ route, navigation }) => {
             <View
               style={styles.categories_container_2}
             >
-              {projectData.categories.map((categories: string) => (
-                <View style={styles.categoires_wrapper}>
+              {projectData.categories.map((categories : string, ix : number) => (
+                <View key={ix} style={styles.categoires_wrapper}>
                   <Text style={styles.categoires_text}>{categories}</Text>
                 </View>
               ))}

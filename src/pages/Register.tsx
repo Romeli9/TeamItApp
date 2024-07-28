@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
 import { collection, addDoc, doc, setDoc } from "firebase/firestore"
-import EditProfile from 'widgets/editProfile';
 
 const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -32,13 +30,10 @@ const RegisterPage: React.FC<{ navigation: any }> = ({ navigation }) => {
       navigation.navigate('Homepage');
     } catch (error: any) {
       console.log(error);
-      alert('Sign Up failed: ' + error.message);
+      Alert.alert('Sign Up failed: ' + error.message);
     } finally {
       setLoading(false);
     }
-  };
-  const handleModalClose = () => {
-    setEditProfileVisible(false);
   };
   return (
     <View style={styles.container}>
