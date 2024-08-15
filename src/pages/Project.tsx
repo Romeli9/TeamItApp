@@ -1,19 +1,34 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Image, StyleSheet, ScrollView, Modal, TouchableWithoutFeedback, ImageBackground } from 'react-native';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { doc, getDoc } from 'firebase/firestore';
-import { FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
-import { getUserById } from '../services/getUserById';
-import { required } from '../shared/consts/Required';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, {useState, useEffect, useRef} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  ScrollView,
+  Modal,
+  ImageBackground,
+} from 'react-native';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import {doc, getDoc} from 'firebase/firestore';
+import {FIREBASE_DB} from '../../FireBaseConfig';
+import {getUserById} from '../services/getUserById';
+import {required} from '../assets/consts/Required';
 
-const MemberAvatar: React.FC<{ userId: string, num: number }> = ({ userId, num }) => {
+const MemberAvatar: React.FC<{userId: string; num: number}> = ({
+  userId,
+  num,
+}) => {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userData = await getUserById(userId); 
+        const userData = await getUserById(userId);
         setUser(userData);
       } catch (error) {
         console.error('Ошибка при загрузке данных пользователя:', error);
@@ -30,26 +45,24 @@ const MemberAvatar: React.FC<{ userId: string, num: number }> = ({ userId, num }
   return (
     <>
       {user.avatar && num === 1 ? (
-        <Image source={{ uri: user.avatar }} style={styles.required_image_2} />
+        <Image source={{uri: user.avatar}} style={styles.required_image_2} />
       ) : (
-        <Image source={{ uri: user.avatar }} style={styles.author_image} />
+        <Image source={{uri: user.avatar}} style={styles.author_image} />
       )}
     </>
   );
 };
 
-const Project: React.FC<any> = ({ route, navigation }) => {
-  const { projectId } = route.params;
+const Project: React.FC<any> = ({route, navigation}) => {
+  const {projectId} = route.params;
   const [projectData, setProjectData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [applications, setApplications] = useState<string[]>([]);
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null); // Индекс роли для подачи заявки
   const [modalVisible, setModalVisible] = useState(false); // Состояние для видимости модального окна
   const [confirmationVisible, setConfirmationVisible] = useState(false); // Состояние для отображения подтверждения
   const [confirmationTimer, setConfirmationTimer] = useState<any>(null); // Таймер для автоматического скрытия подтверждения
   const [requiredOpen, setRequiredOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState("");
-
+  const [selectedItem, setSelectedItem] = useState('');
 
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
@@ -77,59 +90,49 @@ const Project: React.FC<any> = ({ route, navigation }) => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
   }
 
-
-
-
   const openApplicationModal = (index: number) => {
     setOpenSendIndex(index);
 
-    setModalVisible(true); // Открываем модальное окно при нажатии на кнопку "Подать заявку"
-  }
+    setModalVisible(true);
+  };
 
   const closeApplicationModal = () => {
-    setModalVisible(false); // Закрываем модальное окно при нажатии на кнопку "Отмена"
-  }
-
+    setModalVisible(false);
+  };
 
   const showConfirmation = () => {
     setConfirmationVisible(true);
     const timer = setTimeout(() => {
-      setModalVisible(false); // Закрываем модальное окно через 3 секунды
-      setConfirmationVisible(false); // Скрываем подтверждение
+      setModalVisible(false);
+      setConfirmationVisible(false);
     }, 2000);
     setConfirmationTimer(timer);
   };
 
   const toggleRequired = () => {
     setRequiredOpen(!requiredOpen);
-    setSelectedItem("");
-  }
+    setSelectedItem('');
+  };
 
   const HandleApplicationSend = (value: string) => {
     setSelectedItem(value);
-  }
-
-
+  };
 
   return (
     <SafeAreaProvider>
-
-      <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#EAEAEA' }}>
+      <View
+        style={{flex: 1, paddingTop: insets.top, backgroundColor: '#EAEAEA'}}>
         <ScrollView contentContainerStyle={styles.container}>
-
-
-
-
-
-          <ImageBackground source={{ uri: projectData.photo }} style={[styles.projectImage]}>
-
-            {/* <Image source={require('../shared/icons/effect2.png')} style={styles.effect__top}></Image> */}
+          <ImageBackground
+            source={{uri: projectData.photo}}
+            style={[styles.projectImage]}>
+            {/* <Image source={require('../assets/icons/effect2.png')} style={styles.effect__top}></Image> */}
             {/* <LinearGradient
               colors={[
                 'rgba(0,0,0, 0)',
@@ -139,43 +142,53 @@ const Project: React.FC<any> = ({ route, navigation }) => {
               style={styles.gradient}
             >
             </LinearGradient> */}
-
           </ImageBackground>
 
           <View style={styles.about_project_container}>
-            <Text style={styles.about_project_name} >{projectData.name}</Text>
+            <Text style={styles.about_project_name}>{projectData.name}</Text>
             {/* <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text> */}
 
-            <Text style={styles.about_project_desc}>{projectData.description}</Text>
+            <Text style={styles.about_project_desc}>
+              {projectData.description}
+            </Text>
             {/* <Text style={styles.about_project_desc}>Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.</Text> */}
           </View>
 
           <View style={styles.required_container}>
             <Text style={styles.requider_name}>Требуются:</Text>
-            <View style={{ width: '95%', marginLeft: 8 }}>
+            <View style={{width: '95%', marginLeft: 8}}>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.required_contnainer_2}
-              >
+                contentContainerStyle={styles.required_contnainer_2}>
                 <View style={styles.required_offer_container}>
-                  <TouchableOpacity onPress={toggleRequired} style={styles.required_button_wrapper}>
-                    <Image source={require('../shared/icons/plus3.png')} style={styles.required_image} />
+                  <TouchableOpacity
+                    onPress={toggleRequired}
+                    style={styles.required_button_wrapper}>
+                    <Image
+                      source={require('../assets/icons/plus3.png')}
+                      style={styles.required_image}
+                    />
                   </TouchableOpacity>
                   <Text style={styles.required_text}>Предложить</Text>
                 </View>
-                <Image source={require('../shared/icons/slash.png')} style={{ height: 50, marginLeft: 5.5, marginRight: 11.5 }} />
+                <Image
+                  source={require('../assets/icons/slash.png')}
+                  style={{height: 50, marginLeft: 5.5, marginRight: 11.5}}
+                />
                 {projectData.required.map((required: string, ix: number) => (
                   <View style={styles.required_offer_container} key={ix}>
-                    {projectData.members[ix] === "-" ? (
+                    {projectData.members[ix] === '-' ? (
                       <TouchableOpacity
                         ref={buttonRef}
                         onPress={() => {
                           openApplicationModal(ix);
                         }}
-                        style={styles.required_button_wrapper}
-                      >
-                        <Image source={require('../shared/icons/plus3.png')} style={styles.required_image} />
+                        style={styles.required_button_wrapper}>
+                        <Image
+                          source={require('../assets/icons/plus3.png')}
+                          style={styles.required_image}
+                        />
                       </TouchableOpacity>
                     ) : (
                       <MemberAvatar userId={projectData.members[ix]} num={1} />
@@ -183,55 +196,64 @@ const Project: React.FC<any> = ({ route, navigation }) => {
                     <Text style={styles.required_text}>{required}</Text>
                     {openSendIndex === ix && (
                       <Modal
-                        animationType='slide'
+                        animationType="slide"
                         transparent={true}
                         visible={modalVisible}
-                        onRequestClose={closeApplicationModal}
-                      >
+                        onRequestClose={closeApplicationModal}>
                         <View style={styles.modalContainer}>
-
                           {confirmationVisible ? (
                             <View style={styles.modalContent_2}>
-                              <Text style={styles.application_text_2}>Заявка отправлена</Text>
+                              <Text style={styles.application_text_2}>
+                                Заявка отправлена
+                              </Text>
                             </View>
                           ) : (
                             <View style={styles.modalContent}>
-                              <Text style={styles.application_text}>Подать заявку?</Text>
+                              <Text style={styles.application_text}>
+                                Подать заявку?
+                              </Text>
                               <TouchableOpacity onPress={showConfirmation}>
-                                <Image source={require('../shared/icons/check.png')} style={styles.application_ok_button} />
-
-
+                                <Image
+                                  source={require('../assets/icons/check.png')}
+                                  style={styles.application_ok_button}
+                                />
                               </TouchableOpacity>
                               <TouchableOpacity onPress={closeApplicationModal}>
-                                <Image source={require('../shared/icons/p.png')} style={styles.application_not_ok_button} />
+                                <Image
+                                  source={require('../assets/icons/p.png')}
+                                  style={styles.application_not_ok_button}
+                                />
                               </TouchableOpacity>
                             </View>
                           )}
-
                         </View>
                       </Modal>
-
                     )}
-
                   </View>
                 ))}
-
               </ScrollView>
               {requiredOpen && (
                 <Modal
                   transparent={true}
                   visible={requiredOpen}
-                  onRequestClose={toggleRequired}
-                >
+                  onRequestClose={toggleRequired}>
                   <View style={styles.modalContainer_2}>
-                    {selectedItem !== "" ? (
+                    {selectedItem !== '' ? (
                       <View style={styles.modalContent}>
-                        <Text style={styles.application_text}>Вы хотите подать заявку на "{selectedItem}"?</Text>
+                        <Text style={styles.application_text}>
+                          Вы хотите подать заявку на "{selectedItem}"?
+                        </Text>
                         <TouchableOpacity onPress={toggleRequired}>
-                          <Image source={require('../shared/icons/check.png')} style={styles.application_ok_button} />
+                          <Image
+                            source={require('../assets/icons/check.png')}
+                            style={styles.application_ok_button}
+                          />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={toggleRequired}>
-                          <Image source={require('../shared/icons/p.png')} style={styles.application_not_ok_button} />
+                          <Image
+                            source={require('../assets/icons/p.png')}
+                            style={styles.application_not_ok_button}
+                          />
                         </TouchableOpacity>
                       </View>
                     ) : (
@@ -240,13 +262,20 @@ const Project: React.FC<any> = ({ route, navigation }) => {
                           {required.map((item, ix) => (
                             <TouchableOpacity
                               key={ix}
-                              style={[styles.dropdownItem, styles.dropdownItemSelected]}
+                              style={[
+                                styles.dropdownItem,
+                                styles.dropdownItemSelected,
+                              ]}
                               onPress={() => HandleApplicationSend(item.value)}>
                               <View style={styles.dropdownItemContainer}>
                                 <View style={styles.dropdownItem_icon}>
-                                  <Image source={require('../shared/icons/plus2.png')} />
+                                  <Image
+                                    source={require('../assets/icons/plus2.png')}
+                                  />
                                 </View>
-                                <Text style={styles.dropdownItemText}>{item.value}</Text>
+                                <Text style={styles.dropdownItemText}>
+                                  {item.value}
+                                </Text>
                               </View>
                             </TouchableOpacity>
                           ))}
@@ -256,56 +285,43 @@ const Project: React.FC<any> = ({ route, navigation }) => {
                   </View>
                 </Modal>
               )}
-
-
             </View>
           </View>
 
           <View style={styles.categories_container}>
             <Text style={styles.categories_name}>Категории:</Text>
 
-            <View
-              style={styles.categories_container_2}
-            >
-              {projectData.categories.map((categories : string, ix : number) => (
+            <View style={styles.categories_container_2}>
+              {projectData.categories.map((categories: string, ix: number) => (
                 <View key={ix} style={styles.categoires_wrapper}>
                   <Text style={styles.categoires_text}>{categories}</Text>
                 </View>
               ))}
             </View>
-
           </View>
-
-
 
           <View style={styles.author_container}>
             <Text style={styles.author_name}>Автор идеи:</Text>
             <View style={styles.author_wrapper}>
-              <MemberAvatar userId={projectData.creatorId} num={2}></MemberAvatar>
+              <MemberAvatar userId={projectData.creatorId} num={2} />
               <Text style={styles.author_text}>{projectData.creator}</Text>
             </View>
-            
           </View>
 
-          
-
-          <View style={{ height: 20, marginTop: 20 }}></View>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.goback}>
-            <Image source={require('../shared/icons/arrow.png')} />
+          <View style={{height: 20, marginTop: 20}} />
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.goback}>
+            <Image source={require('../assets/icons/arrow.png')} />
           </TouchableOpacity>
-
-
-
         </ScrollView>
       </View>
-
-    </SafeAreaProvider >
+    </SafeAreaProvider>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-
     backgroundColor: '#EAEAEA',
     alignItems: 'center',
   },
@@ -410,7 +426,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#EAEAEA'
+    backgroundColor: '#EAEAEA',
   },
 
   required_image: {
@@ -432,7 +448,7 @@ const styles = StyleSheet.create({
 
   categories_container_2: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: 'row',
     flexWrap: 'wrap',
     marginLeft: 19,
     gap: 6,
@@ -474,7 +490,6 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: '#FFFFFF',
     borderRadius: 30,
-
   },
 
   author_name: {
@@ -483,7 +498,6 @@ const styles = StyleSheet.create({
     color: 'rgba(0, 0, 0, 0.9)',
     textAlign: 'center',
     marginTop: 5,
-
   },
 
   author_image: {
@@ -502,19 +516,19 @@ const styles = StyleSheet.create({
   author_text: {
     marginTop: 7,
     marginLeft: 5,
-    marginRight: 6
+    marginRight: 6,
   },
 
   modalContainer: {
     position: 'absolute',
     top: 560,
-    left: 120
+    left: 120,
   },
 
   modalContainer_2: {
     position: 'absolute',
     top: 560,
-    left: 20
+    left: 20,
   },
 
   modalContent: {
@@ -556,7 +570,6 @@ const styles = StyleSheet.create({
   },
 
   application_not_ok_button: {
-
     marginLeft: 9,
     marginTop: -3,
   },
@@ -568,7 +581,6 @@ const styles = StyleSheet.create({
   },
 
   application_text_2: {
-
     color: 'rgba(255,255,255,0.76)',
     fontSize: 11,
     fontFamily: 'Inter-SemiBold',
@@ -597,12 +609,12 @@ const styles = StyleSheet.create({
   dropdownItem: {
     marginBottom: 10,
     color: 'white',
-    fontFamily: "Inter-SemiBold",
+    fontFamily: 'Inter-SemiBold',
   },
   dropdownItem_icon: {
     paddingHorizontal: 6,
     paddingVertical: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -626,15 +638,9 @@ const styles = StyleSheet.create({
     //zIndex: -10,
     position: 'absolute',
     top: -175,
-    left: -65
+    left: -65,
     //width: '100%',
   },
-
-  
-
-
-
-
 });
 
 export default Project;

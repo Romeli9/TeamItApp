@@ -10,9 +10,9 @@ import {
   ScrollView,
 } from 'react-native';
 
-import { categories } from '../shared/consts/Categories';
-import { required } from '../shared/consts/Required';
-import { LinearGradient } from 'expo-linear-gradient';
+import {categories} from '../assets/consts/Categories';
+import {required} from '../assets/consts/Required';
+import {LinearGradient} from 'expo-linear-gradient';
 
 interface ProjectModalProps {
   isModalVisible: boolean;
@@ -53,52 +53,53 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   categoriesSelected,
   handleCategorySelect,
   CreateProject,
-  members
+  members,
 }) => {
-
-   
-
   return (
     <Modal visible={isModalVisible} animationType="slide" transparent>
-      <LinearGradient 
-      style={styles.modalContainer}
-      colors={[
-        'rgba(46, 10, 95, 0.94)',
-        'rgba(177, 170, 219, 0.6043)',
-        'rgba(31, 24, 75, 0.94)',
-      ]}>
-      
+      <LinearGradient
+        style={styles.modalContainer}
+        colors={[
+          'rgba(46, 10, 95, 0.94)',
+          'rgba(177, 170, 219, 0.6043)',
+          'rgba(31, 24, 75, 0.94)',
+        ]}>
         <View style={styles.modalContent}>
           <ScrollView
             contentContainerStyle={styles.scrollViewContainer}
             keyboardShouldPersistTaps="handled">
             <TouchableOpacity style={styles.closeButton} onPress={ModalClose}>
-              <Image source={require('../shared/icons/cros.png')} />
+              <Image source={require('../assets/icons/cros.png')} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Создание проекта</Text>
-            <TouchableOpacity style={styles.add_image__button} onPress={onImageLibraryPress}>
+            <TouchableOpacity
+              style={styles.add_image__button}
+              onPress={onImageLibraryPress}>
               {selectedImage ? (
-                <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+                <Image
+                  source={{uri: selectedImage}}
+                  style={styles.selectedImage}
+                />
               ) : (
                 <Text style={styles.add_image__text}>+</Text>
               )}
             </TouchableOpacity>
             <TextInput
               value={projectName}
-              placeholder='Введите название'
-              autoCapitalize='none'
+              placeholder="Введите название"
+              autoCapitalize="none"
               placeholderTextColor="#A8A8A8"
-              onChangeText={(text) => setProjectName(text)}
+              onChangeText={text => setProjectName(text)}
               style={styles.project_name__placeholder}
             />
             <View style={styles.project__about__container}>
               <Text style={styles.project__text}>О проекте:</Text>
               <TextInput
                 value={projectDescRaw}
-                placeholder='Описание'
-                autoCapitalize='none'
+                placeholder="Описание"
+                autoCapitalize="none"
                 placeholderTextColor="#A8A8A8"
-                onChangeText={(text) => setProjectDescRaw(text)}
+                onChangeText={text => setProjectDescRaw(text)}
                 style={styles.project_name__placeholder_about}
                 multiline={true}
                 keyboardType="default"
@@ -108,15 +109,19 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
             <View style={styles.project__container_with_plus}>
               <Text style={styles.project__text_2}>Требуются:</Text>
               <View style={styles.fdrow}>
-                <TouchableOpacity style={styles.project__button_plus} onPress={toggleRequired}>
-                  <Image source={require('../shared/icons/plus1.png')} />
+                <TouchableOpacity
+                  style={styles.project__button_plus}
+                  onPress={toggleRequired}>
+                  <Image source={require('../assets/icons/plus1.png')} />
                 </TouchableOpacity>
-                {requiredSelected.map((item) => (
+                {requiredSelected.map(item => (
                   <View key={item} style={styles.selectedItem}>
                     <Text style={styles.selectedItemText}>{item}</Text>
-                    <TouchableOpacity onPress={() => handleRequiredSelect(item)} style={styles.removeSelectedItem}>
+                    <TouchableOpacity
+                      onPress={() => handleRequiredSelect(item)}
+                      style={styles.removeSelectedItem}>
                       <View style={styles.removeSelectedItemTextContainer}>
-                        <Image source={require('../shared/icons/cros2.png')} />
+                        <Image source={require('../assets/icons/cros2.png')} />
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -125,16 +130,24 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               {requiredOpen && (
                 <ScrollView style={styles.dropdownContainer}>
                   <View style={styles.dropdownWrapper}>
-                    {required.map((item) => (
+                    {required.map(item => (
                       <TouchableOpacity
                         key={item.key}
-                        style={[styles.dropdownItem, requiredSelected.includes(item.value) && styles.dropdownItemSelected]}
+                        style={[
+                          styles.dropdownItem,
+                          requiredSelected.includes(item.value) &&
+                            styles.dropdownItemSelected,
+                        ]}
                         onPress={() => handleRequiredSelect(item.value)}>
                         <View style={styles.dropdownItemContainer}>
                           <View style={styles.dropdownItem_icon}>
-                            <Image source={require('../shared/icons/plus2.png')} />
+                            <Image
+                              source={require('../assets/icons/plus2.png')}
+                            />
                           </View>
-                          <Text style={styles.dropdownItemText}>{item.value}</Text>
+                          <Text style={styles.dropdownItemText}>
+                            {item.value}
+                          </Text>
                         </View>
                       </TouchableOpacity>
                     ))}
@@ -146,15 +159,19 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
             <View style={styles.project__container_with_plus}>
               <Text style={styles.project__text_2}>Категории:</Text>
               <View style={styles.fdrow}>
-                <TouchableOpacity style={styles.project__button_plus} onPress={toggleCategory}>
-                  <Image source={require('../shared/icons/plus1.png')} />
+                <TouchableOpacity
+                  style={styles.project__button_plus}
+                  onPress={toggleCategory}>
+                  <Image source={require('../assets/icons/plus1.png')} />
                 </TouchableOpacity>
-                {categoriesSelected.map((item) => (
+                {categoriesSelected.map(item => (
                   <View key={item} style={styles.selectedItem}>
                     <Text style={styles.selectedItemText}>{item}</Text>
-                    <TouchableOpacity onPress={() => handleCategorySelect(item)} style={styles.removeSelectedItem}>
+                    <TouchableOpacity
+                      onPress={() => handleCategorySelect(item)}
+                      style={styles.removeSelectedItem}>
                       <View style={styles.removeSelectedItemTextContainer}>
-                        <Image source={require('../shared/icons/cros2.png')} />
+                        <Image source={require('../assets/icons/cros2.png')} />
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -163,19 +180,24 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               {categoriesOpen && (
                 <ScrollView style={styles.dropdownContainer}>
                   <View style={styles.dropdownWrapper}>
-                    {categories.map((item) => (
+                    {categories.map(item => (
                       <TouchableOpacity
                         key={item.key}
                         style={[
                           styles.dropdownItem,
-                          categoriesSelected.includes(item.value) && styles.dropdownItemSelected,
+                          categoriesSelected.includes(item.value) &&
+                            styles.dropdownItemSelected,
                         ]}
                         onPress={() => handleCategorySelect(item.value)}>
                         <View style={styles.dropdownItemContainer}>
                           <View style={styles.dropdownItem_icon}>
-                            <Image source={require('../shared/icons/plus2.png')} />
+                            <Image
+                              source={require('../assets/icons/plus2.png')}
+                            />
                           </View>
-                          <Text style={styles.dropdownItemText}>{item.value}</Text>
+                          <Text style={styles.dropdownItemText}>
+                            {item.value}
+                          </Text>
                         </View>
                       </TouchableOpacity>
                     ))}
@@ -183,17 +205,17 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 </ScrollView>
               )}
             </View>
-            <TouchableOpacity style={styles.project__button_create} onPress={CreateProject}>
+            <TouchableOpacity
+              style={styles.project__button_create}
+              onPress={CreateProject}>
               <Text style={styles.project__text_create}>Создать</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
-      
       </LinearGradient>
     </Modal>
   );
 };
-
 
 const styles = StyleSheet.create({
   modalContainer: {
@@ -202,7 +224,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     //backgroundColor: 'rgba(0, 0, 0, 0.4)',
     //backgroundColor: 'linear-gradient(rgba(46, 10, 95, 0.94), rgba(177, 170, 219, 0.6043), rgba(31, 24, 75, 0.94))'
-
   },
   modalContent: {
     width: 316,
@@ -268,8 +289,8 @@ const styles = StyleSheet.create({
     width: 274,
     minHeight: 100,
     maxHeight: 185,
-    alignItems: "flex-start",
-    alignSelf: "flex-start",
+    alignItems: 'flex-start',
+    alignSelf: 'flex-start',
     textAlignVertical: 'top',
   },
   project__about__container: {
@@ -290,28 +311,28 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   project__container_with_plus: {
-    alignItems: "flex-start",
-    alignSelf: "flex-start",
+    alignItems: 'flex-start',
+    alignSelf: 'flex-start',
     marginLeft: 12,
   },
   fdrow: {
     flexDirection: 'row',
-    flexWrap: "wrap",
+    flexWrap: 'wrap',
     gap: 15,
-    margin: 0
+    margin: 0,
   },
   project__button_plus: {
-    backgroundColor: "#BE9DE8",
+    backgroundColor: '#BE9DE8',
     width: 34,
     height: 21,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 15,
   },
   project__button_create: {
-    backgroundColor: "#9260D1",
+    backgroundColor: '#9260D1',
     width: 177,
     height: 46,
     borderRadius: 20,
@@ -322,7 +343,7 @@ const styles = StyleSheet.create({
   project__text_create: {
     fontFamily: 'Inter-Bold',
     fontSize: 18,
-    color: "#FFFFFF",
+    color: '#FFFFFF',
   },
   selectedImage: {
     width: 64,
@@ -333,7 +354,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 15,
-    flexWrap: "wrap"
+    flexWrap: 'wrap',
   },
   selectedItem: {
     backgroundColor: '#BE9DE8',
@@ -342,11 +363,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 21,
     paddingVertical: 3,
-    paddingHorizontal: 3
+    paddingHorizontal: 3,
   },
   selectedItemText: {
     color: 'white',
-    fontFamily: "Inter-SemiBold",
+    fontFamily: 'Inter-SemiBold',
     fontSize: 12,
   },
   removeSelectedItem: {
@@ -361,7 +382,7 @@ const styles = StyleSheet.create({
   },
   removeSelectedItemText: {
     color: '#BBBBBB',
-    textAlign: "center",
+    textAlign: 'center',
   },
   dropdownContainer: {
     position: 'relative',
@@ -383,12 +404,12 @@ const styles = StyleSheet.create({
   dropdownItem: {
     marginBottom: 10,
     color: 'white',
-    fontFamily: "Inter-SemiBold",
+    fontFamily: 'Inter-SemiBold',
   },
   dropdownItem_icon: {
     paddingHorizontal: 6,
     paddingVertical: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',

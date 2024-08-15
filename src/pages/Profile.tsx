@@ -1,16 +1,33 @@
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { onAuthStateChanged } from 'firebase/auth';
-import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
-import EditProfile from 'widgets/editProfile';
+import {
+  Button,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {onAuthStateChanged} from 'firebase/auth';
+import {collection, doc, getDoc} from 'firebase/firestore';
+import {useSelector, useDispatch} from 'react-redux';
 
-const Profile: React.FC<{ navigation: any }> = ({ navigation }) => {
+import {FIREBASE_AUTH, FIREBASE_DB} from '../../FireBaseConfig';
+import {setUserData, setProfileData} from 'redux/slices/userSlice';
+import EditProfile from 'components/EditProfile';
+import {RootState} from 'redux/store';
+import ProfileInfo from 'components/ProfileInfo';
+
+const Profile: React.FC<{navigation: any}> = ({navigation}) => {
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
-  const [username, setUsername] = useState<string | null>(null);
-  const [profileData, setProfileData] = useState<any>(null);
   const [userDocRef, setUserDocRef] = useState<any>(null);
+
+  const dispatch = useDispatch();
+
+  const {userName, telegramm, skills, experience, aboutMe} = useSelector(
+    (state: RootState) => state.user,
+  );
+
   useEffect(() => {
     const fetchData = async () => {
       const user = FIREBASE_AUTH.currentUser;
@@ -21,39 +38,22 @@ const Profile: React.FC<{ navigation: any }> = ({ navigation }) => {
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
           const userData = docSnap.data();
-          setUsername(userData.username);
-          setProfileData(userData);
-          console.log(profileData);
+          dispatch(
+            setUserData({
+              username: userData.username,
+              email: userData.email,
+              avatar: userData.avatar,
+            }),
+          );
+          dispatch(setProfileData(userData));
           setUserDocRef(userDoc);
         }
-        
       }
-    }
-  
+    };
+
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
     return unsubscribe;
-
   }, []);
-
-  const fetchUserProjects = async () => {
-    try {
-      const user = FIREBASE_AUTH.currentUser;
-      if (user) {
-        const usersRef = collection(FIREBASE_DB, 'users');
-        const userDoc = doc(usersRef, user.uid);
-        const docSnap = await getDoc(userDoc);
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          setProfileData(userData);
-          } else {
-            console.log('Нет данных пользователя');
-          }
-        }
-      }
-     catch (error) {
-      console.error('Error fetching user projects: ', error);
-    }
-  };
 
   const handleSignOut = async () => {
     try {
@@ -64,34 +64,35 @@ const Profile: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   };
 
-  const handleCreateProfile = async () => {
-    setEditProfileVisible(true);
-  };
-
-  const handleModalClose = () => {
-    setEditProfileVisible(false);
-  };
-  const handleProjectDataChange = (data: any) => {
-    setProfileData(data);
-  };
   return (
     <SafeAreaProvider>
       <View style={styles.container}>
-        <Text>Hello, {username}</Text>
-        <TouchableOpacity style={styles.closeButton} onPress={handleCreateProfile}>
-          <Image source={require('../shared/profile/edit.png')} style={{ width: 25, height: 25 }} />
+        <Text style={styles.text}>Hello, {userName}</Text>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => setEditProfileVisible(true)}>
+          <Image
+            source={require('../assets/profile/edit.png')}
+            style={{width: 25, height: 25}}
+          />
         </TouchableOpacity>
         <View style={styles.container1}>
-        {profileData && (
-          <View style={styles.profileDataContainer}>
-          <Text>Обо мне: {profileData.AboutMe}</Text>
-          <Text>Опыт: {profileData.Experience}</Text>
-          <Text>Навыки: {profileData.Skills}</Text>
-          </View>
-        )}
+          {aboutMe ? (
+            <ProfileInfo />
+          ) : (
+            <View style={styles.profileDataContainer}>
+              <Text>Пожалуйста, заполните свой профиль</Text>
+              <Text>нажмите кнопку справа с верху</Text>
+            </View>
+          )}
         </View>
         <Button title="Sign Out" onPress={handleSignOut} />
-        {isEditProfileVisible && <EditProfile onModalClose={handleModalClose} onProfileDataChange={handleProjectDataChange} userDocRef={userDocRef} />}
+        {isEditProfileVisible && (
+          <EditProfile
+            onModalClose={() => setEditProfileVisible(false)}
+            userDocRef={userDocRef}
+          />
+        )}
       </View>
     </SafeAreaProvider>
   );
@@ -137,5 +138,10 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 20,
     paddingHorizontal: 20,
+  },
+  text: {
+    fontSize: 22,
+    color: '#333',
+    fontFamily: 'Inter-Regular',
   },
 });

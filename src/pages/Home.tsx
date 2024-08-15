@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -12,29 +12,43 @@ import {
   Animated,
   Easing,
   ImageBackground,
-  Alert
+  Alert,
 } from 'react-native';
 
-import { FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE } from '../../FireBaseConfig';
-import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, getDoc, addDoc, getDocs, query, where } from 'firebase/firestore';
-import { loadFonts } from '../shared/fonts/fonts';
+import {
+  FIREBASE_AUTH,
+  FIREBASE_DB,
+  FIREBASE_STORAGE,
+} from '../../FireBaseConfig';
+import {ref, getDownloadURL, uploadBytes} from 'firebase/storage';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import {onAuthStateChanged} from 'firebase/auth';
+import {
+  collection,
+  doc,
+  getDoc,
+  addDoc,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore';
+import {loadFonts} from '../assets/fonts/fonts';
 import * as ImagePicker from 'expo-image-picker';
-import ProjectModal from '../widgets/ModalWindowProject';
+import ProjectModal from '../components/ModalWindowProject';
 
-
-import { LinearGradient } from 'expo-linear-gradient';
+import {LinearGradient} from 'expo-linear-gradient';
 import Carousel from 'react-native-snap-carousel';
 
-
-const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
+const Home: React.FC<{navigation: any}> = ({navigation}) => {
   const [username, setUsername] = useState<string | null>(null);
   const [userImgUrl, setUserImgUrl] = useState<string>('');
   const [isModalVisible, setModalVisible] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [pickerResponse, setPickerResponse] = useState<ImagePicker.ImagePickerResult | null>(null);
+  const [pickerResponse, setPickerResponse] =
+    useState<ImagePicker.ImagePickerResult | null>(null);
   const [projectName, setProjectName] = useState('');
   const [projectDescRaw, setProjectDescRaw] = useState('');
   const [requiredOpen, setRequiredOpen] = useState(false);
@@ -46,7 +60,8 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [allProjects, setAllProjects] = useState<any[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [userId, setUserId] = useState('');
-  const [members, setMembers] = useState<string[]>([]);23
+  const [members, setMembers] = useState<string[]>([]);
+  23;
 
   const [carouselIndex, setCarouselIndex] = useState(0);
 
@@ -56,8 +71,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     Keyboard.dismiss();
   };
 
-
-
   const toggleCategory = () => {
     setCategoriesOpen(!categoriesOpen);
     setRequiredOpen(false);
@@ -66,26 +79,12 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const handleRequiredSelect = (value: string) => {
     setRequiredSelected([...requiredSelected, value]);
-
-    setMembers([...members, "-"]);
-
-
+    setMembers([...members, '-']);
   };
-
-
-  // const handleRequiredSelect = (value: string) => {
-  //    if (requiredSelected.includes(value)) {
-  //      setRequiredSelected(requiredSelected.filter((item) => item !== value));
-  //    } else {
-  //      setRequiredSelected([...requiredSelected, value]);
-  //    }
-  //  };
-
-
 
   const handleCategorySelect = (value: string) => {
     if (categoriesSelected.includes(value)) {
-      setCategoriesSelected(categoriesSelected.filter((item) => item !== value));
+      setCategoriesSelected(categoriesSelected.filter(item => item !== value));
     } else {
       setCategoriesSelected([...categoriesSelected, value]);
     }
@@ -121,9 +120,11 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
 
   const onImageLibraryPress = useCallback(async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Извините, но нам нужно разрешение на доступ к вашей камере, чтобы это работало!');
+      Alert.alert(
+        'Извините, но нам нужно разрешение на доступ к вашей камере, чтобы это работало!',
+      );
       return;
     }
 
@@ -140,9 +141,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setSelectedImage(result.assets[0].uri);
       console.log(result);
     }
-
-    //pickerResponse.assets[0].uri
-
   }, []);
 
   const ModalOpen = () => {
@@ -158,7 +156,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       const response = await fetch(uri);
       const blob = await response.blob();
 
-      const storageRef = ref(FIREBASE_STORAGE, `images/${username}_${Date.now()}`);
+      const storageRef = ref(
+        FIREBASE_STORAGE,
+        `images/${username}_${Date.now()}`,
+      );
       await uploadBytes(storageRef, blob);
 
       const url = await getDownloadURL(storageRef);
@@ -171,15 +172,22 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const CreateProject = async () => {
     try {
-
-      if (!projectName.trim() || !projectDescRaw.trim() || !requiredSelected.length || !categoriesSelected.length || !pickerResponse) {
+      if (
+        !projectName.trim() ||
+        !projectDescRaw.trim() ||
+        !requiredSelected.length ||
+        !categoriesSelected.length ||
+        !pickerResponse
+      ) {
         Alert.alert('Пожалуйста, заполните все поля.');
         return;
       }
 
       let imageUrl = null;
       if (pickerResponse && !pickerResponse.canceled) {
-        const uploadedImageUrl = await uploadImageToFirebase(pickerResponse.assets[0].uri);
+        const uploadedImageUrl = await uploadImageToFirebase(
+          pickerResponse.assets[0].uri,
+        );
         if (uploadedImageUrl) {
           imageUrl = uploadedImageUrl;
         }
@@ -214,7 +222,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setRequiredSelected([]);
       setCategoriesSelected([]);
       setPickerResponse(null);
-      setSelectedImage("");
+      setSelectedImage('');
       setMembers([]);
       ModalClose();
     } catch (error) {
@@ -234,15 +242,15 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
           const projectsRef = collection(FIREBASE_DB, 'projects');
           const querySnapshot = await getDocs(
-            query(projectsRef, where('creator', '==', userData.username))
+            query(projectsRef, where('creator', '==', userData.username)),
           );
 
           const querySnapshot2 = await getDocs(
-            query(projectsRef, where('creator', '!=', userData.username))
+            query(projectsRef, where('creator', '!=', userData.username)),
           );
 
           if (querySnapshot.docs.length > 0) {
-            const projectsData = querySnapshot.docs.map((doc) => ({
+            const projectsData = querySnapshot.docs.map(doc => ({
               id: doc.id,
               ...doc.data(),
             }));
@@ -251,7 +259,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           }
 
           if (querySnapshot2.docs.length > 0) {
-            const projectsData = querySnapshot2.docs.map((doc) => ({
+            const projectsData = querySnapshot2.docs.map(doc => ({
               id: doc.id,
               ...doc.data(),
             }));
@@ -268,49 +276,44 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   const OpenProject = (projectID: string) => {
-    navigation.navigate('Project', { projectId: projectID });
+    navigation.navigate('Project', {projectId: projectID});
   };
 
-  const search = () => {
-  };
+  const search = () => {};
 
-  const carouselItems = allProjects.map((project) => ({
+  const carouselItems = allProjects.map(project => ({
     id: project.id,
     title: project.name,
-    image: { uri: project.photo },
+    image: {uri: project.photo},
     description: project.description,
   }));
 
-
-
-  const renderCarouselItem = ({ item, index }: { item: any; index: number }) => {
+  const renderCarouselItem = ({item, index}: {item: any; index: number}) => {
     return (
       <View style={[styles.carouselItem]}>
         <TouchableOpacity onPress={() => OpenProject(item.id)}>
-
-          <ImageBackground source={{ uri: item.image.uri }} style={[styles.image]}>
+          <ImageBackground
+            source={{uri: item.image.uri}}
+            style={[styles.image]}>
             <LinearGradient
               colors={[
                 'rgba(242,240,255, 0)',
                 'rgba(158,115,198, 0.38)',
                 'rgba(82,0,146, 0.4)',
               ]}
-              style={styles.gradient}
-            >
-            </LinearGradient>
-
+              style={styles.gradient}></LinearGradient>
           </ImageBackground>
-
         </TouchableOpacity>
-        {index === carouselIndex && <Text style={styles.projectTitle}>{item.title}</Text>}
+        {index === carouselIndex && (
+          <Text style={styles.projectTitle}>{item.title}</Text>
+        )}
       </View>
     );
   };
 
-
   if (!dataLoaded || !fontsLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
@@ -318,77 +321,84 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <SafeAreaProvider>
-      <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: '#FFFFFF', paddingLeft: 16 }}>
-
+      <View
+        style={{
+          flex: 1,
+          paddingTop: insets.top,
+          backgroundColor: '#FFFFFF',
+          paddingLeft: 16,
+        }}>
         <View style={styles.topContainer}>
-          <Image source={{ uri: userImgUrl }} style={styles.userImage} />
+          <Image source={{uri: userImgUrl}} style={styles.userImage} />
           <View style={styles.TextContainer}>
-
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{flexDirection: 'row'}}>
               <Text style={styles.TextContainer__text1}>Добро пожаловать!</Text>
-              <Image style={styles.TextContainer__text1_img} source={require('../shared/icons/handshake.png')}></Image>
+              <Image
+                style={styles.TextContainer__text1_img}
+                source={require('../assets/icons/handshake.png')}></Image>
             </View>
             <Text style={styles.TextContainer__text2}>{username}</Text>
           </View>
         </View>
 
-        <View style={{ position: 'absolute', top: insets.top + 76, left: 16 }}>
-          <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 18, color: '#808080' }}>Ваши проекты:</Text>
+        <View style={{position: 'absolute', top: insets.top + 76, left: 16}}>
+          <Text
+            style={{
+              fontFamily: 'Inter-SemiBold',
+              fontSize: 18,
+              color: '#808080',
+            }}>
+            Ваши проекты:
+          </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.userProjectsContainer}
-          >
+            contentContainerStyle={styles.userProjectsContainer}>
             <TouchableOpacity style={styles.create__button} onPress={ModalOpen}>
               <Text style={styles.create__text}>+</Text>
             </TouchableOpacity>
-            {userProjects.map((project) => (
+            {userProjects.map(project => (
               <TouchableOpacity
                 key={project.id}
                 style={styles.projectItem}
-                onPress={() => OpenProject(project.id)}
-              >
-                <Image source={{ uri: project.photo }} style={styles.projectImage} />
+                onPress={() => OpenProject(project.id)}>
+                <Image
+                  source={{uri: project.photo}}
+                  style={styles.projectImage}
+                />
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
 
-
-
-
-
-
-
-
-
-        <View style={[styles.workWithProjectsContainer, { top: insets.top + 260 }]}>
-          <Text style={styles.workWithProjectsText}>С какими проектами вы хотите поработать?</Text>
+        <View
+          style={[styles.workWithProjectsContainer, {top: insets.top + 260}]}>
+          <Text style={styles.workWithProjectsText}>
+            С какими проектами вы хотите поработать?
+          </Text>
           <TouchableOpacity style={styles.searchButton} onPress={search}>
-            <Image source={require('../shared/icons/search.png')} />
+            <Image source={require('../assets/icons/search.png')} />
           </TouchableOpacity>
 
-
           <View style={styles.carousel}>
+            <Image
+              source={require('../assets/icons/Group1.png')}
+              style={styles.effect}></Image>
 
-            <Image source={require('../shared/icons/Group1.png')} style={styles.effect}></Image>
-
-            {<Carousel
-              layout="default"
-              data={carouselItems}
-              renderItem={renderCarouselItem}
-              sliderWidth={400}
-              itemWidth={165}
-              onSnapToItem={(index) => setCarouselIndex(index)}
-            />}
-
+            {
+              <Carousel
+                layout="default"
+                data={carouselItems}
+                renderItem={renderCarouselItem}
+                sliderWidth={400}
+                itemWidth={165}
+                onSnapToItem={index => setCarouselIndex(index)}
+              />
+            }
           </View>
 
-          {/* <ImageBackground source={require('../shared/icons/effect.png')}></ImageBackground> */}
-
+          {/* <ImageBackground source={require('../assets/icons/effect.png')}></ImageBackground> */}
         </View>
-
-
 
         <ProjectModal
           isModalVisible={isModalVisible}
@@ -410,10 +420,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           CreateProject={CreateProject}
           members={members}
         />
-
-
-
-
       </View>
     </SafeAreaProvider>
   );
@@ -450,7 +456,6 @@ const styles = StyleSheet.create({
     paddingRight: 25,
     //height: 155,
     marginLeft: -9,
-
   },
   projectItem: {
     marginLeft: 13,
@@ -460,7 +465,6 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 20,
   },
-
 
   workWithProjectsContainer: {
     position: 'absolute',
@@ -513,14 +517,11 @@ const styles = StyleSheet.create({
   carouselItem: {
     justifyContent: 'center',
     alignItems: 'center',
-
   },
 
   centeredItem: {
-
     width: 165, // Увеличиваем ширину центрального элемента
     height: 259, // Высота центрального элемента
-
   },
 
   gradient: {
@@ -530,8 +531,6 @@ const styles = StyleSheet.create({
   sideItem: {
     width: 134.23,
     height: 227.41,
-
-
   },
   image: {
     width: 165,
@@ -542,7 +541,7 @@ const styles = StyleSheet.create({
 
   topContainer: {
     flex: 1,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
 
   TextContainer: {
@@ -559,7 +558,6 @@ const styles = StyleSheet.create({
 
   TextContainer__text1_img: {
     marginLeft: 3,
-
   },
 
   TextContainer__text2: {
@@ -572,7 +570,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    marginTop: -10
+    marginTop: -10,
   },
 
   imageGradient: {
@@ -587,8 +585,7 @@ const styles = StyleSheet.create({
     //zIndex: -10,
     position: 'absolute',
     bottom: -130,
-    left: -240
+    left: -240,
     //width: '100%',
-  }
-
+  },
 });
