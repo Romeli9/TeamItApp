@@ -1,12 +1,19 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 
-export default function Messenger() {
+const Messenger = ({navigation}: any) => {
   return (
-    <View>
-      <Text>Messenger</Text>
+    <View style={styles.container}>
+      <Text>123123</Text>
     </View>
-  )
-}
+  );
+};
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 10,
+  },
+});
+
+export default Messenger;
