@@ -24,9 +24,7 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
 
   const dispatch = useDispatch();
 
-  const {userName, telegramm, skills, experience, aboutMe} = useSelector(
-    (state: RootState) => state.user,
-  );
+  const {userName, aboutMe} = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,6 +38,7 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
           const userData = docSnap.data();
           dispatch(
             setUserData({
+              userId: user.uid,
               username: userData.username,
               email: userData.email,
               avatar: userData.avatar,

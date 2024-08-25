@@ -18,6 +18,8 @@ import {doc, getDoc} from 'firebase/firestore';
 import {FIREBASE_DB} from '../../FireBaseConfig';
 import {getUserById} from '../services/getUserById';
 import {required} from '../assets/consts/Required';
+import {useSelector} from 'react-redux';
+import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 
 const MemberAvatar: React.FC<{userId: string; num: number}> = ({
   userId,
@@ -55,7 +57,9 @@ const MemberAvatar: React.FC<{userId: string; num: number}> = ({
 
 const Project: React.FC<any> = ({route, navigation}) => {
   const {projectId} = route.params;
-  const [projectData, setProjectData] = useState<any>(null);
+  const projectData: ProjectType | undefined = useSelector(
+    selectProjectById(projectId),
+  );
   const [loading, setLoading] = useState(true);
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null); // Индекс роли для подачи заявки
   const [modalVisible, setModalVisible] = useState(false); // Состояние для видимости модального окна
@@ -67,34 +71,28 @@ const Project: React.FC<any> = ({route, navigation}) => {
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
 
-  useEffect(() => {
-    const fetchProjectData = async () => {
-      try {
-        const projectRef = doc(FIREBASE_DB, 'projects', projectId);
-        const docSnap = await getDoc(projectRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setProjectData(data);
-        } else {
-          console.log('Документ не найден!');
-        }
-      } catch (error) {
-        console.error('Ошибка при загрузке данных о проекте:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  console.log(projectData);
 
-    fetchProjectData();
-  }, [projectId]);
+  // useEffect(() => {
+  //   const fetchProjectData = async () => {
+  //     try {
+  //       const projectRef = doc(FIREBASE_DB, 'projects', projectId);
+  //       const docSnap = await getDoc(projectRef);
+  //       if (docSnap.exists()) {
+  //         const data = docSnap.data();
+  //         setProjectData(data);
+  //       } else {
+  //         console.log('Документ не найден!');
+  //       }
+  //     } catch (error) {
+  //       console.error('Ошибка при загрузке данных о проекте:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-  if (loading) {
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
+  //   fetchProjectData();
+  // }, [projectId]);
 
   const openApplicationModal = (index: number) => {
     setOpenSendIndex(index);
@@ -123,6 +121,14 @@ const Project: React.FC<any> = ({route, navigation}) => {
   const HandleApplicationSend = (value: string) => {
     setSelectedItem(value);
   };
+
+  if (!projectData) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Проект не найден</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaProvider>

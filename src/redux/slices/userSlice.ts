@@ -2,6 +2,7 @@ import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 
 export interface userState {
+  userId: string;
   userName: string;
   email: string;
   avatar: string;
@@ -12,6 +13,7 @@ export interface userState {
 }
 
 const initialState: userState = {
+  userId: '',
   userName: '',
   email: '',
   avatar: '',
@@ -26,6 +28,7 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     setUserData(state, action) {
+      state.userId = action.payload.userId;
       state.avatar = action.payload.avatar;
       state.email = action.payload.email;
       state.userName = action.payload.username;
@@ -35,7 +38,6 @@ export const userSlice = createSlice({
       state.experience = action.payload.Experience;
       state.skills = action.payload.Skills;
       state.telegramm = action.payload.Telegramm;
-      console.log(state);
     },
   },
 });

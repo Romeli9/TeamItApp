@@ -1,60 +1,187 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   Image,
   TextInput,
   ScrollView,
+  Alert,
+  Keyboard,
 } from 'react-native';
-
-import {categories} from '../assets/consts/Categories';
-import {required} from '../assets/consts/Required';
 import {LinearGradient} from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
+
+import {categories} from '../../assets/consts/Categories';
+import {required} from '../../assets/consts/Required';
+import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
+import {FIREBASE_DB, FIREBASE_STORAGE} from '../../../FireBaseConfig';
+import {RootState} from 'redux/store';
+import {useDispatch, useSelector} from 'react-redux';
+import {addDoc, collection} from 'firebase/firestore';
+import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
+import {styles} from './styles';
 
 interface ProjectModalProps {
   isModalVisible: boolean;
-  ModalClose: () => void;
-  onImageLibraryPress: () => void;
-  selectedImage: string | null;
-  projectName: string;
-  setProjectName: React.Dispatch<React.SetStateAction<string>>;
-  projectDescRaw: string;
-  setProjectDescRaw: React.Dispatch<React.SetStateAction<string>>;
-  requiredOpen: boolean;
-  toggleRequired: () => void;
-  requiredSelected: string[];
-  handleRequiredSelect: (value: string) => void;
-  categoriesOpen: boolean;
-  toggleCategory: () => void;
-  categoriesSelected: string[];
-  handleCategorySelect: (value: string) => void;
-  CreateProject: () => void;
-  members: string[];
+  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({
   isModalVisible,
-  ModalClose,
-  onImageLibraryPress,
-  selectedImage,
-  projectName,
-  setProjectName,
-  projectDescRaw,
-  setProjectDescRaw,
-  requiredOpen,
-  toggleRequired,
-  requiredSelected,
-  handleRequiredSelect,
-  categoriesOpen,
-  toggleCategory,
-  categoriesSelected,
-  handleCategorySelect,
-  CreateProject,
-  members,
+  setModalVisible,
 }) => {
+  const [members, setMembers] = useState<string[]>([]);
+  const [requiredSelected, setRequiredSelected] = useState<string[]>([]);
+  const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [requiredOpen, setRequiredOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [projectDescRaw, setProjectDescRaw] = useState('');
+  const [projectName, setProjectName] = useState('');
+
+  const [pickerResponse, setPickerResponse] =
+    useState<ImagePicker.ImagePickerResult | null>(null);
+
+  const {userName, userId} = useSelector((state: RootState) => state.user);
+
+  const {yourProjects} = useSelector((state: RootState) => state.projects);
+
+  const dispatch = useDispatch();
+
+  const uploadImageToFirebase = async (uri: string) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const storageRef = ref(
+        FIREBASE_STORAGE,
+        `images/${userName}_${Date.now()}`,
+      );
+      await uploadBytes(storageRef, blob);
+
+      const url = await getDownloadURL(storageRef);
+      return url;
+    } catch (error) {
+      console.error('Error uploading image: ', error);
+      return null;
+    }
+  };
+
+  const onImageLibraryPress = useCallback(async () => {
+    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Извините, но нам нужно разрешение на доступ к вашей камере, чтобы это работало!',
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      selectionLimit: 1, // Установка лимита на одно изображение
+    });
+
+    if (!result.canceled) {
+      setPickerResponse(result);
+      setSelectedImage(result.assets[0].uri);
+      console.log(result);
+    }
+  }, []);
+
+  const toggleRequired = () => {
+    setRequiredOpen(!requiredOpen);
+    setCategoriesOpen(false);
+    Keyboard.dismiss();
+  };
+
+  const toggleCategory = () => {
+    setCategoriesOpen(!categoriesOpen);
+    setRequiredOpen(false);
+    Keyboard.dismiss();
+  };
+
+  const handleRequiredSelect = (value: string) => {
+    if (requiredSelected.includes(value)) {
+      setRequiredSelected(requiredSelected.filter(item => item !== value));
+      members.splice(-1, 1);
+    } else {
+      setRequiredSelected([...requiredSelected, value]);
+      setMembers([...members, '-']);
+    }
+  };
+
+  const handleCategorySelect = (value: string) => {
+    if (categoriesSelected.includes(value)) {
+      setCategoriesSelected(categoriesSelected.filter(item => item !== value));
+    } else {
+      setCategoriesSelected([...categoriesSelected, value]);
+    }
+  };
+
+  const CreateProject = async () => {
+    try {
+      if (
+        !projectName.trim() ||
+        !projectDescRaw.trim() ||
+        !requiredSelected.length ||
+        !categoriesSelected.length ||
+        !pickerResponse
+      ) {
+        Alert.alert('Пожалуйста, заполните все поля.');
+        return;
+      }
+
+      let imageUrl = '';
+      if (pickerResponse && !pickerResponse.canceled) {
+        const uploadedImageUrl = await uploadImageToFirebase(
+          pickerResponse.assets[0].uri,
+        );
+        if (uploadedImageUrl) {
+          imageUrl = uploadedImageUrl;
+        }
+      }
+
+      const projectData = {
+        photo: imageUrl,
+        name: projectName,
+        description: projectDescRaw,
+        required: requiredSelected,
+        categories: categoriesSelected,
+        creator: userName,
+        creatorId: userId,
+        members: members,
+      };
+
+      const firestore = FIREBASE_DB;
+      const projectsRef = collection(firestore, 'projects');
+
+      const docRef = await addDoc(projectsRef, projectData);
+      console.log('Project created with ID: ', docRef.id);
+
+      const newProject: ProjectType = {
+        id: docRef.id,
+        ...projectData,
+      };
+      dispatch(setYourProjects([newProject, ...yourProjects]));
+
+      setProjectName('');
+      setProjectDescRaw('');
+      setRequiredSelected([]);
+      setCategoriesSelected([]);
+      setPickerResponse(null);
+      setSelectedImage('');
+      setMembers([]);
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  };
+
   return (
     <Modal visible={isModalVisible} animationType="slide" transparent>
       <LinearGradient
@@ -68,8 +195,10 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
           <ScrollView
             contentContainerStyle={styles.scrollViewContainer}
             keyboardShouldPersistTaps="handled">
-            <TouchableOpacity style={styles.closeButton} onPress={ModalClose}>
-              <Image source={require('../assets/icons/cros.png')} />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}>
+              <Image source={require('../../assets/icons/cros.png')} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Создание проекта</Text>
             <TouchableOpacity
@@ -112,7 +241,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 <TouchableOpacity
                   style={styles.project__button_plus}
                   onPress={toggleRequired}>
-                  <Image source={require('../assets/icons/plus1.png')} />
+                  <Text style={styles.plus1}>+</Text>
                 </TouchableOpacity>
                 {requiredSelected.map(item => (
                   <View key={item} style={styles.selectedItem}>
@@ -121,7 +250,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                       onPress={() => handleRequiredSelect(item)}
                       style={styles.removeSelectedItem}>
                       <View style={styles.removeSelectedItemTextContainer}>
-                        <Image source={require('../assets/icons/cros2.png')} />
+                        <Text style={styles.cross1}>+</Text>
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -141,9 +270,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                         onPress={() => handleRequiredSelect(item.value)}>
                         <View style={styles.dropdownItemContainer}>
                           <View style={styles.dropdownItem_icon}>
-                            <Image
-                              source={require('../assets/icons/plus2.png')}
-                            />
+                            <Text style={styles.plus2}>+</Text>
                           </View>
                           <Text style={styles.dropdownItemText}>
                             {item.value}
@@ -162,7 +289,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 <TouchableOpacity
                   style={styles.project__button_plus}
                   onPress={toggleCategory}>
-                  <Image source={require('../assets/icons/plus1.png')} />
+                  <Text style={styles.plus1}>+</Text>
                 </TouchableOpacity>
                 {categoriesSelected.map(item => (
                   <View key={item} style={styles.selectedItem}>
@@ -171,7 +298,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                       onPress={() => handleCategorySelect(item)}
                       style={styles.removeSelectedItem}>
                       <View style={styles.removeSelectedItemTextContainer}>
-                        <Image source={require('../assets/icons/cros2.png')} />
+                        <Text style={styles.cross1}>+</Text>
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -191,9 +318,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                         onPress={() => handleCategorySelect(item.value)}>
                         <View style={styles.dropdownItemContainer}>
                           <View style={styles.dropdownItem_icon}>
-                            <Image
-                              source={require('../assets/icons/plus2.png')}
-                            />
+                            <Text style={styles.plus2}>+</Text>
                           </View>
                           <Text style={styles.dropdownItemText}>
                             {item.value}
@@ -216,218 +341,5 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    //backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    //backgroundColor: 'linear-gradient(rgba(46, 10, 95, 0.94), rgba(177, 170, 219, 0.6043), rgba(31, 24, 75, 0.94))'
-  },
-  modalContent: {
-    width: 316,
-    height: '91.25%',
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 30,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 27,
-    fontFamily: 'Inter-Bold',
-    fontWeight: 'bold',
-  },
-  scrollViewContainer: {
-    flexGrow: 1,
-    alignItems: 'center',
-  },
-  closeButton: {
-    marginLeft: '90%',
-    marginTop: 5,
-    width: 20,
-    height: 20,
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
-  },
-  add_image__button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#D9D9D9',
-    width: 64,
-    height: 75,
-    borderRadius: 20,
-    marginTop: 11,
-    marginBottom: 13,
-  },
-  add_image__text: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 48,
-    color: '#FFFFFF',
-  },
-  project_name__placeholder: {
-    backgroundColor: '#EDEDED',
-    fontSize: 18,
-    fontFamily: 'Inter-Medium',
-    fontWeight: '500',
-    color: '#A8A8A8',
-    borderRadius: 30,
-    paddingVertical: 9,
-    paddingHorizontal: 18,
-    width: 274,
-    height: 42,
-  },
-  project_name__placeholder_about: {
-    backgroundColor: '#EDEDED',
-    fontSize: 18,
-    fontFamily: 'Inter-Medium',
-    fontWeight: '500',
-    color: '#A8A8A8',
-    borderRadius: 30,
-    paddingVertical: 9,
-    paddingHorizontal: 18,
-    width: 274,
-    minHeight: 100,
-    maxHeight: 185,
-    alignItems: 'flex-start',
-    alignSelf: 'flex-start',
-    textAlignVertical: 'top',
-  },
-  project__about__container: {
-    width: 274,
-    minHeight: 100,
-  },
-  project__text: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    marginLeft: 12,
-    marginTop: 15,
-    marginBottom: 10,
-  },
-  project__text_2: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    marginTop: 15,
-    marginBottom: 10,
-  },
-  project__container_with_plus: {
-    alignItems: 'flex-start',
-    alignSelf: 'flex-start',
-    marginLeft: 12,
-  },
-  fdrow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 15,
-    margin: 0,
-  },
-  project__button_plus: {
-    backgroundColor: '#BE9DE8',
-    width: 34,
-    height: 21,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 15,
-  },
-  project__button_create: {
-    backgroundColor: '#9260D1',
-    width: 177,
-    height: 46,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 85,
-  },
-  project__text_create: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 18,
-    color: '#FFFFFF',
-  },
-  selectedImage: {
-    width: 64,
-    height: 75,
-    borderRadius: 20,
-  },
-  selectedItemsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-    flexWrap: 'wrap',
-  },
-  selectedItem: {
-    backgroundColor: '#BE9DE8',
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 21,
-    paddingVertical: 3,
-    paddingHorizontal: 3,
-  },
-  selectedItemText: {
-    color: 'white',
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 12,
-  },
-  removeSelectedItem: {
-    marginLeft: 5,
-  },
-  removeSelectedItemTextContainer: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 6.5,
-    paddingVertical: 2.5,
-    borderRadius: 20,
-    height: 12,
-  },
-  removeSelectedItemText: {
-    color: '#BBBBBB',
-    textAlign: 'center',
-  },
-  dropdownContainer: {
-    position: 'relative',
-    maxHeight: 150,
-    width: 160,
-    backgroundColor: '#BE9DE8',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 15,
-    zIndex: 999,
-    marginTop: 15,
-  },
-  dropdownWrapper: {
-    paddingTop: 13,
-    paddingLeft: 6,
-    paddingRight: 13,
-    paddingBottom: 5,
-  },
-  dropdownItem: {
-    marginBottom: 10,
-    color: 'white',
-    fontFamily: 'Inter-SemiBold',
-  },
-  dropdownItem_icon: {
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dropdownItemContainer: {
-    flex: 1,
-    paddingLeft: 11,
-    flexDirection: 'row',
-  },
-  dropdownItemText: {
-    marginLeft: 5,
-    color: 'white',
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 12,
-  },
-  dropdownItemSelected: {
-    //backgroundColor: '#F2F2F2',
-  },
-});
 
 export default ProjectModal;
