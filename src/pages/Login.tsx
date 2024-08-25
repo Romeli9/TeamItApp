@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, Button, KeyboardAvoidingView, ActivityIndicator, Alert } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { FIREBASE_AUTH } from '../../FireBaseConfig';
+import React, {useState} from 'react';
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Button,
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import {signInWithEmailAndPassword} from 'firebase/auth';
+import {FIREBASE_AUTH} from '../../FireBaseConfig';
 
-const LoginPage: React.FC<{ navigation: any }> = ({ navigation }) => {
+const LoginPage: React.FC<{navigation: any}> = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,30 +37,30 @@ const LoginPage: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <KeyboardAvoidingView behavior='padding'>
+      <KeyboardAvoidingView behavior="padding">
         <TextInput
           value={email}
           style={styles.input}
-          placeholder='Email'
-          autoCapitalize='none'
-          onChangeText={(text) => setEmail(text)}
+          placeholder="Email"
+          autoCapitalize="none"
+          onChangeText={text => setEmail(text)}
           keyboardType="email-address"
         />
-        <TextInput 
+        <TextInput
           secureTextEntry={true}
           value={password}
           style={styles.input}
-          placeholder='Password'
-          autoCapitalize='none'
-          onChangeText={(text) => setPassword(text)}
+          placeholder="Password"
+          autoCapitalize="none"
+          onChangeText={text => setPassword(text)}
         />
 
         {loading ? (
-          <ActivityIndicator size='large' color='#0000ff' />
+          <ActivityIndicator size="large" color="#0000ff" />
         ) : (
           <>
-            <Button color='#007bff' title='Login' onPress={SignIn} />
-            <Button color='#007bff' title='Register' onPress={goToRegister} />
+            <Button color="#007bff" title="Login" onPress={SignIn} />
+            <Button color="#007bff" title="Register" onPress={goToRegister} />
           </>
         )}
       </KeyboardAvoidingView>

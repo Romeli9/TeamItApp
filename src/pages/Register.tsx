@@ -44,6 +44,7 @@ const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
     } catch (error: any) {
       console.log(error);
       Alert.alert('Sign Up failed: ' + error.message);
+      Alert.alert('Sign Up failed: ' + error.message);
     } finally {
       setLoading(false);
     }
