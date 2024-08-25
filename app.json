@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "TeamIt",
-    "slug": "TeamIt",
+    "name": "TeamItApp",
+    "slug": "TeamItApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
