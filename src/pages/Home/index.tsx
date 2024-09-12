@@ -1,26 +1,21 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   Image,
-  Keyboard,
   ScrollView,
   ActivityIndicator,
   ImageBackground,
-  Alert,
 } from 'react-native';
-import {ref, getDownloadURL, uploadBytes} from 'firebase/storage';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import {onAuthStateChanged} from 'firebase/auth';
 import {
   collection,
   doc,
   getDoc,
-  addDoc,
   getDocs,
   query,
   where,
@@ -31,19 +26,11 @@ import Carousel from 'react-native-snap-carousel';
 import {useSelector, useDispatch} from 'react-redux';
 
 import {styles} from './styles';
-import {
-  FIREBASE_AUTH,
-  FIREBASE_DB,
-  FIREBASE_STORAGE,
-} from '../../../FireBaseConfig';
+import {FIREBASE_AUTH, FIREBASE_DB} from '../../../FireBaseConfig';
 import ProjectModal from '../../components/ModalWindowProject';
 import {} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
-import {
-  ProjectType,
-  setOtherProjects,
-  setYourProjects,
-} from 'redux/slices/projectsSlice';
+import {setOtherProjects, setYourProjects} from 'redux/slices/projectsSlice';
 
 const Home: React.FC<{navigation: any}> = ({navigation}) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -54,9 +41,7 @@ const Home: React.FC<{navigation: any}> = ({navigation}) => {
 
   const dispatch = useDispatch();
 
-  const {userName, userId, avatar} = useSelector(
-    (state: RootState) => state.user,
-  );
+  const {userName, avatar} = useSelector((state: RootState) => state.user);
 
   const {yourProjects, otherProjects} = useSelector(
     (state: RootState) => state.projects,
@@ -99,7 +84,6 @@ const Home: React.FC<{navigation: any}> = ({navigation}) => {
               categories: doc.data().categories,
               members: doc.data().members,
             }));
-            console.log('123123', projectsData);
 
             dispatch(setYourProjects(projectsData));
           }
@@ -118,7 +102,6 @@ const Home: React.FC<{navigation: any}> = ({navigation}) => {
             }));
 
             dispatch(setOtherProjects(projectsData));
-            console.log(projectsData);
           }
           setDataLoaded(true);
         }
@@ -131,8 +114,6 @@ const Home: React.FC<{navigation: any}> = ({navigation}) => {
   const OpenProject = (projectID: string) => {
     navigation.navigate('Project', {projectId: projectID});
   };
-
-  const search = () => {};
 
   const renderCarouselItem = ({item, index}: {item: any; index: number}) => {
     return (
@@ -222,7 +203,9 @@ const Home: React.FC<{navigation: any}> = ({navigation}) => {
           <Text style={styles.workWithProjectsText}>
             С какими проектами вы хотите поработать?
           </Text>
-          <TouchableOpacity style={styles.searchButton} onPress={search}>
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={() => navigation.navigate('Search')}>
             <Image source={require('../../assets/icons/search.png')} />
           </TouchableOpacity>
 

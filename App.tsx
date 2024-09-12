@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Text, View, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {User, onAuthStateChanged} from 'firebase/auth';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -21,6 +21,25 @@ import Search from './src/pages/Search';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const HomeStack = createNativeStackNavigator();
+
+// Новый стек для экрана Home
+function HomeStackScreens() {
+  return (
+    <HomeStack.Navigator initialRouteName="Home">
+      <HomeStack.Screen
+        name="Home2"
+        component={Home}
+        options={{headerShown: false}}
+      />
+      <HomeStack.Screen
+        name="Search"
+        component={Search}
+        options={{headerShown: false}}
+      />
+    </HomeStack.Navigator>
+  );
+}
 
 function MyTabs() {
   return (
@@ -52,7 +71,7 @@ function MyTabs() {
       />
       <Tab.Screen
         name="Home"
-        component={Home}
+        component={HomeStackScreens} // Используем HomeStackScreens вместо Home
         options={{
           headerShown: false,
           tabBarIcon: ({color, size, focused}) => (
@@ -133,11 +152,6 @@ export default function App() {
           <Stack.Screen
             name="Project"
             component={Project}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Search"
-            component={Search}
             options={{headerShown: false}}
           />
         </Stack.Navigator>
