@@ -1,0 +1,18 @@
+export const required = [
+    {key:'1', value:'Backend разраб.'},
+    {key:'2', value:'Frontend разраб.'},
+    {key:'3', value:'Дизайнер'},
+    {key:'4', value:'Тестировщик'},
+    {key:'5', value:'Сист. аналитик'},
+    {key:'6', value:'Архитектор'},
+    {key:'7', value:'Project'},
+    {key:'8', value:'Продакт'},
+    {key:'9', value:'Аккаунт'},
+    {key:'10', value:'Сейл'},
+    {key:'11', value:'Проектировщик'},
+    {key:'12', value:'Тимлид'},
+    {key:'13', value:'Верстальщик'},
+    {key:'14', value:'Локализатор'},
+    {key:'15', value:'Бизнес-аналитик'},
+    {key:'16', value:'Технич. писатель'},
+]
