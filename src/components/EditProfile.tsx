@@ -54,9 +54,9 @@ const EditProfile: React.FC<EditProfileProps> = ({
           const updatedProfileData: Partial<UserProfile> = {};
 
           updatedProfileData.AboutMe = aboutMeInput;
-          updatedProfileData.Experience = experience;
-          updatedProfileData.Skills = skills;
-          updatedProfileData.Telegramm = telegramm;
+          updatedProfileData.Experience = experienceInput;
+          updatedProfileData.Skills = skillsInput;
+          updatedProfileData.Telegramm = telegrammInput;
 
           dispatch(setProfileData(updatedProfileData));
 
