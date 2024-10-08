@@ -1,15 +1,37 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Button, Animated, Image, TouchableOpacity, FlatList, ListRenderItem} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  Animated,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  ListRenderItem,
+  ScrollView,
+} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from 'redux/store';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+} from 'firebase/firestore';
+import {FIREBASE_AUTH, FIREBASE_DB} from '../../FireBaseConfig';
 import {} from 'redux/slices/userSlice';
-import projectsSlice, {projectsState, ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import projectsSlice, {
+  projectsState,
+  ProjectType,
+  setYourProjects,
+} from 'redux/slices/projectsSlice';
+import {useNavigation, NavigationProp} from '@react-navigation/native';
 
 type RootStackParamList = {
-  Project: { projectId: string };
+  Project: {projectId: string};
   // другие экраны...
 };
 
@@ -22,17 +44,18 @@ function ProfileInfo() {
   useEffect(() => {
     fetchUserProjects();
   }, []);
-  useSelector(
-    (state: RootState) => state.projects
-  );
-  
+  useSelector((state: RootState) => state.projects);
+
   const [dataLoaded, setDataLoaded] = useState(false);
   const [showMoreInfo, setShowMoreInfo] = useState(false);
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const animatedHeight = useState(new Animated.Value(0))[0];
-  const [buttonImage, setButtonImage] = useState(require('../assets/profile/down.png'));
+  const [buttonImage, setButtonImage] = useState(
+    require('../assets/profile/down.png'),
+  );
   const [subscribed, setSubscribed] = useState(false);
- 
+
+  const test = [...projects, ...projects, ...projects, ...projects];
 
   const toggleMoreInfo = () => {
     setShowMoreInfo(prevState => !prevState);
@@ -43,16 +66,18 @@ function ProfileInfo() {
     }).start();
 
     // Изменяем изображение кнопки
-    setButtonImage(showMoreInfo ? require('../assets/profile/down.png') : require('../assets/profile/up.png'));
+    setButtonImage(
+      showMoreInfo
+        ? require('../assets/profile/down.png')
+        : require('../assets/profile/up.png'),
+    );
   };
-  
+
   const additionalInfoHeight = animatedHeight.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 200], // Увеличиваем максимальную высоту
   });
 
-  
-  
   const fetchUserProjects = async () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
@@ -90,27 +115,31 @@ function ProfileInfo() {
     } catch (error) {
       console.error('Error fetching projects: ', error);
     }
-    
   };
-  
-  const renderProjectItem = ({ item }: { item: ProjectType}) => (
-    <TouchableOpacity style={styles.projectItem} onPress={() => OpenProject(item.id)}>
-      <Image source={{ uri: item.photo }} style={styles.projectImage} />
+
+  const renderProjectItem = ({item}: {item: ProjectType}) => (
+    <TouchableOpacity
+      style={styles.projectItem}
+      onPress={() => OpenProject(item.id)}>
+      <Image source={{uri: item.photo}} style={styles.projectImage} />
       <Text style={styles.projectName}>{item.name}</Text>
     </TouchableOpacity>
   );
-  
+
   const OpenProject = (projectID: string) => {
     navigation.navigate('Project', {projectId: projectID});
   };
- 
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Обо мне: {aboutMe}</Text>
-      
       <View style={styles.additionalInfoContainer}>
-        <Animated.View style={{...styles.additionalInfo, maxHeight: additionalInfoHeight}}>
+        <TouchableOpacity style={styles.text} onPress={toggleMoreInfo}>
+          <Image source={buttonImage} style={{width: 12, height: 12}} />
+          <Text>Обо мне: {aboutMe}</Text>
+        </TouchableOpacity>
+
+        <Animated.View
+          style={{...styles.additionalInfo, maxHeight: additionalInfoHeight}}>
           {showMoreInfo && (
             <>
               <Text style={styles.text}>Опыт: {experience}</Text>
@@ -119,26 +148,17 @@ function ProfileInfo() {
             </>
           )}
         </Animated.View>
-        
+
         <Text style={styles.text_project}>Проекты:</Text>
+        <ScrollView contentContainerStyle={styles.projectList}>
           <FlatList
-            data={projects}
+            data={test}
             renderItem={renderProjectItem}
-            keyExtractor={(item: { id: any; }) => item.id}
+            keyExtractor={(item: {id: any}) => item.id}
             numColumns={2}
-            contentContainerStyle={styles.projectList}
           />
+        </ScrollView>
       </View>
-      
-      
-      <TouchableOpacity
-          style={styles.down_button}
-          onPress={toggleMoreInfo}>
-          <Image
-            source={buttonImage}
-            style={{width: 12, height: 12}}
-          />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -153,7 +173,7 @@ const styles = StyleSheet.create({
   down_button: {
     position: 'absolute',
     left: 25,
-    top: 7,
+    top: 57,
   },
   projectItem: {
     marginLeft: 10,
@@ -169,23 +189,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   text: {
-    marginBottom: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     fontSize: 16,
+    marginBottom: 15,
     color: '#333',
     fontFamily: 'Inter-Regular',
-    width: 350, 
-    left: 25,
+    width: 350,
   },
   additionalInfoContainer: {
+    paddingTop: 350,
     alignItems: 'center',
-    overflow: 'visible', 
-    width: 350, 
-    height: 175,
+    width: 350,
   },
   additionalInfo: {
-    width: '100%', 
+    width: '100%',
   },
-  text_project:{
+  text_project: {
     marginBottom: 15,
     fontSize: 20,
     fontWeight: '500',
@@ -196,14 +217,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
   },
   projectList: {
-    paddingBottom: 50,
+    paddingBottom: 150,
   },
   // additionalInfoContainer121221212: {
-  //   overflow: 'hidden', 
-  //   width: 250, 
+  //   overflow: 'hidden',
+  //   width: 250,
   //   height: 175,
   // },
 });
-
-
-
