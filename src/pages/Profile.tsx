@@ -194,18 +194,7 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
         data={[{}]} // Используйте пустой массив для отображения заголовка
         renderItem={() => (
           <View style={styles.container}>
-            <View style={styles.image_teamIT}>
-              <Image
-                source={require('../assets/teamIt/Case2.png')}
-                style={{ width: 150, height: 150 }}
-              />
-            </View>
-            <View style={styles.image_teamIT}>
-              <Image
-                source={require('../assets/teamIt/Case1.png')}
-                style={{ width: 150, height: 150 }}
-              />
-            </View>
+           
 
             
             <View style={styles.container1}>
@@ -218,6 +207,7 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
                 </View>
               )}
             </View>
+            
             <TouchableOpacity
               style={styles.background_image}
               onPress={backImageLibraryPress}>
@@ -230,6 +220,7 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
                 <Text style={styles.add_image__text}>+</Text>
               )}
             </TouchableOpacity>
+            <View style = {styles.backselectedImage}>
             <TouchableOpacity
               style={styles.add_image__button}
               onPress={onImageLibraryPress}>
@@ -242,8 +233,8 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
                 <Text style={styles.add_image__text}>+</Text>
               )}
             </TouchableOpacity>
+            </View>
             <Text style={styles.text}>@{userName}</Text>
-
             
             {isEditProfileVisible && (
               <EditProfile
@@ -292,23 +283,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 200,
     paddingBottom: 20,
   },
-  image_teamIT:{
-    position: 'absolute',
-    top: 60,
-    right: 50,
-    width: 0,
-    height: 0,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
+  
   add_image__button: {
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#D9D9D9',
-    top: 90,
+   
     width: 125,
     height: 125,
     borderRadius: 100,
@@ -389,6 +370,16 @@ const styles = StyleSheet.create({
   selectedBackgroundImage: {
     width: 500,
     height: 225,
+  },
+  backselectedImage: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    top: 90,
+    width: 133,
+    height: 133,
+    borderRadius: 100,
   },
 });
 
