@@ -15,12 +15,16 @@ import {onAuthStateChanged} from 'firebase/auth';
 import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
 import {useSelector, useDispatch} from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
-import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from '../../FireBaseConfig';
+import {
+  FIREBASE_AUTH,
+  FIREBASE_DB,
+  FIREBASE_STORAGE,
+} from '../../FireBaseConfig';
 import {setUserData, setProfileData} from 'redux/slices/userSlice';
 import EditProfile from 'components/EditProfile';
 import {RootState} from 'redux/store';
 import ProfileInfo from 'components/ProfileInfo';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 
 const Profile: React.FC<{navigation: any}> = ({navigation}) => {
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
@@ -30,41 +34,47 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
   const [pickerResponse, setPickerResponse] =
     useState<ImagePicker.ImagePickerResult | null>(null);
 
-  const {userName, aboutMe, avatar, background} = useSelector((state: RootState) => state.user);
-  
+  const {userName, aboutMe, avatar, background} = useSelector(
+    (state: RootState) => state.user,
+  );
+
   useEffect(() => {
     const fetchData = async () => {
-        const user = FIREBASE_AUTH.currentUser;
+      const user = FIREBASE_AUTH.currentUser;
 
-        if (user) {
-            const firestore = FIREBASE_DB;
-            const usersRef = collection(firestore, 'users');
-            const userDoc = doc(usersRef, user.uid);
-            const docSnap = await getDoc(userDoc);
+      if (user) {
+        const firestore = FIREBASE_DB;
+        const usersRef = collection(firestore, 'users');
+        const userDoc = doc(usersRef, user.uid);
+        const docSnap = await getDoc(userDoc);
 
-            if (docSnap.exists()) {
-                const userData = docSnap.data();
-                dispatch(setUserData({
-                    userId: user.uid,
-                    username: userData.username,
-                    email: userData.email,
-                    avatar: userData.avatar, // Загружаем URL аватарки
-                    background: userData.background,
-                }));
-                dispatch(setProfileData(userData));
-                setUserDocRef(userDoc);
-            }
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          dispatch(
+            setUserData({
+              userId: user.uid,
+              username: userData.username,
+              email: userData.email,
+              avatar: userData.avatar, // Загружаем URL аватарки
+              background: userData.background,
+            }),
+          );
+          dispatch(setProfileData(userData));
+          setUserDocRef(userDoc);
         }
+      }
     };
 
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchData);
     return unsubscribe;
-}, [dispatch]);
-    
+  }, [dispatch]);
+
   const onImageLibraryPress = useCallback(async () => {
     const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Извините, но нам нужно разрешение на доступ к вашей галерее!');
+      Alert.alert(
+        'Извините, но нам нужно разрешение на доступ к вашей галерее!',
+      );
       return;
     }
 
@@ -77,25 +87,38 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
     if (!result.canceled) {
       setPickerResponse(result);
       setSelectedImage(result.assets[0].uri);
-      
+
       const imageUrl = await uploadImageToFirebase(result.assets[0].uri);
       if (imageUrl) {
         const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
         console.log('Current user for image upload:', user); // Проверка текущего пользователя
         if (user) {
-          dispatch(setUserData({ userId: user.uid, username: userName, email: user.email, avatar: imageUrl, background: background }));
-          Alert.alert('Изображение загружено!', 'Ваш новый аватар успешно обновлен.');
+          dispatch(
+            setUserData({
+              userId: user.uid,
+              username: userName,
+              email: user.email,
+              avatar: imageUrl,
+              background: background,
+            }),
+          );
+          Alert.alert(
+            'Изображение загружено!',
+            'Ваш новый аватар успешно обновлен.',
+          );
         } else {
           console.log('User is not signed in while uploading image.');
         }
       }
     }
   }, [dispatch, userName]);
-  
+
   const backImageLibraryPress = useCallback(async () => {
     const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Извините, но нам нужно разрешение на доступ к вашей галерее!');
+      Alert.alert(
+        'Извините, но нам нужно разрешение на доступ к вашей галерее!',
+      );
       return;
     }
 
@@ -108,14 +131,25 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
     if (!result.canceled) {
       setPickerResponse(result);
       setSelectedImage(result.assets[0].uri);
-      
+
       const imageUrl = await uploadImageToFirebase1(result.assets[0].uri);
       if (imageUrl) {
         const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
         console.log('Current user for image upload:', user); // Проверка текущего пользователя
         if (user) {
-          dispatch(setUserData({ userId: user.uid, username: userName, email: user.email, avatar: avatar, background: imageUrl }));
-          Alert.alert('Изображение загружено!', 'Ваш новый аватар успешно обновлен.');
+          dispatch(
+            setUserData({
+              userId: user.uid,
+              username: userName,
+              email: user.email,
+              avatar: avatar,
+              background: imageUrl,
+            }),
+          );
+          Alert.alert(
+            'Изображение загружено!',
+            'Ваш новый аватар успешно обновлен.',
+          );
         } else {
           console.log('User is not signed in while uploading image.');
         }
@@ -125,54 +159,59 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
 
   const uploadImageToFirebase = async (uri: string) => {
     try {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        const storageRef = ref(FIREBASE_STORAGE, `images/${userName}_${Date.now()}`);
-        
-        // Загружаем изображение в Firebase Storage
-        await uploadBytes(storageRef, blob);
-        
-        // Получаем URL загруженного изображения
-        const url = await getDownloadURL(storageRef);
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const storageRef = ref(
+        FIREBASE_STORAGE,
+        `images/${userName}_${Date.now()}`,
+      );
 
-        // Сохраните URL изображения в Firestore
-        const user = FIREBASE_AUTH.currentUser;
-        if (user) {
-            const userDocRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
-            await setDoc(userDocRef, { avatar: url }, { merge: true });
-        }
+      // Загружаем изображение в Firebase Storage
+      await uploadBytes(storageRef, blob);
 
-        return url; // Возвращаем URL для дальнейшего использования
+      // Получаем URL загруженного изображения
+      const url = await getDownloadURL(storageRef);
+
+      // Сохраните URL изображения в Firestore
+      const user = FIREBASE_AUTH.currentUser;
+      if (user) {
+        const userDocRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
+        await setDoc(userDocRef, {avatar: url}, {merge: true});
+      }
+
+      return url; // Возвращаем URL для дальнейшего использования
     } catch (error) {
-        console.error('Error uploading image: ', error);
-        return null;
+      console.error('Error uploading image: ', error);
+      return null;
     }
-    
   };
 
   const uploadImageToFirebase1 = async (uri: string) => {
     try {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        const storageRef = ref(FIREBASE_STORAGE, `images/${userName}_${Date.now()}`);
-        
-        // Загружаем изображение в Firebase Storage
-        await uploadBytes(storageRef, blob);
-        
-        // Получаем URL загруженного изображения
-        const url = await getDownloadURL(storageRef);
-  
-        // Сохраните URL изображения в Firestore
-        const user = FIREBASE_AUTH.currentUser;
-        if (user) {
-            const userDocRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
-            await setDoc(userDocRef, { background: url }, { merge: true });
-        }
-  
-        return url; // Возвращаем URL для дальнейшего использования
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const storageRef = ref(
+        FIREBASE_STORAGE,
+        `images/${userName}_${Date.now()}`,
+      );
+
+      // Загружаем изображение в Firebase Storage
+      await uploadBytes(storageRef, blob);
+
+      // Получаем URL загруженного изображения
+      const url = await getDownloadURL(storageRef);
+
+      // Сохраните URL изображения в Firestore
+      const user = FIREBASE_AUTH.currentUser;
+      if (user) {
+        const userDocRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
+        await setDoc(userDocRef, {background: url}, {merge: true});
+      }
+
+      return url; // Возвращаем URL для дальнейшего использования
     } catch (error) {
-        console.error('Error uploading image: ', error);
-        return null;
+      console.error('Error uploading image: ', error);
+      return null;
     }
   };
   const handleSignOut = async () => {
@@ -186,17 +225,13 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
 
   return (
     <SafeAreaProvider>
-      
       <FlatList
-      scrollEnabled={true}
-      keyboardShouldPersistTaps="handled"
+        scrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollContainer}
         data={[{}]} // Используйте пустой массив для отображения заголовка
         renderItem={() => (
           <View style={styles.container}>
-           
-
-            
             <View style={styles.container1}>
               {aboutMe ? (
                 <ProfileInfo />
@@ -213,7 +248,7 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
               onPress={backImageLibraryPress}>
               {background ? (
                 <Image
-                  source={{ uri: background }}
+                  source={{uri: background}}
                   style={styles.selectedBackgroundImage}
                 />
               ) : (
@@ -225,29 +260,24 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
               style={styles.add_image__button}
               onPress={onImageLibraryPress}>
               {avatar ? (
-                <Image
-                  source={{ uri: avatar }}
-                  style={styles.selectedImage}
-                />
+                <Image source={{uri: avatar}} style={styles.selectedImage} />
               ) : (
                 <Text style={styles.add_image__text}>+</Text>
               )}
             </TouchableOpacity>
             </View>
             <Text style={styles.text}>@{userName}</Text>
-            
+
             {isEditProfileVisible && (
               <EditProfile
                 onModalClose={() => setEditProfileVisible(false)}
                 userDocRef={userDocRef}
               />
             )}
-            <TouchableOpacity
-              style={styles.exitButton}
-              onPress={handleSignOut}>
+            <TouchableOpacity style={styles.exitButton} onPress={handleSignOut}>
               <Image
                 source={require('../assets/profile/exit.png')}
-                style={{ width: 25, height: 23 }}
+                style={{width: 25, height: 23}}
               />
             </TouchableOpacity>
             <TouchableOpacity
@@ -255,18 +285,15 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
               onPress={() => setEditProfileVisible(true)}>
               <Image
                 source={require('../assets/profile/edit.png')}
-                style={{ width: 25, height: 25 }}
+                style={{width: 25, height: 25}}
               />
             </TouchableOpacity>
           </View>
-          
         )}
         keyExtractor={(item, index) => index.toString()} // Используйте индекс как ключ
-       
       />
     </SafeAreaProvider>
   );
-  
 };
 
 export default Profile;
@@ -283,7 +310,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 200,
     paddingBottom: 20,
   },
-  
+ 
   add_image__button: {
     position: 'absolute',
     alignItems: 'center',
@@ -382,7 +409,3 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
 });
-
-
-
-
