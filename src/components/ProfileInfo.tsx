@@ -1,22 +1,38 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, Button, Animated, Image, TouchableOpacity} from 'react-native';
-import {useSelector} from 'react-redux';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet, Button, Animated, Image, TouchableOpacity, FlatList, ListRenderItem} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from 'redux/store';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { FIREBASE_DB } from '../../FireBaseConfig';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { FIREBASE_AUTH, FIREBASE_DB } from '../../FireBaseConfig';
+import {} from 'redux/slices/userSlice';
+import projectsSlice, {projectsState, ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+
+type RootStackParamList = {
+  Project: { projectId: string };
+  // другие экраны...
+};
 
 function ProfileInfo() {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const dispatch = useDispatch();
   const {telegramm, skills, experience, aboutMe} = useSelector(
     (state: RootState) => state.user,
   );
-
-  const [showMoreInfo, setShowMoreInfo] = useState(false);
-  const [projects, setProjects] = useState([]);
-  const animatedHeight = useState(new Animated.Value(0))[0];
+  useEffect(() => {
+    fetchUserProjects();
+  }, []);
+  useSelector(
+    (state: RootState) => state.projects
+  );
   
-  // Состояние для хранения изображения кнопки
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [showMoreInfo, setShowMoreInfo] = useState(false);
+  const [projects, setProjects] = useState<ProjectType[]>([]);
+  const animatedHeight = useState(new Animated.Value(0))[0];
   const [buttonImage, setButtonImage] = useState(require('../assets/profile/down.png'));
   const [subscribed, setSubscribed] = useState(false);
+ 
 
   const toggleMoreInfo = () => {
     setShowMoreInfo(prevState => !prevState);
@@ -35,10 +51,59 @@ function ProfileInfo() {
     outputRange: [0, 200], // Увеличиваем максимальную высоту
   });
 
-  const handleSubscribe = () => {
-    setSubscribed(true); // Изменяем состояние подписки
+  
+  
+  const fetchUserProjects = async () => {
+    try {
+      const user = FIREBASE_AUTH.currentUser;
+      if (user) {
+        const usersRef = collection(FIREBASE_DB, 'users');
+        const userDoc = doc(usersRef, user.uid);
+        const docSnap = await getDoc(userDoc);
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+
+          const projectsRef = collection(FIREBASE_DB, 'projects');
+          const querySnapshot = await getDocs(
+            query(projectsRef, where('creator', '==', userData.username)),
+          );
+
+          if (querySnapshot.docs.length > 0) {
+            const projectsData = querySnapshot.docs.map(doc => ({
+              id: doc.id,
+              creator: doc.data().creator,
+              creatorId: doc.data().creatorId,
+              description: doc.data().description,
+              name: doc.data().name,
+              photo: doc.data().photo,
+              required: doc.data().required,
+              categories: doc.data().categories,
+              members: doc.data().members,
+            }));
+            setProjects(projectsData);
+            dispatch(setYourProjects(projectsData));
+          }
+
+          setDataLoaded(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching projects: ', error);
+    }
+    
   };
   
+  const renderProjectItem = ({ item }: { item: ProjectType}) => (
+    <TouchableOpacity style={styles.projectItem} onPress={() => OpenProject(item.id)}>
+      <Image source={{ uri: item.photo }} style={styles.projectImage} />
+      <Text style={styles.projectName}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+  
+  const OpenProject = (projectID: string) => {
+    navigation.navigate('Project', {projectId: projectID});
+  };
+ 
 
   return (
     <View style={styles.container}>
@@ -54,9 +119,17 @@ function ProfileInfo() {
             </>
           )}
         </Animated.View>
+        
         <Text style={styles.text_project}>Проекты:</Text>
-
+          <FlatList
+            data={projects}
+            renderItem={renderProjectItem}
+            keyExtractor={(item: { id: any; }) => item.id}
+            numColumns={2}
+            contentContainerStyle={styles.projectList}
+          />
       </View>
+      
       
       <TouchableOpacity
           style={styles.down_button}
@@ -74,31 +147,63 @@ export default ProfileInfo;
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    marginVertical: 20,
+    top: 20,
     paddingHorizontal: 20,
   },
   down_button: {
     position: 'absolute',
+    left: 25,
     top: 7,
   },
-  text: {
+  projectItem: {
+    marginLeft: 10,
+  },
+  projectImage: {
+    width: 175,
+    height: 250,
+    borderRadius: 20,
+  },
+  projectName: {
+    marginTop: 5,
     marginBottom: 10,
+    fontWeight: 'bold',
+  },
+  text: {
+    marginBottom: 15,
     fontSize: 16,
     color: '#333',
     fontFamily: 'Inter-Regular',
-    width: 250, 
+    width: 350, 
+    left: 25,
   },
   additionalInfoContainer: {
-    overflow: 'hidden', 
-    width: 250, 
+    alignItems: 'center',
+    overflow: 'visible', 
+    width: 350, 
     height: 175,
   },
   additionalInfo: {
     width: '100%', 
   },
   text_project:{
+    marginBottom: 15,
     fontSize: 20,
     fontWeight: '500',
   },
+  profileProjectContainer: {
+    width: '100%',
+    marginTop: 50,
+    paddingHorizontal: 50,
+  },
+  projectList: {
+    paddingBottom: 50,
+  },
+  // additionalInfoContainer121221212: {
+  //   overflow: 'hidden', 
+  //   width: 250, 
+  //   height: 175,
+  // },
 });
+
+
+
