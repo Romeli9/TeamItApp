@@ -8,6 +8,9 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {StatusBar} from 'expo-status-bar';
 import {useEffect, useState} from 'react';
 import {Provider} from 'react-redux';
+import * as eva from '@eva-design/eva';
+import {ApplicationProvider, IconRegistry} from '@ui-kitten/components';
+import {EvaIconsPack} from '@ui-kitten/eva-icons';
 
 import {store} from './src/redux/store';
 import {FIREBASE_AUTH} from './FireBaseConfig';
@@ -127,36 +130,39 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName={user ? 'Homepage' : 'Login'}>
-          {user ? (
+      <IconRegistry icons={EvaIconsPack} />
+      <ApplicationProvider {...eva} theme={eva.light}>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName={user ? 'Homepage' : 'Login'}>
+            {user ? (
+              <Stack.Screen
+                name="Homepage"
+                component={MyTabs}
+                options={{headerShown: false}}
+              />
+            ) : (
+              <>
+                <Stack.Screen
+                  name="Login"
+                  component={Login}
+                  options={{headerShown: false}}
+                />
+                <Stack.Screen
+                  name="RegisterPage"
+                  component={Register}
+                  options={{headerShown: false}}
+                />
+              </>
+            )}
             <Stack.Screen
-              name="Homepage"
-              component={MyTabs}
+              name="Project"
+              component={Project}
               options={{headerShown: false}}
             />
-          ) : (
-            <>
-              <Stack.Screen
-                name="Login"
-                component={Login}
-                options={{headerShown: false}}
-              />
-              <Stack.Screen
-                name="RegisterPage"
-                component={Register}
-                options={{headerShown: false}}
-              />
-            </>
-          )}
-          <Stack.Screen
-            name="Project"
-            component={Project}
-            options={{headerShown: false}}
-          />
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
+          </Stack.Navigator>
+          <StatusBar style="auto" />
+        </NavigationContainer>
+      </ApplicationProvider>
     </Provider>
   );
 }

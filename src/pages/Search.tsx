@@ -96,7 +96,6 @@ const Search: React.FC = () => {
             requireds.includes(require),
           ),
       );
-      console.log(projects);
       dispatch(setOtherProjects(filtered));
     } else {
       dispatch(setOtherProjects(projects));
@@ -149,7 +148,7 @@ const Search: React.FC = () => {
           </View>
         </View>
 
-        <Button title="Назад" onPress={() => navigation.goBack()} />
+        <Button title="Искать" onPress={() => navigation.goBack()} />
       </View>
     </SafeAreaProvider>
   );
