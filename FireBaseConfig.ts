@@ -12,6 +12,8 @@ const firebaseConfig = {
   messagingSenderId: '86866590567',
   appId: '1:86866590567:web:2b3e358bd77d8acdc40dc2',
   measurementId: 'G-MYPH1TJZDM',
+  databaseURL:
+    'https://teamit-fd85a-default-rtdb.europe-west1.firebasedatabase.app/', // Добавленный URL
 };
 
 export const FIREBASE_APP = initializeApp(firebaseConfig);
