@@ -1,32 +1,34 @@
-import * as React from 'react';
-import {View, StyleSheet} from 'react-native';
-import {User, onAuthStateChanged} from 'firebase/auth';
-import {NavigationContainer} from '@react-navigation/native';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {StatusBar} from 'expo-status-bar';
-import {useEffect, useState} from 'react';
-import {Provider} from 'react-redux';
 import * as eva from '@eva-design/eva';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ApplicationProvider, IconRegistry} from '@ui-kitten/components';
 import {EvaIconsPack} from '@ui-kitten/eva-icons';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
+import {StyleSheet, View} from 'react-native';
 
+import {MaterialCommunityIcons} from '@expo/vector-icons';
+import {StatusBar} from 'expo-status-bar';
+import {User, onAuthStateChanged} from 'firebase/auth';
+import {
+  Home,
+  LoginPage,
+  Messenger,
+  Profile,
+  Project,
+  RegisterPage,
+  Search,
+} from 'pages';
+import {Provider} from 'react-redux';
+
+import {FIREBASE_AUTH} from './src/app/FireBaseConfig';
 import {store} from './src/redux/store';
-import {FIREBASE_AUTH} from './FireBaseConfig';
-import Login from './src/pages/Login';
-import Register from './src/pages/Register';
-import Home from './src/pages/Home';
-import Profile from './src/pages/Profile';
-import Messenger from './src/pages/Messenger';
-import Project from './src/pages/Project';
-import Search from './src/pages/Search';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const HomeStack = createNativeStackNavigator();
 
-// Новый стек для экрана Home
 function HomeStackScreens() {
   return (
     <HomeStack.Navigator initialRouteName="Home">
@@ -74,7 +76,7 @@ function MyTabs() {
       />
       <Tab.Screen
         name="Home"
-        component={HomeStackScreens} // Используем HomeStackScreens вместо Home
+        component={HomeStackScreens} 
         options={{
           headerShown: false,
           tabBarIcon: ({color, size, focused}) => (
@@ -144,12 +146,12 @@ export default function App() {
               <>
                 <Stack.Screen
                   name="Login"
-                  component={Login}
+                  component={LoginPage}
                   options={{headerShown: false}}
                 />
                 <Stack.Screen
                   name="RegisterPage"
-                  component={Register}
+                  component={RegisterPage}
                   options={{headerShown: false}}
                 />
               </>

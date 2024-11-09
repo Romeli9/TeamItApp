@@ -1,6 +1,6 @@
 import {StyleSheet} from 'react-native';
 
-export const styles = StyleSheet.create({
+export const HomePagestyles = StyleSheet.create({
   create__button: {
     alignItems: 'center',
     justifyContent: 'center',

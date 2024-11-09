@@ -1,26 +1,27 @@
 import React, {useCallback, useState} from 'react';
 import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  Image,
-  TextInput,
-  ScrollView,
   Alert,
+  Image,
   Keyboard,
+  Modal,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import {LinearGradient} from 'expo-linear-gradient';
-import * as ImagePicker from 'expo-image-picker';
 
-import {categories} from '../../assets/consts/Categories';
-import {required} from '../../assets/consts/Required';
-import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
-import {FIREBASE_DB, FIREBASE_STORAGE} from '../../../FireBaseConfig';
-import {RootState} from 'redux/store';
-import {useDispatch, useSelector} from 'react-redux';
+import * as ImagePicker from 'expo-image-picker';
+import {LinearGradient} from 'expo-linear-gradient';
 import {addDoc, collection} from 'firebase/firestore';
+import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
+import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
+import {RootState} from 'redux/store';
+import {categories} from 'shared/assets/consts/Categories';
+import {required} from 'shared/assets/consts/Required';
+
+import {FIREBASE_DB, FIREBASE_STORAGE} from '../../app/FireBaseConfig';
 import {styles} from './styles';
 
 interface ProjectModalProps {
@@ -198,7 +199,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}>
-              <Image source={require('../../assets/icons/cros.png')} />
+              <Image source={require('shared/assets/icons/cros.png')} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Создание проекта</Text>
             <TouchableOpacity
