@@ -17,7 +17,7 @@ import {useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {required} from 'shared/assets/consts/Required';
 
-import {getUserById} from '../../services/getUserById';
+import {getUserById} from '../../../services/getUserById';
 import {ProjectStyles as styles} from './Project.styles';
 
 const MemberAvatar: React.FC<{userId: string; num: number}> = ({

@@ -36,17 +36,17 @@ export const MainTabsNavigator = () => {
       <MainTabsStack.Screen
         name={Screens.PROFILE_TAB}
         component={ProfileStackNavigator}
-        options={{headerShown: false}}
+        options={{title: 'Профиль', headerShown: false}}
       />
       <MainTabsStack.Screen
         name={Screens.HOME_TAB}
         component={HomeStackNavigator}
-        options={{headerShown: false}}
+        options={{title: 'Главная', headerShown: false}}
       />
       <MainTabsStack.Screen
         name={Screens.CHATLIST}
         component={ChatList}
-        options={{headerShown: false}}
+        options={{title: 'Чаты',headerShown: false}}
       />
     </MainTabsStack.Navigator>
   );
