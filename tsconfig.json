@@ -1,11 +1,17 @@
 {
+  "extends": "@react-native/typescript-config/tsconfig.json",
   "compilerOptions": {
-    "paths": {
-      "@firebase/auth": ["../node_modules/@firebase/auth/dist/index.rn.d.ts"]
-    },
-    "strict": true,
     "baseUrl": "./src",
+    "paths": {
+      "shared/*": ["shared/*"],
+      "features/*": ["features/*"],
+      "entities/*": ["entities/*"],
+      "pages/*": ["pages/*"],
+      "app/*": ["app/*"],
+      "navigation/*": ["app/navigation/*"],
+      "widgets/*": ["widgets/*"],
+      "redux/*": ["redux/*"],
+      "@firebase/auth": ["../node_modules/@firebase/auth/dist/index.rn.d.ts"]
+    }
   },
-  "extends": "expo/tsconfig.base",
-  
 }

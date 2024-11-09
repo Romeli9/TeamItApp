@@ -1,32 +1,32 @@
+import React, {useCallback, useEffect, useState} from 'react';
 import {
-  Button,
-  ScrollView,
-  StyleSheet,
+  Alert,
+  FlatList,
+  Image,
   Text,
   TouchableOpacity,
   View,
-  Image,
-  Alert,
-  FlatList,
 } from 'react-native';
-import React, {useEffect, useState, useCallback} from 'react';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+
+import EditProfile from 'components/EditProfile';
+import ProfileInfo from 'components/ProfileInfo';
+import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';
 import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
-import {useSelector, useDispatch} from 'react-redux';
-import * as ImagePicker from 'expo-image-picker';
+import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {useDispatch, useSelector} from 'react-redux';
+import {setProfileData, setUserData} from 'redux/slices/userSlice';
+import {RootState} from 'redux/store';
+
 import {
   FIREBASE_AUTH,
   FIREBASE_DB,
   FIREBASE_STORAGE,
-} from '../../FireBaseConfig';
-import {setUserData, setProfileData} from 'redux/slices/userSlice';
-import EditProfile from 'components/EditProfile';
-import {RootState} from 'redux/store';
-import ProfileInfo from 'components/ProfileInfo';
-import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
+} from '../../app/FireBaseConfig';
+import {ProfileStyles as styles} from './Profile.styles';
 
-const Profile: React.FC<{navigation: any}> = ({navigation}) => {
+export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string>('');
@@ -234,13 +234,13 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
           <View style={styles.container}>
             <View style={styles.image_teamIT}>
               <Image
-                source={require('../assets/teamIt/Case2.png')}
+                source={require('shared/assets/teamIt/Case2.png')}
                 style={{width: 150, height: 150}}
               />
             </View>
             <View style={styles.image_teamIT}>
               <Image
-                source={require('../assets/teamIt/Case1.png')}
+                source={require('shared/assets/teamIt/Case1.png')}
                 style={{width: 150, height: 150}}
               />
             </View>
@@ -286,7 +286,7 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
             )}
             <TouchableOpacity style={styles.exitButton} onPress={handleSignOut}>
               <Image
-                source={require('../assets/profile/exit.png')}
+                source={require('shared/assets/profile/exit.png')}
                 style={{width: 25, height: 23}}
               />
             </TouchableOpacity>
@@ -294,7 +294,7 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
               style={styles.closeButton}
               onPress={() => setEditProfileVisible(true)}>
               <Image
-                source={require('../assets/profile/edit.png')}
+                source={require('shared/assets/profile/edit.png')}
                 style={{width: 25, height: 25}}
               />
             </TouchableOpacity>
@@ -305,117 +305,3 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
     </SafeAreaProvider>
   );
 };
-
-export default Profile;
-
-const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-  },
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 200,
-    paddingBottom: 20,
-  },
-  image_teamIT: {
-    position: 'absolute',
-    top: 60,
-    right: 50,
-    width: 0,
-    height: 0,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  add_image__button: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#D9D9D9',
-    top: 90,
-    width: 125,
-    height: 125,
-    borderRadius: 100,
-    marginTop: 11,
-    marginBottom: 13,
-  },
-  add_image__text: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 48,
-    color: '#FFFFFF',
-  },
-  selectedImage: {
-    width: 125,
-    height: 125,
-    borderRadius: 100,
-  },
-  container1: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 40,
-    right: 80,
-    width: 20,
-    height: 325,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  exitButton: {
-    position: 'absolute',
-    top: 42,
-    right: 50,
-    width: 20,
-    height: 325,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  project__about__container: {
-    width: 274,
-    marginTop: 5,
-  },
-  project__about__text: {
-    fontSize: 18,
-    color: '#000000',
-    fontFamily: 'Inter-Medium',
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  profileDataContainer: {
-    width: '100%',
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  text: {
-    position: 'absolute',
-    top: 245,
-    marginHorizontal: -500,
-    fontSize: 22,
-    color: '#333',
-    fontFamily: 'Inter-Regular',
-  },
-  background_image: {
-    position: 'absolute',
-    justifyContent: 'center',
-    backgroundColor: '#BE9DE8',
-    top: -50,
-    width: 500,
-    height: 225,
-    marginTop: 11,
-    marginBottom: 13,
-  },
-  selectedBackgroundImage: {
-    width: 500,
-    height: 225,
-  },
-});

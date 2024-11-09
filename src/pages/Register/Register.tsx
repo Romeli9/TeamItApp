@@ -1,19 +1,21 @@
 import React, {useState} from 'react';
 import {
-  View,
-  StyleSheet,
-  TextInput,
-  Button,
-  KeyboardAvoidingView,
   ActivityIndicator,
   Alert,
+  Button,
   Image,
+  KeyboardAvoidingView,
+  TextInput,
+  View,
 } from 'react-native';
-import {createUserWithEmailAndPassword} from 'firebase/auth';
-import {FIREBASE_AUTH, FIREBASE_DB} from '../../FireBaseConfig';
-import {collection, addDoc, doc, setDoc} from 'firebase/firestore';
 
-const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
+import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
+import {createUserWithEmailAndPassword} from 'firebase/auth';
+import {collection, doc, setDoc} from 'firebase/firestore';
+
+import {RegisterStyles as styles} from './Register.styles';
+
+export const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -42,10 +44,8 @@ const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
 
       console.log('User registered:', user.uid);
       navigation.navigate('Homepage');
-    } catch (error: any) {
+    } catch (error) {
       console.log(error);
-      Alert.alert('Sign Up failed: ' + error.message);
-      Alert.alert('Sign Up failed: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -53,22 +53,22 @@ const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
   return (
     <View style={styles.container}>
       <View style={styles.image_teamIT}>
-      <Image
-            source={require('../assets/teamIt/Case2.png')}
-            style={{width: 150, height: 150}}
-          />
+        <Image
+          source={require('shared/assets/teamIt/Case2.png')}
+          style={{width: 150, height: 150}}
+        />
       </View>
       <View style={styles.image_teamIT}>
-      <Image
-            source={require('../assets/teamIt/Case1.png')}
-            style={{width: 150, height: 150}}
-          />
+        <Image
+          source={require('shared/assets/teamIt/Case1.png')}
+          style={{width: 150, height: 150}}
+        />
       </View>
       <View style={styles.image_team_IT}>
-      <Image
-            source={require('../assets/teamIt/imageTeamIt.png')}
-            style={{width: 75, height: 75}}
-          />
+        <Image
+          source={require('shared/assets/teamIt/imageTeamIt.png')}
+          style={{width: 75, height: 75}}
+        />
       </View>
       <KeyboardAvoidingView behavior="padding">
         <TextInput
@@ -110,68 +110,17 @@ const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
         />
       </KeyboardAvoidingView>
       <View style={styles.image_teamIT_down}>
-      <Image
-            source={require('../assets/teamIt/Case3.png')}
-            style={{width: 450, height: 300}}
-          />
+        <Image
+          source={require('shared/assets/teamIt/Case3.png')}
+          style={{width: 450, height: 300}}
+        />
       </View>
       <View style={styles.image_teamIT_down}>
-      <Image
-            source={require('../assets/teamIt/Case4.png')}
-            style={{width: 450, height: 300}}
-          />
+        <Image
+          source={require('shared/assets/teamIt/Case4.png')}
+          style={{width: 450, height: 300}}
+        />
       </View>
     </View>
   );
 };
-
-export default RegisterPage;
-
-const styles = StyleSheet.create({
-  container: {
-    marginHorizontal: 20,
-    flex: 1,
-    justifyContent: 'center',
-  },
-  image_teamIT:{
-    position: 'absolute',
-    top: 60,
-    right: 0,
-    width: 0,
-    height: 0,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  image_team_IT:{
-    position: 'absolute',
-    top: 70,
-    right: 10,
-    width: 0,
-    height: 0,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  input: {
-    marginVertical: 4,
-    height: 50,
-    borderWidth: 1,
-    padding: 10,
-    borderColor: '#ccc',
-    borderRadius: 10,
-  },
-  image_teamIT_down:{
-    position: 'absolute',
-    top: 700,
-    right: 200,
-    width: 0,
-    height: 100,
-    borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-});

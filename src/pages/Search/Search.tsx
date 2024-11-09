@@ -1,32 +1,28 @@
-import Checkbox from 'expo-checkbox';
-import React, {useEffect, useRef, useState} from 'react';
-import {View, Text, Button, StyleSheet, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useDispatch, useSelector} from 'react-redux';
+import React, {useEffect, useRef, useState} from 'react';
+import {Button, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+
+import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
+import Checkbox from 'expo-checkbox';
+import {collection, getDocs, query, where} from 'firebase/firestore';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import {RootState} from 'redux/store';
-import {categories} from 'assets/consts/Categories';
-import {FIREBASE_AUTH, FIREBASE_DB} from '../../FireBaseConfig';
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from 'firebase/firestore';
-import {ProjectType, setOtherProjects} from 'redux/slices/projectsSlice';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   setCategory,
   setRequired,
   setStateProjects,
 } from 'redux/slices/filterSlice';
-import {required} from 'assets/consts/Required';
+import {setOtherProjects} from 'redux/slices/projectsSlice';
+import {RootState} from 'redux/store';
+import {categories} from 'shared/assets/consts/Categories';
+import {required} from 'shared/assets/consts/Required';
 
-const Search: React.FC = () => {
+import {SearchStyles as styles} from './Search.styles';
+
+export const Search: React.FC = () => {
   const navigation = useNavigation();
 
   const {categoryes, requireds, projects} = useSelector(
@@ -153,49 +149,3 @@ const Search: React.FC = () => {
     </SafeAreaProvider>
   );
 };
-
-export default Search;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    padding: 10,
-  },
-  boxesContainer: {
-    marginTop: 10,
-    display: 'flex',
-    flex: 1,
-  },
-  containerboxed1: {
-    position: 'absolute',
-    left: 0,
-    flexDirection: 'column',
-    flex: 1,
-  },
-  containerboxed2: {
-    position: 'absolute',
-    right: 0,
-    flexDirection: 'column',
-    flex: 1,
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  checkbox: {
-    marginRight: 8,
-  },
-  textStyle1: {
-    fontSize: 20,
-    fontFamily: 'Inter-Bold',
-    color: '#808080',
-    marginBottom: 15,
-  },
-  textStyle2: {
-    fontSize: 18,
-    fontFamily: 'Inter-SemiBold',
-    color: '#808080',
-  },
-});

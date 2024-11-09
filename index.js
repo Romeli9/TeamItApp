@@ -1,8 +1,7 @@
 /**
  * @format
  */
-
+import {App} from 'app/App';
 import {registerRootComponent} from 'expo';
-import App from './App';
 
 registerRootComponent(App);

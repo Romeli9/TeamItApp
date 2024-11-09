@@ -1,17 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Image,
+  ImageBackground,
+  ScrollView,
   Text,
   TouchableOpacity,
-  Image,
-  ScrollView,
-  ActivityIndicator,
-  ImageBackground,
+  View,
 } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+
+import {LinearGradient} from 'expo-linear-gradient';
 import {
   collection,
   doc,
@@ -20,19 +18,21 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-
-import {LinearGradient} from 'expo-linear-gradient';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import Carousel from 'react-native-snap-carousel';
-import {useSelector, useDispatch} from 'react-redux';
-
-import {styles} from './styles';
-import {FIREBASE_AUTH, FIREBASE_DB} from '../../../FireBaseConfig';
-import ProjectModal from '../../components/ModalWindowProject';
-import {} from 'redux/slices/userSlice';
-import {RootState} from 'redux/store';
+import {useDispatch, useSelector} from 'react-redux';
 import {setOtherProjects, setYourProjects} from 'redux/slices/projectsSlice';
+import 'redux/slices/userSlice';
+import {RootState} from 'redux/store';
 
-const Home: React.FC<{navigation: any}> = ({navigation}) => {
+import {FIREBASE_AUTH, FIREBASE_DB} from '../../app/FireBaseConfig';
+import ProjectModal from '../../components/ModalWindowProject';
+import {HomePagestyles as styles} from './Home.styles';
+
+export const Home: React.FC<{navigation: any}> = ({navigation}) => {
   const [isModalVisible, setModalVisible] = useState(false);
 
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -160,7 +160,7 @@ const Home: React.FC<{navigation: any}> = ({navigation}) => {
               <Text style={styles.TextContainer__text1}>Добро пожаловать!</Text>
               <Image
                 style={styles.TextContainer__text1_img}
-                source={require('../../assets/icons/handshake.png')}></Image>
+                source={require('shared/assets/icons/handshake.png')}></Image>
             </View>
             <Text style={styles.TextContainer__text2}>{userName}</Text>
           </View>
@@ -206,12 +206,12 @@ const Home: React.FC<{navigation: any}> = ({navigation}) => {
           <TouchableOpacity
             style={styles.searchButton}
             onPress={() => navigation.navigate('Search')}>
-            <Image source={require('../../assets/icons/search.png')} />
+            <Image source={require('shared/assets/icons/search.png')} />
           </TouchableOpacity>
 
           <View style={styles.carousel}>
             <Image
-              source={require('../../assets/icons/Group1.png')}
+              source={require('shared/assets/icons/Group1.png')}
               style={styles.effect}></Image>
 
             {
@@ -235,5 +235,3 @@ const Home: React.FC<{navigation: any}> = ({navigation}) => {
     </SafeAreaProvider>
   );
 };
-
-export default Home;

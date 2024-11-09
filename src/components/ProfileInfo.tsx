@@ -21,7 +21,7 @@ import {
   doc,
   getDoc,
 } from 'firebase/firestore';
-import {FIREBASE_AUTH, FIREBASE_DB} from '../../FireBaseConfig';
+import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
 import {} from 'redux/slices/userSlice';
 import projectsSlice, {
   projectsState,
@@ -51,7 +51,7 @@ function ProfileInfo() {
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const animatedHeight = useState(new Animated.Value(0))[0];
   const [buttonImage, setButtonImage] = useState(
-    require('../assets/profile/down.png'),
+    require('shared/assets/profile/down.png'),
   );
   const [subscribed, setSubscribed] = useState(false);
 
@@ -68,8 +68,8 @@ function ProfileInfo() {
     // Изменяем изображение кнопки
     setButtonImage(
       showMoreInfo
-        ? require('../assets/profile/down.png')
-        : require('../assets/profile/up.png'),
+        ? require('shared/assets/profile/down.png')
+        : require('shared/assets/profile/up.png'),
     );
   };
 

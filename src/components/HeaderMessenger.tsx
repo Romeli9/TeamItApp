@@ -1,7 +1,8 @@
-import {BellIcon, SearchIcon} from 'assets/icons/icons';
-import {LinearGradient} from 'expo-linear-gradient';
 import React from 'react';
-import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+
+import {LinearGradient} from 'expo-linear-gradient';
+import {BellIcon, SearchIcon} from 'shared/assets/icons/icons';
 
 export const HeaderMessenger = () => {
   return (
