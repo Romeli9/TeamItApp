@@ -29,6 +29,7 @@ import projectsSlice, {
   setYourProjects,
 } from 'redux/slices/projectsSlice';
 import {useNavigation, NavigationProp} from '@react-navigation/native';
+import { Screens } from 'app/navigation/navigationEnums';
 
 type RootStackParamList = {
   Project: {projectId: string};
@@ -55,7 +56,6 @@ function ProfileInfo() {
   );
   const [subscribed, setSubscribed] = useState(false);
 
-  const test = [...projects, ...projects, ...projects, ...projects];
 
   const toggleMoreInfo = () => {
     setShowMoreInfo(prevState => !prevState);
@@ -127,7 +127,7 @@ function ProfileInfo() {
   );
 
   const OpenProject = (projectID: string) => {
-    navigation.navigate('Project', {projectId: projectID});
+    navigation.navigate(Screens.PROJECT, {projectId: projectID});
   };
 
   return (
@@ -152,7 +152,7 @@ function ProfileInfo() {
         <Text style={styles.text_project}>Проекты:</Text>
         <ScrollView contentContainerStyle={styles.projectList}>
           <FlatList
-            data={test}
+            data={projects}
             renderItem={renderProjectItem}
             keyExtractor={(item: {id: any}) => item.id}
             numColumns={2}

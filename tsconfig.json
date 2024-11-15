@@ -11,7 +11,10 @@
       "navigation/*": ["app/navigation/*"],
       "widgets/*": ["widgets/*"],
       "redux/*": ["redux/*"],
+      "services/*": ["services/*"],
+
       "@firebase/auth": ["../node_modules/@firebase/auth/dist/index.rn.d.ts"]
+      
     }
   },
 }

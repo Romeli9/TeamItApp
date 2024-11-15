@@ -19,6 +19,7 @@ const config = {
       widgets: path.resolve(__dirname, 'src/widgets'),
       features: path.resolve(__dirname, 'src/features'),
       redux: path.resolve(__dirname, 'src/redux'),
+      services: path.resolve(__dirname, 'src/services'),
     },
   },
   watchFolders: [path.resolve(__dirname, 'src')],

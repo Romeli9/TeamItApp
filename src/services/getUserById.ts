@@ -1,5 +1,5 @@
 import {doc, getDoc} from 'firebase/firestore';
-import {FIREBASE_DB} from '../app/FireBaseConfig';
+import {FIREBASE_DB} from 'app/FireBaseConfig';
 
 // Функция для получения данных пользователя по его ID
 export const getUserById = async (userId: string) => {

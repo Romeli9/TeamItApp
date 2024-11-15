@@ -6,7 +6,6 @@ import {Colors} from 'shared/libs/helpers';
 export const CartIcon = (props: any) => (
   <Icon {...props} name="shopping-cart-outline" />
 );
-export const TruckIcon = (props: any) => <Icon {...props} name="car-outline" />;
 export const HomeIcon = (props: any) => <Icon {...props} name="home-outline" />;
 export const CatalogIcon = (props: any) => (
   <Icon {...props} name="book-outline" />
