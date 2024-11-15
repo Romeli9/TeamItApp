@@ -16,6 +16,8 @@ import {
 import {useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {required} from 'shared/assets/consts/Required';
+import {ArrowLeftIcon, CheckIcon, CloseIcon, PlusIcon} from 'shared/icons';
+import {Colors} from 'shared/libs/helpers';
 
 import {getUserById} from '../../../services/getUserById';
 import {ProjectStyles as styles} from './Project.styles';
@@ -70,29 +72,6 @@ export const Project: React.FC<any> = ({route, navigation}) => {
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
 
-  console.log(projectData);
-
-  // useEffect(() => {
-  //   const fetchProjectData = async () => {
-  //     try {
-  //       const projectRef = doc(FIREBASE_DB, 'projects', projectId);
-  //       const docSnap = await getDoc(projectRef);
-  //       if (docSnap.exists()) {
-  //         const data = docSnap.data();
-  //         setProjectData(data);
-  //       } else {
-  //         console.log('Документ не найден!');
-  //       }
-  //     } catch (error) {
-  //       console.error('Ошибка при загрузке данных о проекте:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProjectData();
-  // }, [projectId]);
-
   const openApplicationModal = (index: number) => {
     setOpenSendIndex(index);
 
@@ -136,18 +115,7 @@ export const Project: React.FC<any> = ({route, navigation}) => {
         <ScrollView contentContainerStyle={styles.container}>
           <ImageBackground
             source={{uri: projectData.photo}}
-            style={[styles.projectImage]}>
-            {/* <Image source={require('shared/assets/icons/effect2.png')} style={styles.effect__top}></Image> */}
-            {/* <LinearGradient
-              colors={[
-                'rgba(0,0,0, 0)',
-                'rgba(228,193,255, 0.3)',
-                'rgba(228,193,255, 0.75)',
-              ]}
-              style={styles.gradient}
-            >
-            </LinearGradient> */}
-          </ImageBackground>
+            style={[styles.projectImage]}></ImageBackground>
 
           <View style={styles.about_project_container}>
             <Text style={styles.about_project_name}>{projectData.name}</Text>
@@ -156,7 +124,24 @@ export const Project: React.FC<any> = ({route, navigation}) => {
             <Text style={styles.about_project_desc}>
               {projectData.description}
             </Text>
-            {/* <Text style={styles.about_project_desc}>Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.Разработка сервиса, в котором любой человек сможет заполнить анкету о своих интересах, роде деятельности и навыках, а алгоритм подберет для него потенциальных собеседников со схожими интересами.</Text> */}
+            {/* <Text style={styles.about_project_desc}>
+              Разработка сервиса, в котором любой человек сможет заполнить
+              анкету о своих интересах, роде деятельности и навыках, а алгоритм
+              подберет для него потенциальных собеседников со схожими
+              интересами.Разработка сервиса, в котором любой человек сможет
+              заполнить анкету о своих интересах, роде деятельности и навыках, а
+              алгоритм подберет для него потенциальных собеседников со схожими
+              интересами.Разработка сервиса, в котором любой человек сможет
+              заполнить анкету о своих интересах, роде деятельности и навыках, а
+              алгоритм подберет для него потенциальных собеседников со схожими
+              интересами.Разработка сервиса, в котором любой человек сможет
+              заполнить анкету о своих интересах, роде деятельности и навыках, а
+              алгоритм подберет для него потенциальных собеседников со схожими
+              интересами.Разработка сервиса, в котором любой человек сможет
+              заполнить анкету о своих интересах, роде деятельности и навыках, а
+              алгоритм подберет для него потенциальных собеседников со схожими
+              интересами.
+            </Text> */}
           </View>
 
           <View style={styles.required_container}>
@@ -170,10 +155,7 @@ export const Project: React.FC<any> = ({route, navigation}) => {
                   <TouchableOpacity
                     onPress={toggleRequired}
                     style={styles.required_button_wrapper}>
-                    <Image
-                      source={require('shared/assets/icons/plus3.png')}
-                      style={styles.required_image}
-                    />
+                    <Text style={styles.required_image}>+</Text>
                   </TouchableOpacity>
                   <Text style={styles.required_text}>Предложить</Text>
                 </View>
@@ -190,10 +172,7 @@ export const Project: React.FC<any> = ({route, navigation}) => {
                           openApplicationModal(ix);
                         }}
                         style={styles.required_button_wrapper}>
-                        <Image
-                          source={require('shared/assets/icons/plus3.png')}
-                          style={styles.required_image}
-                        />
+                        <Text style={styles.required_image}>+</Text>
                       </TouchableOpacity>
                     ) : (
                       <MemberAvatar userId={projectData.members[ix]} num={1} />
@@ -218,15 +197,17 @@ export const Project: React.FC<any> = ({route, navigation}) => {
                                 Подать заявку?
                               </Text>
                               <TouchableOpacity onPress={showConfirmation}>
-                                <Image
-                                  source={require('shared/assets/icons/check.png')}
-                                  style={styles.application_ok_button}
+                                <CheckIcon
+                                  width={20}
+                                  height={23}
+                                  fill={Colors.White100}
                                 />
                               </TouchableOpacity>
                               <TouchableOpacity onPress={closeApplicationModal}>
-                                <Image
-                                  source={require('shared/assets/icons/p.png')}
-                                  style={styles.application_not_ok_button}
+                                <CloseIcon
+                                  width={20}
+                                  height={23}
+                                  fill={Colors.White100}
                                 />
                               </TouchableOpacity>
                             </View>
@@ -249,24 +230,26 @@ export const Project: React.FC<any> = ({route, navigation}) => {
                           Вы хотите подать заявку на "{selectedItem}"?
                         </Text>
                         <TouchableOpacity onPress={toggleRequired}>
-                          <Image
-                            source={require('shared/assets/icons/check.png')}
-                            style={styles.application_ok_button}
+                          <CheckIcon
+                            width={20}
+                            height={23}
+                            fill={Colors.White100}
                           />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={toggleRequired}>
-                          <Image
-                            source={require('shared/assets/icons/p.png')}
-                            style={styles.application_not_ok_button}
+                          <CloseIcon
+                            width={20}
+                            height={23}
+                            fill={Colors.White100}
                           />
                         </TouchableOpacity>
                       </View>
                     ) : (
                       <ScrollView style={styles.dropdownContainer}>
                         <View style={styles.dropdownWrapper}>
-                          {required.map((item, ix) => (
+                          {required.map(item => (
                             <TouchableOpacity
-                              key={ix}
+                              key={item.key}
                               style={[
                                 styles.dropdownItem,
                                 styles.dropdownItemSelected,
@@ -274,9 +257,7 @@ export const Project: React.FC<any> = ({route, navigation}) => {
                               onPress={() => HandleApplicationSend(item.value)}>
                               <View style={styles.dropdownItemContainer}>
                                 <View style={styles.dropdownItem_icon}>
-                                  <Image
-                                    source={require('shared/assets/icons/plus2.png')}
-                                  />
+                                  <PlusIcon />
                                 </View>
                                 <Text style={styles.dropdownItemText}>
                                   {item.value}
@@ -313,11 +294,10 @@ export const Project: React.FC<any> = ({route, navigation}) => {
             </View>
           </View>
 
-          <View style={{height: 20, marginTop: 20}} />
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.goback}>
-            <Image source={require('shared/assets/icons/arrow.png')} />
+            <ArrowLeftIcon />
           </TouchableOpacity>
         </ScrollView>
       </View>

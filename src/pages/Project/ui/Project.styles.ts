@@ -125,7 +125,8 @@ export const ProjectStyles = StyleSheet.create({
     height: 'auto',
     backgroundColor: '#FFFFFF',
     borderRadius: 30,
-    paddingBottom: 15,
+    paddingTop: 14,
+    paddingBottom: 17,
   },
 
   categories_container_2: {
@@ -145,7 +146,6 @@ export const ProjectStyles = StyleSheet.create({
     textAlign: 'left',
 
     marginLeft: 19,
-    marginTop: 5,
   },
 
   categoires_wrapper: {
@@ -215,7 +215,7 @@ export const ProjectStyles = StyleSheet.create({
 
   modalContent: {
     flexDirection: 'row',
-
+    alignItems: 'center',
     // width: 158,
     paddingTop: 7,
     paddingBottom: 5,
@@ -258,7 +258,7 @@ export const ProjectStyles = StyleSheet.create({
 
   application_text: {
     color: 'rgba(255,255,255,0.76)',
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: 'Inter-SemiBold',
   },
 

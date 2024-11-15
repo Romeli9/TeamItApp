@@ -4,8 +4,9 @@ import {Colors} from 'shared/libs/helpers/colors';
 
 export const ChatItemStyles = StyleSheet.create({
   container: {
-    width: 326,
+    width: '100%',
     height: 77,
+    paddingHorizontal: 15,
     borderBottomWidth: 2,
     borderBottomColor: '#E4E4E4',
     flexDirection: 'row',

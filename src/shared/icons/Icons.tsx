@@ -64,7 +64,7 @@ export const AddImgIcon = (props: any) => (
 export const SendIcon = (props: any) => (
   <Icon {...props} name="arrow-upward-outline" />
 );
-export const PlusIcon = (props: any) => (
+export const PlusSquareIcon = (props: any) => (
   <Icon {...props} name="plus-square-outline" />
 );
 export const CubeIcon = (props: any) => <Icon {...props} name="cube-outline" />;
@@ -93,3 +93,5 @@ export const ArrowLeftIcon = (props: any) => (
 export const ArrowRightIcon = (props: any) => (
   <Icon {...props} name="arrow-forward-outline" />
 );
+
+export const PlusIcon = (props: any) => <Icon {...props} name="plus-outline" />;

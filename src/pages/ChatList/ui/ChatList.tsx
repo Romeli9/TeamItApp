@@ -1,23 +1,34 @@
-import {HeaderMessenger} from 'components';
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {FlatList, StyleSheet, Text, View} from 'react-native';
+
+import {HeaderMessenger} from 'components';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import {ChatItem} from 'shared/ui';
 
 import {ChatListStyles as styles} from './ChatList.styles';
-import { ChatItem } from 'shared/ui';
+
+const data = [1, 2, 3, 4, 5];
 
 export const ChatList = ({navigation}: any) => {
   const insets = useSafeAreaInsets();
 
+  const renderItem = ({item}: {item: any}) => {
+    return <ChatItem />;
+  };
+
   return (
     <SafeAreaProvider>
       <HeaderMessenger />
-      <View style={[styles.container, {paddingTop: insets.top}]}>
-        <ChatItem />
-      </View>
+      <FlatList
+        style={styles.container}
+        data={data}
+        initialNumToRender={20}
+        renderItem={renderItem}
+        keyExtractor={item => item.toString()}
+      />
     </SafeAreaProvider>
   );
 };
