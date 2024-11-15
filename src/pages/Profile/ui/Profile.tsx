@@ -23,16 +23,13 @@ import {
   FIREBASE_AUTH,
   FIREBASE_DB,
   FIREBASE_STORAGE,
-} from '../../app/FireBaseConfig';
+} from 'app/FireBaseConfig';
 import {ProfileStyles as styles} from './Profile.styles';
 
 export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
-  const [selectedImage, setSelectedImage] = useState<string>('');
   const dispatch = useDispatch();
-  const [pickerResponse, setPickerResponse] =
-    useState<ImagePicker.ImagePickerResult | null>(null);
 
   const {userName, aboutMe, avatar, background} = useSelector(
     (state: RootState) => state.user,
@@ -85,8 +82,6 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
     });
 
     if (!result.canceled) {
-      setPickerResponse(result);
-      setSelectedImage(result.assets[0].uri);
 
       const imageUrl = await uploadImageToFirebase(result.assets[0].uri);
       if (imageUrl) {
@@ -129,8 +124,6 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
     });
 
     if (!result.canceled) {
-      setPickerResponse(result);
-      setSelectedImage(result.assets[0].uri);
 
       const imageUrl = await uploadImageToFirebase1(result.assets[0].uri);
       if (imageUrl) {
@@ -208,7 +201,7 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
         await setDoc(userDocRef, {background: url}, {merge: true});
       }
 
-      return url; // Возвращаем URL для дальнейшего использования
+      return url; 
     } catch (error) {
       console.error('Error uploading image: ', error);
       return null;
@@ -229,7 +222,7 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
         scrollEnabled={true}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollContainer}
-        data={[{}]} // Используйте пустой массив для отображения заголовка
+        data={[{}]}
         renderItem={() => (
           <View style={styles.container}>
             <View style={styles.image_teamIT}>
@@ -300,7 +293,7 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
             </TouchableOpacity>
           </View>
         )}
-        keyExtractor={(item, index) => index.toString()} // Используйте индекс как ключ
+        keyExtractor={(item, index) => index.toString()}
       />
     </SafeAreaProvider>
   );

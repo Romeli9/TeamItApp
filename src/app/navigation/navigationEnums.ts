@@ -12,4 +12,6 @@ export enum Screens {
   AUTH = 'Auth',
   CHATLIST = 'ChatList',
   MESSENGER = 'Messenger',
+  PROJECT = 'Project',
+  SEARCH = 'Search',
 }
