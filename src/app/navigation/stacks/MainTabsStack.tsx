@@ -26,7 +26,7 @@ export const MainTabsNavigator = () => {
           if (route.name === Screens.CHATLIST)
             return <MessageIcon {...iconProps} />;
         },
-        tabBarActiveTintColor: Colors.Green400,
+        tabBarActiveTintColor: Colors.Purple100,
         tabBarInactiveTintColor: Colors.Gray500,
         tabBarStyle: (route => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? '';
@@ -46,7 +46,7 @@ export const MainTabsNavigator = () => {
       <MainTabsStack.Screen
         name={Screens.CHATLIST}
         component={ChatList}
-        options={{title: 'Чаты',headerShown: false}}
+        options={{title: 'Чаты', headerShown: false}}
       />
     </MainTabsStack.Navigator>
   );

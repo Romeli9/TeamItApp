@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 
+import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import EditProfile from 'components/EditProfile';
 import ProfileInfo from 'components/ProfileInfo';
 import * as ImagePicker from 'expo-image-picker';
@@ -19,11 +20,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setProfileData, setUserData} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
 
-import {
-  FIREBASE_AUTH,
-  FIREBASE_DB,
-  FIREBASE_STORAGE,
-} from 'app/FireBaseConfig';
 import {ProfileStyles as styles} from './Profile.styles';
 
 export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
@@ -52,7 +48,7 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
               userId: user.uid,
               username: userData.username,
               email: userData.email,
-              avatar: userData.avatar, // Загружаем URL аватарки
+              avatar: userData.avatar,
               background: userData.background,
             }),
           );
@@ -82,7 +78,6 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
     });
 
     if (!result.canceled) {
-
       const imageUrl = await uploadImageToFirebase(result.assets[0].uri);
       if (imageUrl) {
         const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
@@ -124,7 +119,6 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
     });
 
     if (!result.canceled) {
-
       const imageUrl = await uploadImageToFirebase1(result.assets[0].uri);
       if (imageUrl) {
         const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
@@ -201,7 +195,7 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
         await setDoc(userDocRef, {background: url}, {merge: true});
       }
 
-      return url; 
+      return url;
     } catch (error) {
       console.error('Error uploading image: ', error);
       return null;
