@@ -30,9 +30,16 @@ export const RootNavigator = () => {
       <RootStack.Screen
         name={Screens.MESSENGER}
         component={Messenger}
-        options={() => ({
-          header: () => <Header showBackButton onBackPress={handleGoBack} />,
+        options={({route}) => ({
+          header: () => (
+            <Header
+              showBackButton
+              onBackPress={handleGoBack}
+              chatName={route.params.chatName}
+            />
+          ),
         })}
+        // options={{headerShown: true}}
       />
       <RootStack.Screen
         name={Screens.PROJECT}

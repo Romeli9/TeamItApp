@@ -6,6 +6,7 @@ export type ProjectRouteParams = {
 
 export type MessengerRouteParams = {
   chatId: string;
+  chatName: string;
 };
 
 export type RootStackParamsList = {

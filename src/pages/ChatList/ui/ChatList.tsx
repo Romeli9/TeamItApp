@@ -10,22 +10,27 @@ import {ChatItem} from 'shared/ui';
 
 import {ChatListStyles as styles} from './ChatList.styles';
 
-const data = [1, 2, 3, 4, 5] as unknown as Chat[];
+const data = [
+  {id: '1', name: 'Егорик'},
+  {id: '2', name: 'Димасик'},
+  {id: '3', name: 'Мияги'},
+  {id: '4', name: 'Сын Мияги'},
+  {id: '5', name: 'Абалдуй'},
+] as unknown as Chat[];
 
 export const ChatList = () => {
   const navigation = useAppNavigation();
 
-  const handleNavigate = (chatId: string) => {
-    navigation.navigate(Screens.MESSENGER, {chatId});
+  const handleNavigate = (chatId: string, chatName: string) => {
+    navigation.navigate(Screens.MESSENGER, {chatId, chatName});
   };
 
   const renderItem = ({item}: {item: Chat}) => {
     const handlePress = () => {
-      console.log(item);
-      handleNavigate(item.id);
+      handleNavigate(item.id, item.name);
     };
 
-    return <ChatItem onPress={handlePress} />;
+    return <ChatItem chatName={item.name} onPress={handlePress} />;
   };
 
   return (
@@ -36,7 +41,7 @@ export const ChatList = () => {
         data={data}
         initialNumToRender={20}
         renderItem={renderItem}
-        keyExtractor={item => item.toString()}
+        keyExtractor={item => item.id.toString()}
       />
     </View>
   );

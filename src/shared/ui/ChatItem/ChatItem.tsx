@@ -7,10 +7,11 @@ import {RootState} from 'redux/store';
 import {ChatItemStyles as styles} from './ChatItem.styles';
 
 type ChatItemProps = {
+  chatName: string;
   onPress: () => void;
 };
 
-export const ChatItem = ({onPress}: ChatItemProps) => {
+export const ChatItem = ({chatName, onPress}: ChatItemProps) => {
   const {userName, avatar} = useSelector((state: RootState) => state.user);
 
   return (
@@ -21,7 +22,7 @@ export const ChatItem = ({onPress}: ChatItemProps) => {
 
       <View style={styles.infoBlock}>
         <View style={styles.header}>
-          <Text style={styles.chatName}>{userName}</Text>
+          <Text style={styles.chatName}>{chatName}</Text>
           <Text style={styles.timestamp}>19:30</Text>
         </View>
         <View style={styles.messageBlock}>
