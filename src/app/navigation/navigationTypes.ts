@@ -12,6 +12,8 @@ export type MessengerRouteParams = {
 export type RootStackParamsList = {
   Main: NavigatorScreenParams<MainTabsStackParamsList>;
   Auth: undefined;
+  Register: undefined;
+  Login: undefined;
   HomeTab: undefined;
   Messenger: MessengerRouteParams;
   Project: NavigatorScreenParams<ProjectRouteParams>;

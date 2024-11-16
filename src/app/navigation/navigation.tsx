@@ -2,7 +2,7 @@ import {createNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 
-import {Messenger, Project} from 'pages';
+import {LoginPage, Messenger, Project, RegisterPage} from 'pages';
 import {useAppNavigation} from 'shared/libs/useAppNavigation.tsx';
 import {Header} from 'widgets';
 
@@ -45,6 +45,20 @@ export const RootNavigator = () => {
         name={Screens.PROJECT}
         component={Project}
         options={{headerShown: false}}
+      />
+      <RootStack.Screen
+        name={Screens.LOGIN}
+        component={LoginPage}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <RootStack.Screen
+        name={Screens.REGISTER}
+        component={RegisterPage}
+        options={{
+          headerShown: false,
+        }}
       />
     </RootStack.Navigator>
   );
