@@ -3,6 +3,7 @@ import {
   FlatList,
   GestureResponderEvent,
   KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   View,
@@ -23,9 +24,26 @@ import {MessengerStyles as styles} from './Messenger.styles';
 //TODO: Сделать чатикс
 
 const messages = [
-  {id: '1', message: 'хуй'},
-  {id: '2', message: 'хуй'},
-  {id: '3', message: 'хуй'},
+  {id: '1', message: 'хуй', isCurrentUser: true},
+  {id: '2', message: 'хуй', isCurrentUser: false},
+  {id: '3', message: 'хуй', isCurrentUser: true},
+  {id: '4', message: 'хуй', isCurrentUser: false},
+  {id: '5', message: 'хуй', isCurrentUser: true},
+  {id: '6', message: 'хуй', isCurrentUser: false},
+  {id: '7', message: 'хуй', isCurrentUser: true},
+  {id: '8', message: 'хуй', isCurrentUser: false},
+  {id: '9', message: 'хуй', isCurrentUser: true},
+  {id: '10', message: 'хуй', isCurrentUser: false},
+  {id: '11', message: 'хуй', isCurrentUser: true},
+  {id: '12', message: 'хуй', isCurrentUser: false},
+  {id: '13', message: 'хуй', isCurrentUser: true},
+  {id: '14', message: 'хуй', isCurrentUser: false},
+  {id: '15', message: 'хуй', isCurrentUser: true},
+  {id: '16', message: 'хуй', isCurrentUser: false},
+  {id: '17', message: 'хуй', isCurrentUser: true},
+  {id: '18', message: 'хуй', isCurrentUser: false},
+  {id: '19', message: 'хуй', isCurrentUser: true},
+  {id: '20', message: 'хуй', isCurrentUser: false},
 ] as unknown as IMessage[];
 
 export const Messenger = ({navigation}: any) => {
@@ -35,10 +53,8 @@ export const Messenger = ({navigation}: any) => {
 
   const [currentMessage, setCurrentMessage] = useState<string>('');
 
-  console.log('хуйхуйхуй');
-
   const renderMessage = ({item}: {item: IMessage}) => {
-    const isCurrentUser = item.authorId === userId;
+    // const isCurrentUser = item.authorId === userId;
 
     // const isSending = !!sendingMessages[item.id];
 
@@ -47,7 +63,7 @@ export const Messenger = ({navigation}: any) => {
       <>
         <Message
           message={item.message}
-          isCurrentUser={isCurrentUser}
+          isCurrentUser={item.isCurrentUser}
           // isSending={isSending}
           isRead={item.isRead}
           hasError={hasError}
@@ -58,29 +74,34 @@ export const Messenger = ({navigation}: any) => {
 
   const insets = useSafeAreaInsets();
 
+  const handleSendOrUpdate = () => {
+    setCurrentMessage('');
+  };
+
+  const handleAttachFile = () => {
+    // заглушка
+  };
+
   return (
-    <SafeAreaProvider>
-      <View
-        style={[
-          styles.container,
-          {paddingTop: insets.top, paddingBottom: insets.bottom},
-        ]}>
-        <KeyboardAvoidingView style={styles.messagesContainer}>
-          <FlatList
-            data={messages}
-            initialNumToRender={20}
-            renderItem={renderMessage}
-            keyExtractor={item => item.id.toString()}
-            contentContainerStyle={styles.contentContainer}
-          />
-          <ChatTextarea
-            message={currentMessage}
-            setMessage={setCurrentMessage}
-            // onSendMessage={handleSendOrUpdate}
-            // onAttachFile={handleAttachFile}
-          />
-        </KeyboardAvoidingView>
-      </View>
-    </SafeAreaProvider>
+    <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={[styles.messagesContainer, {paddingBottom: insets.top}]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={insets.top}>
+        <FlatList
+          data={messages}
+          initialNumToRender={20}
+          renderItem={renderMessage}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.contentContainer}
+        />
+        <ChatTextarea
+          message={currentMessage}
+          setMessage={setCurrentMessage}
+          onSendMessage={handleSendOrUpdate}
+          onAttachFile={handleAttachFile}
+        />
+      </KeyboardAvoidingView>
+    </View>
   );
 };

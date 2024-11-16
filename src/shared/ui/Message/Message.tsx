@@ -1,15 +1,5 @@
-import React, {memo, useState} from 'react';
-import {
-  GestureResponderEvent,
-  Image,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-
-import {Colors, IconStyles, TextStyles, emoji} from 'shared/libs/helpers';
+import React, {memo} from 'react';
+import {GestureResponderEvent, Pressable, Text, View} from 'react-native';
 
 import {MessageStyles as styles} from './Message.styles';
 
@@ -17,16 +7,16 @@ type MessageProps = {
   isRead?: boolean;
   message: string;
   onLongPress?: (event: GestureResponderEvent) => void;
-  // isSending: boolean;
+  isSending?: boolean;
   hasError?: boolean;
-  isCurrentUser: boolean;
+  isCurrentUser?: boolean;
 };
 
 export const Message = memo(
   ({
     isRead,
     message,
-    // isSending,
+    isSending,
     hasError,
     onLongPress,
     isCurrentUser,
@@ -108,39 +98,7 @@ export const Message = memo(
                 ]}>
                 {message}
               </Text>
-              {/* {reactions.length === 0 && isCurrentUser && (
-                <View style={styles.inlineStatusIcon}>{renderIcon()}</View>
-              )} */}
             </View>
-            {/* {reactions.length > 0 && (
-              <View style={styles.reactionsAndStatusContainer}>
-                <View style={styles.reactionsContainer}>
-                  {reactions.map((reaction, ix) => {
-                    const onPress = () => onSendReaction(reaction.reaction);
-                    return (
-                      <TouchableOpacity
-                        key={ix}
-                        onPress={onPress}
-                        style={styles.reaction}
-                        accessible={true}
-                        accessibilityRole="button"
-                        accessibilityLabel={`${t('Реакция')} ${
-                          emoji[reaction.reaction as keyof typeof emoji]
-                        }`}>
-                        <Text
-                          style={TextStyles.span1.changeColor(Colors.White100)}>
-                          {emoji[reaction.reaction as keyof typeof emoji]}{' '}
-                          {reaction.count}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-                {isCurrentUser && (
-                  <View style={styles.statusIcon}>{renderIcon()}</View>
-                )}
-              </View>
-            )} */}
           </Pressable>
         </View>
       </>

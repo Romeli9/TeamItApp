@@ -9,6 +9,9 @@ import {
   View,
 } from 'react-native';
 
+import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
+import {Screens} from 'app/navigation/navigationEnums';
+import ProjectModal from 'components/ModalWindowProject';
 import {LinearGradient} from 'expo-linear-gradient';
 import {
   collection,
@@ -27,11 +30,10 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setOtherProjects, setYourProjects} from 'redux/slices/projectsSlice';
 import 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
+import {SearchIcon} from 'shared/icons';
+import {Colors, IconStyles} from 'shared/libs/helpers';
 
-import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
-import ProjectModal from 'components/ModalWindowProject';
 import {HomePagestyles as styles} from './Home.styles';
-import { Screens } from 'app/navigation/navigationEnums';
 
 export const Home: React.FC<{navigation: any}> = ({navigation}) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -207,7 +209,11 @@ export const Home: React.FC<{navigation: any}> = ({navigation}) => {
           <TouchableOpacity
             style={styles.searchButton}
             onPress={() => navigation.navigate(Screens.SEARCH)}>
-            <Image source={require('shared/assets/icons/search.png')} />
+            <SearchIcon
+              fill={IconStyles.medium.changeColor(Colors.White100).color}
+              width={IconStyles.large.width}
+              height={IconStyles.large.height}
+            />
           </TouchableOpacity>
 
           <View style={styles.carousel}>

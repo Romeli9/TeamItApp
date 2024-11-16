@@ -14,6 +14,7 @@ export interface IMessage {
   isSending?: boolean;
   isRead: boolean;
   hasError?: boolean;
+  isCurrentUser?: boolean;
 }
 
 export type TImages = {
@@ -35,6 +36,7 @@ export interface Participant {
 
 export interface Chat {
   id: string;
+  name: string;
   // productId: number;
   // product: Product;
   // messages: string[];
