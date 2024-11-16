@@ -27,8 +27,18 @@ export const RootNavigator = () => {
           headerShown: false,
         }}
       />
-      <RootStack.Screen name={Screens.MESSENGER} component={Messenger} options={{headerShown: false}}/>
-      <RootStack.Screen name={Screens.PROJECT} component={Project} options={{headerShown: false}}/>
+      <RootStack.Screen
+        name={Screens.MESSENGER}
+        component={Messenger}
+        options={() => ({
+          header: () => <Header showBackButton onBackPress={handleGoBack} />,
+        })}
+      />
+      <RootStack.Screen
+        name={Screens.PROJECT}
+        component={Project}
+        options={{headerShown: false}}
+      />
     </RootStack.Navigator>
   );
 };
