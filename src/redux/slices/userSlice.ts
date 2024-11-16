@@ -10,6 +10,7 @@ export interface userState {
   skills: string;
   experience: string;
   aboutMe: string;
+  background: string;
 }
 
 const initialState: userState = {
@@ -21,6 +22,7 @@ const initialState: userState = {
   skills: '',
   experience: '',
   aboutMe: '',
+  background: '',
 };
 
 export const userSlice = createSlice({
@@ -30,6 +32,7 @@ export const userSlice = createSlice({
     setUserData(state, action) {
       state.userId = action.payload.userId;
       state.avatar = action.payload.avatar;
+      state.background = action.payload.background;
       state.email = action.payload.email;
       state.userName = action.payload.username;
     },
