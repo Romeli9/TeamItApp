@@ -85,9 +85,8 @@ export const Messenger = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
-        style={[styles.messagesContainer, {paddingBottom: insets.top}]}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={insets.top}>
+        style={styles.messagesContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <FlatList
           data={messages}
           initialNumToRender={20}

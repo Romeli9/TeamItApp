@@ -6,9 +6,10 @@ export const ChatTextareaStyles = StyleSheet.create({
   container: {
     width: '100%',
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     paddingHorizontal: 5,
-    paddingVertical: 15,
+    paddingTop: 15,
+    paddingBottom: 25,
     borderTopColor: Colors.Gray100,
     borderTopWidth: 1,
   },
@@ -18,6 +19,7 @@ export const ChatTextareaStyles = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 10,
     marginHorizontal: 5,
+    paddingVertical: 5,
   },
   input: {
     fontSize: 16,
