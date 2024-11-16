@@ -15,11 +15,11 @@ import {
 } from 'react-native-safe-area-context';
 import {useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
+import {getUserById} from 'services/getUserById';
 import {required} from 'shared/assets/consts/Required';
 import {ArrowLeftIcon, CheckIcon, CloseIcon, PlusIcon} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers';
 
-import {getUserById} from '../../../services/getUserById';
 import {ProjectStyles as styles} from './Project.styles';
 
 const MemberAvatar: React.FC<{userId: string; num: number}> = ({
@@ -61,7 +61,6 @@ export const Project: React.FC<any> = ({route, navigation}) => {
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
-  const [loading, setLoading] = useState(true);
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
