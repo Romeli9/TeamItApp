@@ -1,41 +1,17 @@
 import {RouteProp, useRoute} from '@react-navigation/native';
-import React, {useState} from 'react';
-import {
-  FlatList,
-  GestureResponderEvent,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import React, {useMemo, useState} from 'react';
+import {FlatList, KeyboardAvoidingView, Platform, View} from 'react-native';
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
-import {
-  MessengerRouteParams,
-  RootStackParamsList,
-} from 'app/navigation/navigationTypes';
-import {HeaderMessenger} from 'components';
+import {RootStackParamsList} from 'app/navigation/navigationTypes';
 import {IMessage} from 'entities';
-import {
-  addDoc,
-  collection,
-  doc,
-  serverTimestamp,
-  updateDoc,
-} from 'firebase/firestore';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import {addDoc, collection, serverTimestamp} from 'firebase/firestore';
 import {useSelector} from 'react-redux';
 import {RootState} from 'redux/store';
-import {useChatMessages} from 'shared/hooks/useChatMessages';
+import {useChatMessages} from 'shared/hooks';
 import {ChatTextarea, Message} from 'shared/ui';
 
 import {MessengerStyles as styles} from './Messenger.styles';
-
-//TODO: Сделать чатикс
 
 // const messages = [
 //   {id: '1', message: 'хуй', isCurrentUser: true},
@@ -73,6 +49,8 @@ export const Messenger = () => {
 
   const messages = useChatMessages(chatId);
 
+  const reversedMessages = useMemo(() => [...messages].reverse(), [messages]);
+
   const [currentMessage, setCurrentMessage] = useState<string>('');
 
   const renderMessage = ({item}: {item: IMessage}) => {
@@ -94,8 +72,6 @@ export const Messenger = () => {
     );
   };
 
-  const insets = useSafeAreaInsets();
-
   const sendMessage = async (
     chatId: string,
     message: string,
@@ -108,12 +84,6 @@ export const Messenger = () => {
         message,
         createdAt: serverTimestamp(),
         isRead: false,
-      });
-
-      const chatRef = doc(FIREBASE_DB, 'chats', chatId);
-      await updateDoc(chatRef, {
-        lastMessage: message,
-        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Ошибка при отправке сообщения:', error);
@@ -137,7 +107,7 @@ export const Messenger = () => {
         style={styles.messagesContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <FlatList
-          data={messages}
+          data={reversedMessages}
           initialNumToRender={20}
           renderItem={renderMessage}
           keyExtractor={item => item.id}
