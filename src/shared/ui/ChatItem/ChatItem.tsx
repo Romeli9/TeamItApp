@@ -6,11 +6,15 @@ import {RootState} from 'redux/store';
 
 import {ChatItemStyles as styles} from './ChatItem.styles';
 
-export const ChatItem = () => {
+type ChatItemProps = {
+  onPress: () => void;
+};
+
+export const ChatItem = ({onPress}: ChatItemProps) => {
   const {userName, avatar} = useSelector((state: RootState) => state.user);
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity onPress={onPress} style={styles.container}>
       <View style={styles.avatarContainer}>
         <Image style={styles.image} source={{uri: avatar}} />
       </View>
@@ -29,6 +33,6 @@ export const ChatItem = () => {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
