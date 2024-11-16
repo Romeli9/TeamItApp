@@ -10,12 +10,16 @@ import {
 } from 'react-native';
 
 import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
+import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {createUserWithEmailAndPassword} from 'firebase/auth';
 import {collection, doc, setDoc} from 'firebase/firestore';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {RegisterStyles as styles} from './Register.styles';
 
-export const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
+export const RegisterPage = () => {
+  const navigation = useAppNavigation();
+
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -43,7 +47,7 @@ export const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
       });
 
       console.log('User registered:', user.uid);
-      navigation.navigate('Homepage');
+      navigation.navigate(Stacks.HOME_TAB);
     } catch (error) {
       console.log(error);
     } finally {
@@ -106,7 +110,7 @@ export const RegisterPage: React.FC<{navigation: any}> = ({navigation}) => {
         <Button
           color="#B783EC"
           title="Go to Login"
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate(Screens.LOGIN)}
         />
       </KeyboardAvoidingView>
       <View style={styles.image_teamIT_down}>
