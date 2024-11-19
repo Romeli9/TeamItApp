@@ -38,5 +38,5 @@ export const useChatMessages = (chatId: string) => {
     return () => unsubscribe();
   }, [chatId]);
 
-  return messages;
+  return {messages, setMessages};
 };
