@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
+import {Screens} from 'app/navigation/navigationEnums';
 import EditProfile from 'components/EditProfile';
 import ProfileInfo from 'components/ProfileInfo';
 import * as ImagePicker from 'expo-image-picker';
@@ -19,10 +20,13 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
 import {setProfileData, setUserData} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
 
-export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
+export const Profile = () => {
+  const navigation = useAppNavigation();
+
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
   const dispatch = useDispatch();
@@ -204,7 +208,7 @@ export const Profile: React.FC<{navigation: any}> = ({navigation}) => {
   const handleSignOut = async () => {
     try {
       await FIREBASE_AUTH.signOut();
-      navigation.navigate('Login');
+      navigation.navigate(Screens.LOGIN);
     } catch (error) {
       console.error('Sign out error:', error);
     }

@@ -4,11 +4,18 @@ export type ProjectRouteParams = {
   projectId: string;
 };
 
+export type MessengerRouteParams = {
+  chatId: string;
+  chatName: string;
+};
+
 export type RootStackParamsList = {
   Main: NavigatorScreenParams<MainTabsStackParamsList>;
   Auth: undefined;
+  Register: undefined;
+  Login: undefined;
   HomeTab: undefined;
-  Messenger: undefined;
+  Messenger: MessengerRouteParams;
   Project: NavigatorScreenParams<ProjectRouteParams>;
 };
 

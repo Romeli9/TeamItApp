@@ -10,6 +10,8 @@ export enum Screens {
   HOME = 'Home',
   PROFILE = 'Profile',
   AUTH = 'Auth',
+  LOGIN = 'Login',
+  REGISTER = 'Register',
   CHATLIST = 'ChatList',
   MESSENGER = 'Messenger',
   PROJECT = 'Project',
