@@ -4,17 +4,12 @@ import {userState} from 'redux/slices/userSlice';
 
 export interface IMessage {
   id: string;
-  chatId: number;
+  chatId: string;
   message: string;
   authorId: string;
-  author: userState;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string;
-  isSending?: boolean;
+  createdAt: Date;
   isRead: boolean;
-  hasError?: boolean;
-  isCurrentUser?: boolean;
+  status: 'sending' | 'sent' | 'read';
 }
 
 export type TImages = {
@@ -28,17 +23,9 @@ export interface Reactions {
   count: number;
 }
 
-export interface Participant {
-  // user: User;
-  chatId: number;
-  userId: number;
-}
-
 export interface Chat {
   id: string;
   name: string;
-  // productId: number;
-  // product: Product;
-  // messages: string[];
-  // participants: Participant[];
+  lastMessage: string;
+  participants: string[];
 }

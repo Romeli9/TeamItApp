@@ -118,6 +118,7 @@ export const ProjectStyles = StyleSheet.create({
   required_image_2: {
     width: 50,
     height: 50,
+    borderRadius: 25,
   },
 
   categories_container: {

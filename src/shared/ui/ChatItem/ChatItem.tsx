@@ -8,10 +8,11 @@ import {ChatItemStyles as styles} from './ChatItem.styles';
 
 type ChatItemProps = {
   chatName: string;
+  lastMessage: string;
   onPress: () => void;
 };
 
-export const ChatItem = ({chatName, onPress}: ChatItemProps) => {
+export const ChatItem = ({chatName, lastMessage, onPress}: ChatItemProps) => {
   const {userName, avatar} = useSelector((state: RootState) => state.user);
 
   return (
@@ -30,7 +31,7 @@ export const ChatItem = ({chatName, onPress}: ChatItemProps) => {
             numberOfLines={1}
             ellipsizeMode="tail"
             style={styles.messageText}>
-            Лысый ахуел? ты когда доделаешь ааааааааааааааааааааааааааа?
+            {lastMessage}
           </Text>
         </View>
       </View>

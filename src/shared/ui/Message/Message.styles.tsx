@@ -76,10 +76,13 @@ export const MessageStyles = StyleSheet.create({
     backgroundColor: Colors.Blue200,
   },
   statusIcon: {
-    marginLeft: 'auto',
-    marginTop: 10,
-    marginRight: -7,
-    marginBottom: -5,
+    // marginLeft: 'auto',
+    // marginTop: 10,
+    // marginRight: -7,
+    // marginBottom: -5,
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
   },
   spaceBetween: {
     flex: 1,
