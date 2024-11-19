@@ -10,11 +10,15 @@ import {
 } from 'react-native';
 
 import {FIREBASE_AUTH} from 'app/FireBaseConfig';
+import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {signInWithEmailAndPassword} from 'firebase/auth';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {LoginPagestyles as styles} from './Login.styles';
 
-export const LoginPage: React.FC<{navigation: any}> = ({navigation}) => {
+export const LoginPage = () => {
+  const navigation = useAppNavigation();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +29,7 @@ export const LoginPage: React.FC<{navigation: any}> = ({navigation}) => {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response);
-      navigation.navigate('Homepage');
+      navigation.navigate(Stacks.HOME_TAB);
     } catch (error: any) {
       console.log(error);
       Alert.alert('Sign In failed: ' + error.message);
@@ -35,7 +39,7 @@ export const LoginPage: React.FC<{navigation: any}> = ({navigation}) => {
   };
 
   const goToRegister = () => {
-    navigation.navigate('RegisterPage');
+    navigation.navigate(Screens.REGISTER);
   };
 
   return (

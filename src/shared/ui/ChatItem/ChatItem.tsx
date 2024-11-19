@@ -6,18 +6,24 @@ import {RootState} from 'redux/store';
 
 import {ChatItemStyles as styles} from './ChatItem.styles';
 
-export const ChatItem = () => {
+type ChatItemProps = {
+  chatName: string;
+  lastMessage: string;
+  onPress: () => void;
+};
+
+export const ChatItem = ({chatName, lastMessage, onPress}: ChatItemProps) => {
   const {userName, avatar} = useSelector((state: RootState) => state.user);
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity onPress={onPress} style={styles.container}>
       <View style={styles.avatarContainer}>
         <Image style={styles.image} source={{uri: avatar}} />
       </View>
 
       <View style={styles.infoBlock}>
         <View style={styles.header}>
-          <Text style={styles.chatName}>{userName}</Text>
+          <Text style={styles.chatName}>{chatName}</Text>
           <Text style={styles.timestamp}>19:30</Text>
         </View>
         <View style={styles.messageBlock}>
@@ -25,10 +31,10 @@ export const ChatItem = () => {
             numberOfLines={1}
             ellipsizeMode="tail"
             style={styles.messageText}>
-            Лысый ахуел? ты когда доделаешь ааааааааааааааааааааааааааа?
+            {lastMessage}
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };

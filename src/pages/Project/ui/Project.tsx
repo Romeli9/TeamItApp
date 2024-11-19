@@ -15,53 +15,19 @@ import {
 } from 'react-native-safe-area-context';
 import {useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
+import {getUserById} from 'services/getUserById';
 import {required} from 'shared/assets/consts/Required';
 import {ArrowLeftIcon, CheckIcon, CloseIcon, PlusIcon} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers';
+import {MemberAvatar} from 'shared/ui';
 
-import {getUserById} from '../../../services/getUserById';
 import {ProjectStyles as styles} from './Project.styles';
-
-const MemberAvatar: React.FC<{userId: string; num: number}> = ({
-  userId,
-  num,
-}) => {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = await getUserById(userId);
-        setUser(userData);
-      } catch (error) {
-        console.error('Ошибка при загрузке данных пользователя:', error);
-      }
-    };
-
-    fetchUserData();
-  }, [userId]);
-
-  if (!user || !user.avatar) {
-    return null;
-  }
-
-  return (
-    <>
-      {user.avatar && num === 1 ? (
-        <Image source={{uri: user.avatar}} style={styles.required_image_2} />
-      ) : (
-        <Image source={{uri: user.avatar}} style={styles.author_image} />
-      )}
-    </>
-  );
-};
 
 export const Project: React.FC<any> = ({route, navigation}) => {
   const {projectId} = route.params;
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
-  const [loading, setLoading] = useState(true);
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
