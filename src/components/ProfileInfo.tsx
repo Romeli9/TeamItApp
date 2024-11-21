@@ -1,42 +1,44 @@
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
   Animated,
-  Image,
-  TouchableOpacity,
+  Button,
   FlatList,
+  Image,
   ListRenderItem,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from 'redux/store';
+
+import {Screens} from 'app/navigation/navigationEnums';
 import {
   collection,
-  query,
-  where,
-  getDocs,
   doc,
   getDoc,
+  getDocs,
+  query,
+  where,
 } from 'firebase/firestore';
-import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
-import {} from 'redux/slices/userSlice';
+import {useDispatch, useSelector} from 'react-redux';
 import projectsSlice, {
-  projectsState,
   ProjectType,
+  projectsState,
   setYourProjects,
 } from 'redux/slices/projectsSlice';
-import {useNavigation, NavigationProp} from '@react-navigation/native';
-import { Screens } from 'app/navigation/navigationEnums';
+import 'redux/slices/userSlice';
+import {RootState} from 'redux/store';
+
+import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
 
 type RootStackParamList = {
   Project: {projectId: string};
   // другие экраны...
 };
 
-function ProfileInfo() {
+export const ProfileInfo = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const dispatch = useDispatch();
   const {telegramm, skills, experience, aboutMe} = useSelector(
@@ -55,7 +57,6 @@ function ProfileInfo() {
     require('shared/assets/profile/down.png'),
   );
   const [subscribed, setSubscribed] = useState(false);
-
 
   const toggleMoreInfo = () => {
     setShowMoreInfo(prevState => !prevState);
@@ -133,24 +134,25 @@ function ProfileInfo() {
   return (
     <View style={styles.container}>
       <View style={styles.additionalInfoContainer}>
-        <TouchableOpacity style={styles.text} onPress={toggleMoreInfo}>
-          <Image source={buttonImage} style={{width: 12, height: 12}} />
-          <Text>Обо мне: {aboutMe}</Text>
-        </TouchableOpacity>
-
-        <Animated.View
-          style={{...styles.additionalInfo, maxHeight: additionalInfoHeight}}>
-          {showMoreInfo && (
-            <>
-              <Text style={styles.text}>Опыт: {experience}</Text>
-              <Text style={styles.text}>Навыки: {skills}</Text>
-              <Text style={styles.text}>Телеграмм: {telegramm}</Text>
-            </>
-          )}
-        </Animated.View>
-
-        <Text style={styles.text_project}>Проекты:</Text>
         <ScrollView contentContainerStyle={styles.projectList}>
+          <TouchableOpacity style={styles.text} onPress={toggleMoreInfo}>
+            <Image source={buttonImage} style={{width: 12, height: 12}} />
+            <Text>Обо мне: {aboutMe}</Text>
+          </TouchableOpacity>
+
+          <Animated.View
+            style={{...styles.additionalInfo, maxHeight: additionalInfoHeight}}>
+            {showMoreInfo && (
+              <>
+                <Text style={styles.text}>Опыт: {experience}</Text>
+                <Text style={styles.text}>Навыки: {skills}</Text>
+                <Text style={styles.text}>Телеграмм: {telegramm}</Text>
+              </>
+            )}
+          </Animated.View>
+
+          <Text style={styles.text_project}>Проекты:</Text>
+
           <FlatList
             data={projects}
             renderItem={renderProjectItem}
@@ -161,13 +163,10 @@ function ProfileInfo() {
       </View>
     </View>
   );
-}
-
-export default ProfileInfo;
+};
 
 const styles = StyleSheet.create({
   container: {
-    top: 20,
     paddingHorizontal: 20,
   },
   down_button: {
@@ -201,7 +200,7 @@ const styles = StyleSheet.create({
   additionalInfoContainer: {
     paddingTop: 350,
     alignItems: 'center',
-    width: 350,
+    width: 400,
   },
   additionalInfo: {
     width: '100%',
@@ -213,11 +212,11 @@ const styles = StyleSheet.create({
   },
   profileProjectContainer: {
     width: '100%',
-    marginTop: 50,
     paddingHorizontal: 50,
   },
   projectList: {
     paddingBottom: 150,
+    width: '100%',
   },
   // additionalInfoContainer121221212: {
   //   overflow: 'hidden',
