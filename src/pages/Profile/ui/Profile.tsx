@@ -38,8 +38,9 @@ export const Profile = () => {
 
   const route = useRoute<ProfileScreenRouteProp>();
 
-  console.log(route);
-  // const {userId} = route.params;
+  const {userId} = route.params || {};
+
+  console.log(userId);
 
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [isInviteModalVisible, setInviteModalVisible] = useState(false);
