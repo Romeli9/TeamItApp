@@ -1,3 +1,4 @@
+import {RouteProp, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
@@ -10,8 +11,8 @@ import {
 
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import EditProfile from 'components/EditProfile';
-import ProfileInfo from 'components/ProfileInfo';
+import {RootStackParamsList} from 'app/navigation/navigationTypes';
+import {EditProfile, InviteModal, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';
 import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
@@ -24,10 +25,18 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
 
+type ProfileScreenRouteProp = RouteProp<RootStackParamsList, Screens.PROFILE>;
+
 export const Profile = () => {
   const navigation = useAppNavigation();
 
+  const route = useRoute<ProfileScreenRouteProp>();
+
+  console.log(route);
+  // const {userId} = route.params;
+
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
+  const [isInviteModalVisible, setInviteModalVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
   const dispatch = useDispatch();
 
@@ -246,6 +255,7 @@ export const Profile = () => {
                 </View>
               )}
             </View>
+
             <TouchableOpacity
               style={styles.background_image}
               onPress={backImageLibraryPress}>
@@ -258,16 +268,32 @@ export const Profile = () => {
                 <Text style={styles.add_image__text}>+</Text>
               )}
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.add_image__button}
-              onPress={onImageLibraryPress}>
-              {avatar ? (
-                <Image source={{uri: avatar}} style={styles.selectedImage} />
-              ) : (
-                <Text style={styles.add_image__text}>+</Text>
-              )}
-            </TouchableOpacity>
+            <View style={styles.backselectedImage}>
+              <TouchableOpacity
+                style={styles.add_image__button}
+                onPress={onImageLibraryPress}>
+                {avatar ? (
+                  <Image source={{uri: avatar}} style={styles.selectedImage} />
+                ) : (
+                  <Text style={styles.add_image__text}>+</Text>
+                )}
+              </TouchableOpacity>
+            </View>
             <Text style={styles.text}>@{userName}</Text>
+            {isInviteModalVisible && (
+              <InviteModal
+                onModalClose={() => setInviteModalVisible(false)}
+                userDocRef={userDocRef}
+                Project={{
+                  projectId: '',
+                }}
+              />
+            )}
+            <TouchableOpacity
+              style={styles.invite}
+              onPress={() => setInviteModalVisible(true)}>
+              <Text style={styles.inviteProject}>Пригласить в проект</Text>
+            </TouchableOpacity>
 
             {isEditProfileVisible && (
               <EditProfile

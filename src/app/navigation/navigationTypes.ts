@@ -9,9 +9,12 @@ export type MessengerRouteParams = {
   chatName: string;
 };
 
+export type ProfileRouteParams = {
+  userId?: string;
+};
+
 export type RootStackParamsList = {
   Main: NavigatorScreenParams<MainTabsStackParamsList>;
-  Auth: undefined;
   Register: undefined;
   Login: undefined;
   HomeTab: undefined;
@@ -31,5 +34,5 @@ export type HomeStackParamsList = {
 };
 
 export type ProfileStackParamsList = {
-  Profile: undefined;
+  Profile: ProfileRouteParams;
 };

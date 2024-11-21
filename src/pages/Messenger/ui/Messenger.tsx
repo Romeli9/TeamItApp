@@ -3,6 +3,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList, KeyboardAvoidingView, Platform, View} from 'react-native';
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
+import {Screens} from 'app/navigation/navigationEnums';
 import {RootStackParamsList} from 'app/navigation/navigationTypes';
 import {IMessage} from 'entities';
 import {
@@ -21,7 +22,10 @@ import {ChatTextarea, Message} from 'shared/ui';
 
 import {MessengerStyles as styles} from './Messenger.styles';
 
-type MessengerScreenRouteProp = RouteProp<RootStackParamsList, 'Messenger'>;
+type MessengerScreenRouteProp = RouteProp<
+  RootStackParamsList,
+  Screens.MESSENGER
+>;
 
 export const Messenger = () => {
   const {userId, userName} = useSelector((state: RootState) => state.user);
