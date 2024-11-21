@@ -11,7 +11,10 @@ import {
 
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import {RootStackParamsList} from 'app/navigation/navigationTypes';
+import {
+  ProfileStackParamsList,
+  RootStackParamsList,
+} from 'app/navigation/navigationTypes';
 import {EditProfile, InviteModal, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';
@@ -25,7 +28,10 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
 
-type ProfileScreenRouteProp = RouteProp<RootStackParamsList, Screens.PROFILE>;
+type ProfileScreenRouteProp = RouteProp<
+  ProfileStackParamsList,
+  Screens.PROFILE
+>;
 
 export const Profile = () => {
   const navigation = useAppNavigation();
