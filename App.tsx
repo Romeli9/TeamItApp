@@ -18,6 +18,7 @@ import Profile from './src/pages/Profile';
 import Messenger from './src/pages/Messenger';
 import Project from './src/pages/Project';
 import Search from './src/pages/Search';
+import NotMyProfile from './src/pages/NotMyProfile';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -152,6 +153,11 @@ export default function App() {
           <Stack.Screen
             name="Project"
             component={Project}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="NotMyProfile"
+            component={NotMyProfile}
             options={{headerShown: false}}
           />
         </Stack.Navigator>
