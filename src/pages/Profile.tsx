@@ -20,6 +20,7 @@ import {
   FIREBASE_DB,
   FIREBASE_STORAGE,
 } from '../../FireBaseConfig';
+import InviteModal from 'components/InviteModal';
 import {setUserData, setProfileData} from 'redux/slices/userSlice';
 import EditProfile from 'components/EditProfile';
 import {RootState} from 'redux/store';
@@ -28,6 +29,7 @@ import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 
 const Profile: React.FC<{navigation: any}> = ({navigation}) => {
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
+  const [isInviteModalVisible, setInviteModalVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const dispatch = useDispatch();
@@ -267,7 +269,17 @@ const Profile: React.FC<{navigation: any}> = ({navigation}) => {
             </TouchableOpacity>
             </View>
             <Text style={styles.text}>@{userName}</Text>
-
+            {isInviteModalVisible && (
+              <InviteModal
+                onModalClose={() => setInviteModalVisible(false)}
+                userDocRef={userDocRef} Project={{
+                  projectId: ''
+                }}              />
+            )}
+            <TouchableOpacity style={styles.invite} onPress={() => setInviteModalVisible(true)}>
+              <Text style={styles.inviteProject}>Пригласить в проект</Text>
+            </TouchableOpacity>
+              
             {isEditProfileVisible && (
               <EditProfile
                 onModalClose={() => setEditProfileVisible(false)}
@@ -349,6 +361,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0)',
   },
+  invite: {
+    position: 'absolute',
+    top: 275,
+    backgroundColor: '#BE9DE8',
+    width: 200,
+    height: 40,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  inviteProject: {
+    color: '#FFFFFF',
+    top: 7,
+    fontSize: 18,
+    textAlign: 'center',
+  },
+
   exitButton: {
     position: 'absolute',
     top: 42,
