@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@eva-design/eva": "^2.2.0",
     "@expo/metro-runtime": "~4.0.0",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-firebase/app": "^20.3.0",
@@ -22,7 +23,10 @@
     "@reduxjs/toolkit": "^2.2.7",
     "@rneui/base": "^0.0.0-edge.2",
     "@rneui/themed": "^0.0.0-edge.2",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/react-native-snap-carousel": "^3.8.11",
+    "@ui-kitten/components": "^5.3.1",
+    "@ui-kitten/eva-icons": "^5.3.1",
     "deprecated-react-native-prop-types": "^5.0.0",
     "expo": "^52.0.9",
     "expo-build-properties": "~0.13.1",

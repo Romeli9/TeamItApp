@@ -1,15 +1,15 @@
 import {useState} from 'react';
 import {
   Modal,
-  View,
   StyleSheet,
-  TouchableOpacity,
   Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import {DocumentReference, getDoc, updateDoc} from 'firebase/firestore';
-import {useSelector, useDispatch} from 'react-redux';
 
+import {DocumentReference, getDoc, updateDoc} from 'firebase/firestore';
+import {useDispatch, useSelector} from 'react-redux';
 import {setProfileData} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
 
@@ -25,7 +25,7 @@ interface UserProfile {
   Telegramm: string;
 }
 
-const EditProfile: React.FC<EditProfileProps> = ({
+export const EditProfile: React.FC<EditProfileProps> = ({
   onModalClose,
   userDocRef,
 }) => {
@@ -224,5 +224,3 @@ const styles = StyleSheet.create({
     width: 274,
   },
 });
-
-export default EditProfile;

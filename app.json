@@ -12,9 +12,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "newArchEnabled": true,
       "supportsTablet": true
     },
     "android": {
+      "newArchEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -23,9 +25,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font",
-      "expo-build-properties"
-    ]
+    "plugins": ["expo-font", "expo-build-properties"]
   }
 }

@@ -1,41 +1,44 @@
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
   Animated,
-  Image,
-  TouchableOpacity,
+  Button,
   FlatList,
+  Image,
   ListRenderItem,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from 'redux/store';
+
+import {Screens} from 'app/navigation/navigationEnums';
 import {
   collection,
-  query,
-  where,
-  getDocs,
   doc,
   getDoc,
+  getDocs,
+  query,
+  where,
 } from 'firebase/firestore';
-import {FIREBASE_AUTH, FIREBASE_DB} from '../../FireBaseConfig';
-import {} from 'redux/slices/userSlice';
+import {useDispatch, useSelector} from 'react-redux';
 import projectsSlice, {
-  projectsState,
   ProjectType,
+  projectsState,
   setYourProjects,
 } from 'redux/slices/projectsSlice';
-import {useNavigation, NavigationProp} from '@react-navigation/native';
+import 'redux/slices/userSlice';
+import {RootState} from 'redux/store';
+
+import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
 
 type RootStackParamList = {
   Project: {projectId: string};
   // другие экраны...
 };
 
-function ProfileInfo() {
+export const ProfileInfo = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const dispatch = useDispatch();
   const {telegramm, skills, experience, aboutMe} = useSelector(
@@ -51,7 +54,7 @@ function ProfileInfo() {
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const animatedHeight = useState(new Animated.Value(0))[0];
   const [buttonImage, setButtonImage] = useState(
-    require('../assets/profile/down.png'),
+    require('shared/assets/profile/down.png'),
   );
   const [subscribed, setSubscribed] = useState(false);
 
@@ -66,8 +69,8 @@ function ProfileInfo() {
     // Изменяем изображение кнопки
     setButtonImage(
       showMoreInfo
-        ? require('../assets/profile/down.png')
-        : require('../assets/profile/up.png'),
+        ? require('shared/assets/profile/down.png')
+        : require('shared/assets/profile/up.png'),
     );
   };
 
@@ -125,32 +128,31 @@ function ProfileInfo() {
   );
 
   const OpenProject = (projectID: string) => {
-    navigation.navigate('Project', {projectId: projectID});
+    navigation.navigate(Screens.PROJECT, {projectId: projectID});
   };
 
   return (
     <View style={styles.container}>
-      
       <View style={styles.additionalInfoContainer}>
-      <ScrollView contentContainerStyle={styles.projectList}>
-        <TouchableOpacity style={styles.text} onPress={toggleMoreInfo}>
-          <Image source={buttonImage} style={{width: 12, height: 12}} />
-          <Text>Обо мне: {aboutMe}</Text>
-        </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.projectList}>
+          <TouchableOpacity style={styles.text} onPress={toggleMoreInfo}>
+            <Image source={buttonImage} style={{width: 12, height: 12}} />
+            <Text>Обо мне: {aboutMe}</Text>
+          </TouchableOpacity>
 
-        <Animated.View
-          style={{...styles.additionalInfo, maxHeight: additionalInfoHeight}}>
-          {showMoreInfo && (
-            <>
-              <Text style={styles.text}>Опыт: {experience}</Text>
-              <Text style={styles.text}>Навыки: {skills}</Text>
-              <Text style={styles.text}>Телеграмм: {telegramm}</Text>
-            </>
-          )}
-        </Animated.View>
+          <Animated.View
+            style={{...styles.additionalInfo, maxHeight: additionalInfoHeight}}>
+            {showMoreInfo && (
+              <>
+                <Text style={styles.text}>Опыт: {experience}</Text>
+                <Text style={styles.text}>Навыки: {skills}</Text>
+                <Text style={styles.text}>Телеграмм: {telegramm}</Text>
+              </>
+            )}
+          </Animated.View>
 
-        <Text style={styles.text_project}>Проекты:</Text>
-        
+          <Text style={styles.text_project}>Проекты:</Text>
+
           <FlatList
             data={projects}
             renderItem={renderProjectItem}
@@ -161,9 +163,7 @@ function ProfileInfo() {
       </View>
     </View>
   );
-}
-
-export default ProfileInfo;
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -217,7 +217,6 @@ const styles = StyleSheet.create({
   projectList: {
     paddingBottom: 150,
     width: '100%',
-    
   },
   // additionalInfoContainer121221212: {
   //   overflow: 'hidden',
