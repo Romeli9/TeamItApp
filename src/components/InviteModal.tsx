@@ -12,6 +12,7 @@ import { Picker } from '@react-native-picker/picker';
 import { DocumentReference, updateDoc } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { ProjectType, selectProjectById } from 'redux/slices/projectsSlice';
+import { RootState } from 'redux/store';
 
 type InviteModalProps = {
   onModalClose: () => void;
@@ -25,7 +26,7 @@ const InviteModal: React.FC<InviteModalProps> = ({
 }) => {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null); // Добавлено состояние для выбранного проекта
   const [message, setMessage] = useState<string>('');
-  const projects = useSelector((state: any) => state.projects.yourProjects);
+  const projects = useSelector((state: RootState) => state.projects.yourProjects);
   console.log(projects);
   const handleInvite = async () => {
     if (userDocRef && selectedProjectId) { // Используем selectedProjectId
@@ -59,7 +60,7 @@ const InviteModal: React.FC<InviteModalProps> = ({
             onValueChange={(itemValue) => setSelectedProjectId(itemValue)}>
            <Picker.Item label="Выберите проект" value={null} />
             {projects && projects.length > 0 ? (
-              projects.map((project: { id: React.Key | null | undefined; name: string | undefined; }) => (
+              projects.map((project) => (
                 <Picker.Item key={project.id} label={project.name} value={project.id} />
               ))
             ) : (
@@ -71,7 +72,7 @@ const InviteModal: React.FC<InviteModalProps> = ({
             placeholder="Введите ваше сообщение"
             value={message}
             onChangeText={setMessage}
-            multiline
+        
           />
           <TouchableOpacity style={styles.button} onPress={handleInvite}>
             <Text style={styles.buttonText}>Отправить приглашение</Text>
@@ -121,12 +122,13 @@ const styles = StyleSheet.create({
     top: 175,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: 'gray',
   },
   picker: {
-    width: '100%', // Добавлено для корректного отображения Picker
+    width: '100%', 
     height: 50,
     top: -20,
+    color: '#00000',
   },
   input: {
     width: '90%',
