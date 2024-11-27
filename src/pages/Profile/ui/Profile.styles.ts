@@ -30,7 +30,7 @@ export const ProfileStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#D9D9D9',
-    top: 90,
+    // top: 90,
     width: 125,
     height: 125,
     borderRadius: 100,
@@ -50,7 +50,7 @@ export const ProfileStyles = StyleSheet.create({
   container1: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
   },
   closeButton: {
     position: 'absolute',
