@@ -36,7 +36,6 @@ export const InviteModal: React.FC<InviteModalProps> = ({
   const projects = useSelector(
     (state: RootState) => state.projects.yourProjects,
   );
-  console.log(projects);
   const handleInvite = async () => {
     if (userDocRef && selectedProjectId) {
       // Используем selectedProjectId
@@ -73,7 +72,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
               style={styles.picker}
               itemStyle={{color: 'black', fontSize: 16}}
               onValueChange={itemValue => setSelectedProjectId(itemValue)}>
-              <Picker.Item label="Выберите проект" value={null} />
+              <Picker.Item label="Выберите проект" value={''} />
               {projects && projects.length > 0 ? (
                 projects.map(project => (
                   <Picker.Item
@@ -145,7 +144,7 @@ const styles = StyleSheet.create({
     top: 175,
   },
   buttonText: {
-    color: 'gray',
+    color: 'white',
   },
   picker: {
     width: '100%',

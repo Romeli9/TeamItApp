@@ -22,8 +22,9 @@ import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {setProfileData, setUserData} from 'redux/slices/userSlice';
+import {setProfileData, setUserData, userState} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
+import {getUserById} from 'services/getUserById';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
@@ -41,7 +42,7 @@ export const Profile = () => {
   const {userId} = route.params || {};
 
   console.log(userId);
-
+  const [isUserInProject, setIsUserInProject] = useState(false);
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [isInviteModalVisible, setInviteModalVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
@@ -50,6 +51,29 @@ export const Profile = () => {
   const {userName, aboutMe, avatar, background} = useSelector(
     (state: RootState) => state.user,
   );
+
+  useEffect(() => {
+    getUser();
+  }, [userId]);
+
+  const getUser = async () => {
+    if (userId) {
+      let userInfo = await getUserById(userId);
+      console.log('1123123123123', userInfo);
+      dispatch(
+        setUserData({
+          userId: userId,
+          username: userInfo.username,
+          email: userInfo.email,
+          avatar: userInfo.avatar,
+          background: userInfo.background,
+        }),
+      );
+      dispatch(setProfileData(userInfo));
+
+      // setUser(userInfo);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,7 +125,6 @@ export const Profile = () => {
       const imageUrl = await uploadImageToFirebase(result.assets[0].uri);
       if (imageUrl) {
         const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
-        console.log('Current user for image upload:', user); // Проверка текущего пользователя
         if (user) {
           dispatch(
             setUserData({
@@ -117,7 +140,6 @@ export const Profile = () => {
             'Ваш новый аватар успешно обновлен.',
           );
         } else {
-          console.log('User is not signed in while uploading image.');
         }
       }
     }
@@ -142,7 +164,6 @@ export const Profile = () => {
       const imageUrl = await uploadImageToFirebase1(result.assets[0].uri);
       if (imageUrl) {
         const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
-        console.log('Current user for image upload:', user); // Проверка текущего пользователя
         if (user) {
           dispatch(
             setUserData({
@@ -158,7 +179,6 @@ export const Profile = () => {
             'Ваш новый аватар успешно обновлен.',
           );
         } else {
-          console.log('User is not signed in while uploading image.');
         }
       }
     }
@@ -230,6 +250,18 @@ export const Profile = () => {
     }
   };
 
+  useEffect(() => {
+    const checkUserInProject = () => {
+      const currentUser = FIREBASE_AUTH.currentUser;
+      //console.log(currentUser);
+      /*  if (currentUser) {
+        setIsUserInProject(currentUser.uid === userId); // Сравниваем текущий uid с переданным userId
+      }*/
+    };
+
+    checkUserInProject();
+  }, [userId]);
+
   return (
     <SafeAreaProvider>
       <FlatList
@@ -296,11 +328,15 @@ export const Profile = () => {
                 }}
               />
             )}
-            <TouchableOpacity
-              style={styles.invite}
-              onPress={() => setInviteModalVisible(true)}>
-              <Text style={styles.inviteProject}>Пригласить в проект</Text>
-            </TouchableOpacity>
+
+            {
+              //userId && (
+              <TouchableOpacity
+                style={styles.invite}
+                onPress={() => setInviteModalVisible(true)}>
+                <Text style={styles.inviteProject}>Пригласить в проект</Text>
+              </TouchableOpacity>
+            }
 
             {isEditProfileVisible && (
               <EditProfile

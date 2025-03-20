@@ -61,11 +61,6 @@ export const EditProfile: React.FC<EditProfileProps> = ({
           dispatch(setProfileData(updatedProfileData));
 
           await updateDoc(userDocRef, updatedProfileData);
-
-          console.log(
-            'Profile data successfully updated in Firebase:',
-            updatedProfileData,
-          );
         }
       }
     } catch (error) {

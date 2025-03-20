@@ -30,7 +30,7 @@ export const ProfileStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#D9D9D9',
-    top: 90,
+    // top: 90,
     width: 125,
     height: 125,
     borderRadius: 100,

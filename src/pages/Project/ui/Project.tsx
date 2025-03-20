@@ -1,3 +1,4 @@
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   Image,
@@ -9,6 +10,8 @@ import {
   View,
 } from 'react-native';
 
+import {Screens, Stacks} from 'app/navigation/navigationEnums';
+import SearchModal, {UserFrom} from 'components/SearchModal';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -19,24 +22,36 @@ import {getUserById} from 'services/getUserById';
 import {required} from 'shared/assets/consts/Required';
 import {ArrowLeftIcon, CheckIcon, CloseIcon, PlusIcon} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 import {MemberAvatar} from 'shared/ui';
 
 import {ProjectStyles as styles} from './Project.styles';
 
-export const Project: React.FC<any> = ({route, navigation}) => {
+type RootStackParamList = {
+  Profile: {userId: string};
+  // другие экраны...
+};
+
+export const Project: React.FC<any> = ({route}) => {
   const {projectId} = route.params;
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
+  // const navigation = useAppNavigation();
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [confirmationTimer, setConfirmationTimer] = useState<any>(null);
   const [requiredOpen, setRequiredOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState('');
-
+  const [isSearchModal, setSearchModal] = useState(false);
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const handleUserClick = (user: UserFrom) => {
+    navigation.navigate(Screens.PROFILE, {userId: user.id});
+  };
 
   const openApplicationModal = (index: number) => {
     setOpenSendIndex(index);
@@ -62,7 +77,7 @@ export const Project: React.FC<any> = ({route, navigation}) => {
     setSelectedItem('');
   };
 
-  const HandleApplicationSend = (value: string) => {
+  const handleApplicationSend = (value: string) => {
     setSelectedItem(value);
   };
 
@@ -220,7 +235,7 @@ export const Project: React.FC<any> = ({route, navigation}) => {
                                 styles.dropdownItem,
                                 styles.dropdownItemSelected,
                               ]}
-                              onPress={() => HandleApplicationSend(item.value)}>
+                              onPress={() => handleApplicationSend(item.value)}>
                               <View style={styles.dropdownItemContainer}>
                                 <View style={styles.dropdownItem_icon}>
                                   <PlusIcon />
@@ -259,7 +274,16 @@ export const Project: React.FC<any> = ({route, navigation}) => {
               <Text style={styles.author_text}>{projectData.creator}</Text>
             </View>
           </View>
-
+          <SearchModal
+            onUserSelect={handleUserClick}
+            visible={isSearchModal}
+            onClose={() => setSearchModal(false)}
+          />
+          <TouchableOpacity
+            onPress={() => setSearchModal(true)}
+            style={styles.invite}>
+            <Text style={styles.inviteProject}>Поиск участников</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.goback}>

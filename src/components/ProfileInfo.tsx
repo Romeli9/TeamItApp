@@ -137,7 +137,7 @@ export const ProfileInfo = () => {
         <ScrollView contentContainerStyle={styles.projectList}>
           <TouchableOpacity style={styles.text} onPress={toggleMoreInfo}>
             <Image source={buttonImage} style={{width: 12, height: 12}} />
-            <Text>Обо мне: {aboutMe}</Text>
+            <Text style={{fontSize: 15}}>Обо мне: {aboutMe}</Text>
           </TouchableOpacity>
 
           <Animated.View
@@ -146,7 +146,7 @@ export const ProfileInfo = () => {
               <>
                 <Text style={styles.text}>Опыт: {experience}</Text>
                 <Text style={styles.text}>Навыки: {skills}</Text>
-                <Text style={styles.text}>Телеграмм: {telegramm}</Text>
+                <Text style={styles.text}>Телеграм: {telegramm}</Text>
               </>
             )}
           </Animated.View>
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    fontSize: 16,
+    fontSize: 15,
     marginBottom: 15,
     color: '#333',
     fontFamily: 'Inter-Regular',

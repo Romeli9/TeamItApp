@@ -46,10 +46,8 @@ export const RegisterPage = () => {
           'https://firebasestorage.googleapis.com/v0/b/teamit-fd85a.appspot.com/o/empty%2Fimages.jpg?alt=media&token=997b132a-0902-4b26-8e97-81dfdfd3b44b',
       });
 
-      console.log('User registered:', user.uid);
       navigation.navigate(Stacks.HOME_TAB);
     } catch (error) {
-      console.log(error);
     } finally {
       setLoading(false);
     }

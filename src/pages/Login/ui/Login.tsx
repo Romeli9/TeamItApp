@@ -28,10 +28,8 @@ export const LoginPage = () => {
     setLoading(true);
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
-      console.log(response);
       navigation.navigate(Stacks.HOME_TAB);
     } catch (error: any) {
-      console.log(error);
       Alert.alert('Sign In failed: ' + error.message);
     } finally {
       setLoading(false);

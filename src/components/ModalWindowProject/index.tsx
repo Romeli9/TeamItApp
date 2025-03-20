@@ -90,7 +90,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     if (!result.canceled) {
       setPickerResponse(result);
       setSelectedImage(result.assets[0].uri);
-      console.log(result);
+      result;
     }
   }, []);
 
@@ -162,7 +162,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       const projectsRef = collection(firestore, 'projects');
 
       const docRef = await addDoc(projectsRef, projectData);
-      console.log('Project created with ID: ', docRef.id);
 
       const newProject: ProjectType = {
         id: docRef.id,
