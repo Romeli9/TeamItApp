@@ -1,5 +1,4 @@
 export const categories = [
-  //{key:'1', value:'ПИВО'},
   {key: 2, value: 'Desktop'},
   {key: 3, value: 'Мобильные'},
   {key: 4, value: 'Web'},

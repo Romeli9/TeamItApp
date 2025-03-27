@@ -296,11 +296,11 @@ export const Profile = () => {
                 }}
               />
             )}
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.invite}
               onPress={() => setInviteModalVisible(true)}>
               <Text style={styles.inviteProject}>Пригласить в проект</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {isEditProfileVisible && (
               <EditProfile
