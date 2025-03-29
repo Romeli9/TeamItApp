@@ -1,5 +1,7 @@
 import {NavigatorScreenParams} from '@react-navigation/native';
 
+import {Screens, Stacks} from './navigationEnums';
+
 export type ProjectRouteParams = {
   projectId: string;
 };
@@ -14,25 +16,29 @@ export type ProfileRouteParams = {
 };
 
 export type RootStackParamsList = {
-  Main: NavigatorScreenParams<MainTabsStackParamsList>;
-  Register: undefined;
-  Login: undefined;
-  HomeTab: undefined;
-  Messenger: MessengerRouteParams;
-  Project: NavigatorScreenParams<ProjectRouteParams>;
+  [Screens.LOGIN]:
+    | undefined
+    | {
+        redirectTo: string;
+        redirectParams?: any;
+      };
+  [Screens.REGISTER]: undefined;
+  [Stacks.MAIN]: NavigatorScreenParams<MainTabsStackParamsList>;
+  [Screens.MESSENGER]: MessengerRouteParams;
+  [Screens.PROJECT]: ProjectRouteParams;
 };
 
 export type MainTabsStackParamsList = {
-  HomeTab: NavigatorScreenParams<HomeStackParamsList>;
-  ProfileTab: NavigatorScreenParams<ProfileStackParamsList>;
-  ChatList: undefined;
+  [Stacks.HOME_TAB]: NavigatorScreenParams<HomeStackParamsList>;
+  [Stacks.PROFILE_TAB]: NavigatorScreenParams<ProfileStackParamsList>;
+  [Screens.CHATLIST]: undefined;
 };
 
 export type HomeStackParamsList = {
-  Home: undefined;
-  Search: undefined;
+  [Screens.HOME]: undefined;
+  [Screens.SEARCH]: undefined;
 };
 
 export type ProfileStackParamsList = {
-  Profile: ProfileRouteParams;
+  [Screens.PROFILE]: ProfileRouteParams;
 };

@@ -17,7 +17,7 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 import {LoginPagestyles as styles} from './Login.styles';
 
 export const LoginPage = () => {
-  const navigation = useAppNavigation();
+  const {navigate} = useAppNavigation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,7 +28,7 @@ export const LoginPage = () => {
     setLoading(true);
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate(Stacks.HOME_TAB);
+      navigate(Screens.PROFILE);
     } catch (error: any) {
       Alert.alert('Sign In failed: ' + error.message);
     } finally {
@@ -37,7 +37,7 @@ export const LoginPage = () => {
   };
 
   const goToRegister = () => {
-    navigation.navigate(Screens.REGISTER);
+    navigate(Screens.REGISTER);
   };
 
   return (

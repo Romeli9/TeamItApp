@@ -30,16 +30,12 @@ import projectsSlice, {
 } from 'redux/slices/projectsSlice';
 import 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
 
-type RootStackParamList = {
-  Project: {projectId: string};
-  // другие экраны...
-};
-
 export const ProfileInfo = () => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const {navigate} = useAppNavigation();
   const dispatch = useDispatch();
   const {telegramm, skills, experience, aboutMe} = useSelector(
     (state: RootState) => state.user,
@@ -128,7 +124,7 @@ export const ProfileInfo = () => {
   );
 
   const OpenProject = (projectID: string) => {
-    navigation.navigate(Screens.PROJECT, {projectId: projectID});
+    navigate(Screens.PROJECT, {projectId: projectID});
   };
 
   return (

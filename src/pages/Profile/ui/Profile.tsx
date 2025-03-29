@@ -29,15 +29,10 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
 
-type ProfileScreenRouteProp = RouteProp<
-  ProfileStackParamsList,
-  Screens.PROFILE
->;
-
 export const Profile = () => {
-  const navigation = useAppNavigation();
+  const {navigate} = useAppNavigation();
 
-  const route = useRoute<ProfileScreenRouteProp>();
+  const route = useRoute<RouteProp<ProfileStackParamsList, Screens.PROFILE>>();
 
   const {userId} = route.params || {};
 
@@ -59,7 +54,6 @@ export const Profile = () => {
   const getUser = async () => {
     if (userId) {
       let userInfo = await getUserById(userId);
-      console.log('1123123123123', userInfo);
       dispatch(
         setUserData({
           userId: userId,
@@ -244,7 +238,7 @@ export const Profile = () => {
   const handleSignOut = async () => {
     try {
       await FIREBASE_AUTH.signOut();
-      navigation.navigate(Screens.LOGIN);
+      navigate(Screens.LOGIN);
     } catch (error) {
       console.error('Sign out error:', error);
     }

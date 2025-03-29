@@ -1,4 +1,9 @@
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   Image,
@@ -11,6 +16,7 @@ import {
 } from 'react-native';
 
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
+import {ProjectRouteParams} from 'app/navigation/navigationTypes';
 import SearchModal, {UserFrom} from 'components/SearchModal';
 import {
   SafeAreaProvider,
@@ -27,17 +33,14 @@ import {MemberAvatar} from 'shared/ui';
 
 import {ProjectStyles as styles} from './Project.styles';
 
-type RootStackParamList = {
-  Profile: {userId: string};
-  // другие экраны...
-};
+export const Project = () => {
+  const route = useRoute<RouteProp<{params: ProjectRouteParams}>>();
+  const {navigate, goBack} = useAppNavigation();
 
-export const Project: React.FC<any> = ({route}) => {
   const {projectId} = route.params;
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
-  // const navigation = useAppNavigation();
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
@@ -47,10 +50,15 @@ export const Project: React.FC<any> = ({route}) => {
   const [isSearchModal, setSearchModal] = useState(false);
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const handleUserClick = (user: UserFrom) => {
-    navigation.navigate(Screens.PROFILE, {userId: user.id});
+    navigate(Stacks.MAIN, {
+      screen: Stacks.PROFILE_TAB,
+      params: {
+        screen: Screens.PROFILE,
+        params: {userId: user.id},
+      },
+    });
   };
 
   const openApplicationModal = (index: number) => {
@@ -284,9 +292,7 @@ export const Project: React.FC<any> = ({route}) => {
             style={styles.invite}>
             <Text style={styles.inviteProject}>Поиск участников</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.goback}>
+          <TouchableOpacity onPress={goBack} style={styles.goback}>
             <ArrowLeftIcon />
           </TouchableOpacity>
         </ScrollView>

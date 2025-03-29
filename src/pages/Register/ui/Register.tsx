@@ -18,7 +18,7 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 import {RegisterStyles as styles} from './Register.styles';
 
 export const RegisterPage = () => {
-  const navigation = useAppNavigation();
+  const {navigate} = useAppNavigation();
 
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -44,9 +44,7 @@ export const RegisterPage = () => {
         email: email,
         avatar:
           'https://firebasestorage.googleapis.com/v0/b/teamit-fd85a.appspot.com/o/empty%2Fimages.jpg?alt=media&token=997b132a-0902-4b26-8e97-81dfdfd3b44b',
-      });
-
-      navigation.navigate(Stacks.HOME_TAB);
+      }).then(() => navigate(Screens.PROFILE));
     } catch (error) {
     } finally {
       setLoading(false);
@@ -108,7 +106,7 @@ export const RegisterPage = () => {
         <Button
           color="#B783EC"
           title="Go to Login"
-          onPress={() => navigation.navigate(Screens.LOGIN)}
+          onPress={() => navigate(Screens.LOGIN)}
         />
       </KeyboardAvoidingView>
       <View style={styles.image_teamIT_down}>

@@ -10,13 +10,11 @@ export const ProfileStackNavigator = () => {
   const ProfileStack = createNativeStackNavigator<ProfileStackParamsList>();
 
   return (
-    <ProfileStack.Navigator>
+    <ProfileStack.Navigator screenOptions={{headerShown: false}}>
       <ProfileStack.Screen
         name={Screens.PROFILE}
         component={Profile}
-        options={{
-          headerShown: false,
-        }}
+        initialParams={{userId: undefined}}
       />
     </ProfileStack.Navigator>
   );

@@ -1,7 +1,9 @@
 import {createNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import React from 'react';
+import React, {useEffect} from 'react';
 
+import {auth} from 'app/FireBaseConfig.ts';
+import {onAuthStateChanged} from 'firebase/auth';
 import {LoginPage, Messenger, Project, RegisterPage} from 'pages';
 import {useAppNavigation} from 'shared/libs/useAppNavigation.tsx';
 import {Header} from 'widgets';
@@ -14,18 +16,40 @@ export const RootNavigator = () => {
   const RootStack = createNativeStackNavigator<RootStackParamsList>();
   const navigation = useAppNavigation();
 
+  // Проверка авторизации
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      if (!user && navigationRef.isReady()) {
+        navigation.navigate(Screens.LOGIN);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   return (
     <RootStack.Navigator>
+      {/* Public screens */}
+      <RootStack.Screen
+        name={Screens.LOGIN}
+        component={LoginPage}
+        options={{headerShown: false}}
+      />
+      <RootStack.Screen
+        name={Screens.REGISTER}
+        component={RegisterPage}
+        options={{headerShown: false}}
+      />
+
+      {/* Protected screens */}
       <RootStack.Screen
         name={Stacks.MAIN}
         component={MainTabsNavigator}
-        options={{
-          headerShown: false,
-        }}
+        options={{headerShown: false}}
       />
       <RootStack.Screen
         name={Screens.MESSENGER}
@@ -39,26 +63,11 @@ export const RootNavigator = () => {
             />
           ),
         })}
-        // options={{headerShown: true}}
       />
       <RootStack.Screen
         name={Screens.PROJECT}
         component={Project}
         options={{headerShown: false}}
-      />
-      <RootStack.Screen
-        name={Screens.LOGIN}
-        component={LoginPage}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <RootStack.Screen
-        name={Screens.REGISTER}
-        component={RegisterPage}
-        options={{
-          headerShown: false,
-        }}
       />
     </RootStack.Navigator>
   );
