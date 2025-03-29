@@ -69,7 +69,7 @@ export const Messenger = () => {
       <>
         <Message
           status={item.status}
-          message={item.message}
+          message={item.message.replace(/\n+$/g, '')}
           isCurrentUser={isCurrentUser}
           isRead={item.isRead}
         />
@@ -89,7 +89,7 @@ export const Messenger = () => {
       id: tempMessageId,
       chatId,
       authorId: userId,
-      message,
+      message: message.replace(/\n+$/g, ''),
       createdAt: new Date(),
       isRead: false,
       status: 'sending',

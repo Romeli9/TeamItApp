@@ -20,14 +20,17 @@ export const ChatList = () => {
   const chats = useChatList(userId);
 
   const renderItem = ({item}: {item: Chat}) => {
-    const handlePress = () => {
-      navigate(Screens.MESSENGER, {chatId: item.id, chatName: item.name});
+    const handlePress = (chatName: string) => {
+      navigate(Screens.MESSENGER, {chatId: item.id, chatName});
     };
 
     return (
       <ChatItem
-        chatName={item.name}
         lastMessage={item.lastMessage}
+        time={item.time}
+        group={item.group}
+        participants={item.participants}
+        image={item.image}
         onPress={handlePress}
       />
     );
