@@ -27,8 +27,15 @@ export const LoginPage = () => {
   const SignIn = async () => {
     setLoading(true);
     try {
-      const response = await signInWithEmailAndPassword(auth, email, password);
-      navigate(Screens.PROFILE);
+      await signInWithEmailAndPassword(auth, email, password).then(() =>
+        navigate(Stacks.MAIN, {
+          screen: Stacks.PROFILE_TAB,
+          params: {
+            screen: Screens.PROFILE,
+            params: {userId: undefined},
+          },
+        }),
+      );
     } catch (error: any) {
       Alert.alert('Sign In failed: ' + error.message);
     } finally {

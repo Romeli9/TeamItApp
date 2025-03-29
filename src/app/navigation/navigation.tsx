@@ -33,7 +33,6 @@ export const RootNavigator = () => {
 
   return (
     <RootStack.Navigator>
-      {/* Public screens */}
       <RootStack.Screen
         name={Screens.LOGIN}
         component={LoginPage}
@@ -45,7 +44,6 @@ export const RootNavigator = () => {
         options={{headerShown: false}}
       />
 
-      {/* Protected screens */}
       <RootStack.Screen
         name={Stacks.MAIN}
         component={MainTabsNavigator}
