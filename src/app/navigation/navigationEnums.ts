@@ -1,15 +1,12 @@
 export enum Stacks {
   MAIN = 'Main',
   HOME_TAB = 'HomeTab',
+  PROFILE_TAB = 'ProfileTab',
 }
 
 export enum Screens {
-  HOME_TAB = 'HomeTab',
-  PROFILE_TAB = 'ProfileTab',
-
   HOME = 'Home',
   PROFILE = 'Profile',
-  AUTH = 'Auth',
   LOGIN = 'Login',
   REGISTER = 'Register',
   CHATLIST = 'ChatList',
@@ -17,3 +14,5 @@ export enum Screens {
   PROJECT = 'Project',
   SEARCH = 'Search',
 }
+
+export type AllRoutes = Screens | Stacks;

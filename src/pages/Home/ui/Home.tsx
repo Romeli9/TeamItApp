@@ -32,10 +32,13 @@ import 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
 import {SearchIcon} from 'shared/icons';
 import {Colors, IconStyles} from 'shared/libs/helpers';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {HomePagestyles as styles} from './Home.styles';
 
-export const Home: React.FC<{navigation: any}> = ({navigation}) => {
+export const Home = () => {
+  const {navigate} = useAppNavigation();
+
   const [isModalVisible, setModalVisible] = useState(false);
 
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -114,8 +117,8 @@ export const Home: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
 
-  const OpenProject = (projectID: string) => {
-    navigation.navigate('Project', {projectId: projectID});
+  const OpenProject = (projectId: string) => {
+    navigate(Screens.PROJECT, {projectId});
   };
 
   const renderCarouselItem = ({item, index}: {item: any; index: number}) => {
@@ -208,7 +211,7 @@ export const Home: React.FC<{navigation: any}> = ({navigation}) => {
           </Text>
           <TouchableOpacity
             style={styles.searchButton}
-            onPress={() => navigation.navigate(Screens.SEARCH)}>
+            onPress={() => navigate(Screens.SEARCH)}>
             <SearchIcon
               fill={IconStyles.medium.changeColor(Colors.White100).color}
               width={IconStyles.large.width}

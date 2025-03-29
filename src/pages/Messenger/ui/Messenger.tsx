@@ -22,15 +22,10 @@ import {ChatTextarea, Message} from 'shared/ui';
 
 import {MessengerStyles as styles} from './Messenger.styles';
 
-type MessengerScreenRouteProp = RouteProp<
-  RootStackParamsList,
-  Screens.MESSENGER
->;
-
 export const Messenger = () => {
   const {userId, userName} = useSelector((state: RootState) => state.user);
 
-  const route = useRoute<MessengerScreenRouteProp>();
+  const route = useRoute<RouteProp<RootStackParamsList, Screens.MESSENGER>>();
 
   const {chatId} = route.params;
 
