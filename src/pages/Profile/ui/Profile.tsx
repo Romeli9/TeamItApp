@@ -36,7 +36,6 @@ export const Profile = () => {
 
   const {userId} = route.params || {};
 
-  console.log(userId);
   const [isUserInProject, setIsUserInProject] = useState(false);
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [isInviteModalVisible, setInviteModalVisible] = useState(false);

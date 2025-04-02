@@ -6,9 +6,8 @@ import {ChatList} from 'pages';
 import {HomeIcon, MessageIcon, ProfileIcon} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers/colors';
 
-import {HomeStackNavigator, ProfileStackNavigator} from '.';
 import {Screens, Stacks} from '../navigationEnums';
-import {MainTabsStackParamsList} from '../navigationTypes';
+import {HomeStackNavigator, ProfileStackNavigator} from './';
 
 export const MainTabsNavigator = () => {
   const MainTabs = createBottomTabNavigator();

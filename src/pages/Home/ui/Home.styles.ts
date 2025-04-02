@@ -1,4 +1,6 @@
-import {StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
+
+const screenWidth = Dimensions.get('window').width;
 
 export const HomePagestyles = StyleSheet.create({
   create__button: {
@@ -64,51 +66,40 @@ export const HomePagestyles = StyleSheet.create({
     right: 28,
   },
 
-  carousel: {
-    marginTop: 20,
-    width: '100%',
-    height: 300,
-  },
+  // carousel: {
+  //   marginTop: 20,
+  //   width: '100%',
+  //   height: 300,
+  // },
   imageContainer: {
     width: '100%',
     height: 300, // Высота изображения
   },
-  projectTitle: {
-    fontSize: 16,
-    fontFamily: 'Inter-ExtraBold',
-    textTransform: 'uppercase',
-    color: '#FFFFFF',
-    width: 314,
-    textAlign: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 15,
-  },
 
-  carouselItem: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  // carouselItem: {
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  // },
 
   centeredItem: {
     width: 165, // Увеличиваем ширину центрального элемента
     height: 259, // Высота центрального элемента
   },
 
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
-  },
+  // gradient: {
+  //   ...StyleSheet.absoluteFillObject,
+  // },
 
-  sideItem: {
-    width: 134.23,
-    height: 227.41,
-  },
-  image: {
-    width: 165,
-    height: 259,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
+  // sideItem: {
+  //   width: 134.23,
+  //   height: 227.41,
+  // },
+  // image: {
+  //   width: 165,
+  //   height: 259,
+  //   borderRadius: 20,
+  //   overflow: 'hidden',
+  // },
 
   topContainer: {
     flex: 1,
@@ -151,12 +142,56 @@ export const HomePagestyles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-
   effect: {
-    //zIndex: -10,
     position: 'absolute',
     bottom: -130,
     left: -240,
-    //width: '100%',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    borderRadius: 20,
+    justifyContent: 'flex-end',
+  },
+  gradient: {
+    height: '40%',
+    justifyContent: 'flex-end',
+    padding: 16,
+    borderRadius: 20,
+  },
+  projectTitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  carouselContainer: {
+    width: '100%',
+    height: 320,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  carouselWrapper: {
+    width: '100%',
+    overflow: 'visible',
+  },
+  carouselItem: {
+    width: screenWidth * 0.7,
+    height: 340,
+    borderRadius: 20,
+    // overflow: 'hidden',
+    marginLeft: screenWidth / 5,
+    // justifyContent: 'center',
+    // alignItems: 'center',
+  },
+  activeItem: {
+    transform: [{scale: 1}],
+    zIndex: 3,
+  },
+  sideItem: {
+    transform: [{scale: 0.9}],
+    zIndex: 1,
+    opacity: 0.9,
   },
 });

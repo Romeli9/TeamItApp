@@ -44,7 +44,15 @@ export const RegisterPage = () => {
         email: email,
         avatar:
           'https://firebasestorage.googleapis.com/v0/b/teamit-fd85a.appspot.com/o/empty%2Fimages.jpg?alt=media&token=997b132a-0902-4b26-8e97-81dfdfd3b44b',
-      }).then(() => navigate(Screens.PROFILE));
+      }).then(() =>
+        navigate(Stacks.MAIN, {
+          screen: Stacks.PROFILE_TAB,
+          params: {
+            screen: Screens.PROFILE,
+            params: {userId: undefined},
+          },
+        }),
+      );
     } catch (error) {
     } finally {
       setLoading(false);
