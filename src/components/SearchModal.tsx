@@ -36,7 +36,6 @@ const SearchModal = ({visible, onClose, onUserSelect}: SearchModalProps) => {
     const allUsers = snapshot.docs
       .map(doc => {
         const data = doc.data();
-        console.log(data);
         const obj: UserFrom = {username: data.username, id: doc.id};
         return obj;
       })
