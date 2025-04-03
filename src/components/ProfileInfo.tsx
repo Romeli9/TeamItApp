@@ -143,7 +143,7 @@ function ProfileInfo() {
           {showMoreInfo && (
             <>
               <Text style={styles.text}>Опыт: {experience}</Text>
-              <Text style={styles.text}>Навыки: {skills}</Text>
+              <Text style={styles.text}>Роль: {skills}</Text>
               <Text style={styles.text}>Телеграмм: {telegramm}</Text>
             </>
           )}
