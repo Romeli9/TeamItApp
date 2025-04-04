@@ -324,11 +324,13 @@ export const Project = () => {
             onClose={() => setSearchModal(false)}
             requiredRoles={projectData.required}
           />
-          <TouchableOpacity
-            onPress={() => setSearchModal(true)}
-            style={styles.invite}>
-            <Text style={styles.inviteProject}>Поиск участников</Text>
-          </TouchableOpacity>
+          {projectData.creatorId === userId && (
+            <TouchableOpacity
+              onPress={() => setSearchModal(true)}
+              style={styles.invite}>
+              <Text style={styles.inviteProject}>Поиск участников</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={goBack} style={styles.goback}>
             <ArrowLeftIcon />
           </TouchableOpacity>
