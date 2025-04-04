@@ -19,11 +19,7 @@ export const ProfileStackNavigator = () => {
 
   return (
     <ProfileStack.Navigator screenOptions={{headerShown: false}}>
-      <ProfileStack.Screen
-        name={Screens.PROFILE}
-        component={Profile}
-        initialParams={{userId: undefined}}
-      />
+      <ProfileStack.Screen name={Screens.PROFILE} component={Profile} />
       <ProfileStack.Screen
         name={Screens.VIEW_PROFILE}
         component={ProfileView}

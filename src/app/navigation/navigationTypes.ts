@@ -41,6 +41,6 @@ export type HomeStackParamsList = {
 };
 
 export type ProfileStackParamsList = {
-  [Screens.PROFILE]: ProfileRouteParams; // TODO: заменить на undefined
+  [Screens.PROFILE]: undefined;
   [Screens.VIEW_PROFILE]: ProfileRouteParams;
 };

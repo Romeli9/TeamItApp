@@ -29,10 +29,6 @@ import {ProfileStyles as styles} from './Profile.styles';
 export const Profile = () => {
   const {navigate} = useAppNavigation();
 
-  const route = useRoute<RouteProp<ProfileStackParamsList, Screens.PROFILE>>();
-
-  const {userId} = route.params || {};
-
   const [isUserInProject, setIsUserInProject] = useState(false);
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [isInviteModalVisible, setInviteModalVisible] = useState(false);
@@ -42,26 +38,6 @@ export const Profile = () => {
   const {userName, aboutMe, avatar, background} = useSelector(
     (state: RootState) => state.user,
   );
-
-  useEffect(() => {
-    getUser();
-  }, [userId]);
-
-  const getUser = async () => {
-    if (userId) {
-      let userInfo = await getUserById(userId);
-      dispatch(
-        setUserData({
-          userId: userId,
-          username: userInfo.username,
-          email: userInfo.email,
-          avatar: userInfo.avatar,
-          background: userInfo.background,
-        }),
-      );
-      dispatch(setProfileData(userInfo));
-    }
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -237,18 +213,6 @@ export const Profile = () => {
       console.error('Sign out error:', error);
     }
   };
-
-  useEffect(() => {
-    const checkUserInProject = () => {
-      const currentUser = FIREBASE_AUTH.currentUser;
-      //console.log(currentUser);
-      /*  if (currentUser) {
-        setIsUserInProject(currentUser.uid === userId); // Сравниваем текущий uid с переданным userId
-      }*/
-    };
-
-    checkUserInProject();
-  }, [userId]);
 
   return (
     <SafeAreaProvider>
