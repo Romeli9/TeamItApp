@@ -4,7 +4,13 @@ import React, {useEffect} from 'react';
 
 import {auth} from 'app/FireBaseConfig.ts';
 import {onAuthStateChanged} from 'firebase/auth';
-import {LoginPage, Messenger, Project, RegisterPage} from 'pages';
+import {
+  LoginPage,
+  Messenger,
+  Project,
+  ProjectRequests,
+  RegisterPage,
+} from 'pages';
 import {useAppNavigation} from 'shared/libs/useAppNavigation.tsx';
 import {Header} from 'widgets';
 
@@ -66,6 +72,13 @@ export const RootNavigator = () => {
         name={Screens.PROJECT}
         component={Project}
         options={{headerShown: false}}
+      />
+      <RootStack.Screen
+        name={Screens.PROJECT_REQUESTS}
+        component={ProjectRequests}
+        options={() => ({
+          header: () => <Header showBackButton onBackPress={handleGoBack} />,
+        })}
       />
     </RootStack.Navigator>
   );

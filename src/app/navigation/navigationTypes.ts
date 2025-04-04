@@ -26,6 +26,7 @@ export type RootStackParamsList = {
   [Stacks.MAIN]: NavigatorScreenParams<MainTabsStackParamsList>;
   [Screens.MESSENGER]: MessengerRouteParams;
   [Screens.PROJECT]: ProjectRouteParams;
+  [Screens.PROJECT_REQUESTS]: undefined;
 };
 
 export type MainTabsStackParamsList = {
@@ -40,5 +41,6 @@ export type HomeStackParamsList = {
 };
 
 export type ProfileStackParamsList = {
-  [Screens.PROFILE]: ProfileRouteParams;
+  [Screens.PROFILE]: ProfileRouteParams; // TODO: заменить на undefined
+  [Screens.VIEW_PROFILE]: ProfileRouteParams;
 };

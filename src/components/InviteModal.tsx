@@ -14,7 +14,13 @@ import {
 } from 'react-native';
 
 import {Picker} from '@react-native-picker/picker';
-import {DocumentReference, updateDoc} from 'firebase/firestore';
+import {FIREBASE_DB} from 'app/FireBaseConfig';
+import {
+  DocumentReference,
+  addDoc,
+  collection,
+  updateDoc,
+} from 'firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
@@ -22,35 +28,127 @@ import {RootState} from 'redux/store';
 type InviteModalProps = {
   onModalClose: () => void;
   userDocRef: DocumentReference<any> | undefined;
-  Project: {projectId: string};
+  userName: string;
 };
 
 export const InviteModal: React.FC<InviteModalProps> = ({
   onModalClose,
   userDocRef,
+  userName,
 }) => {
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+  const [selectedProject, setSelectedProject] = useState<ProjectType | null>(
     null,
-  ); // Добавлено состояние для выбранного проекта
+  );
+  const [selectedRole, setSelectedRole] = useState('');
   const [message, setMessage] = useState<string>('');
+  const [part, setPart] = useState(0);
+
   const projects = useSelector(
     (state: RootState) => state.projects.yourProjects,
   );
+
+  const {userId} = useSelector((state: RootState) => state.user);
+
   const handleInvite = async () => {
-    if (userDocRef && selectedProjectId) {
-      // Используем selectedProjectId
+    if (selectedProject?.id) {
       try {
-        await updateDoc(userDocRef, {
-          projects: selectedProjectId,
-          message: message,
-        }); // Обновляем с использованием выбранного проекта
+        const requestData = {
+          projectId: selectedProject.id,
+          projectName: selectedProject.name,
+          senderId: userId,
+          senderName: userName,
+          recipientId: selectedProject.creatorId,
+          recipientName: selectedProject.creator,
+          role: selectedRole,
+          message,
+          status: 'pending',
+          createdAt: new Date(),
+        };
+
+        await addDoc(collection(FIREBASE_DB, 'projectRequests'), requestData);
         Alert.alert('Приглашение отправлено!');
-        onModalClose(); // Закрываем модальное окно после отправки
+        onModalClose();
       } catch (error) {
         console.error('Ошибка при отправке приглашения:', error);
       }
     } else {
-      Alert.alert('Пожалуйста, выберите проект.'); // Уведомление, если проект не выбран
+      Alert.alert('Пожалуйста, выберите проект.');
+    }
+  };
+
+  const renderPart = () => {
+    switch (part) {
+      case 0:
+        return (
+          <>
+            <Text>Выберите проект:</Text>
+            <Picker
+              selectedValue={selectedProject?.id}
+              style={styles.picker}
+              itemStyle={{color: 'black', fontSize: 16}}
+              onValueChange={itemValue => {
+                const selectedProject = projects.find(
+                  project => project.id === itemValue,
+                );
+                setSelectedProject(selectedProject || null);
+              }}>
+              <Picker.Item label="Выберите проект" value={''} />
+              {projects && projects.length > 0 ? (
+                projects.map(project => (
+                  <Picker.Item
+                    key={project.id}
+                    label={project.name || 'Без названия'}
+                    value={project.id}
+                  />
+                ))
+              ) : (
+                <Picker.Item label="Нет доступных проектов" value={undefined} />
+              )}
+            </Picker>
+
+            <TouchableOpacity
+              style={styles.button}
+              disabled={!selectedProject}
+              onPress={() => setPart(1)}>
+              <Text style={styles.buttonText}>Далее</Text>
+            </TouchableOpacity>
+          </>
+        );
+
+      case 1:
+        return (
+          <>
+            <Text>Выберите роль</Text>
+            <Picker
+              selectedValue={selectedRole}
+              style={styles.picker}
+              itemStyle={{color: 'black', fontSize: 16}}
+              onValueChange={(item: string) => {
+                setSelectedRole(item);
+              }}>
+              <Picker.Item label="Выберите роль" value={''} />
+              {selectedProject?.required.map((item, ix) => (
+                <Picker.Item key={ix} label={item} value={item} />
+              ))}
+            </Picker>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Введите ваше сообщение"
+              placeholderTextColor="#A8A8A8"
+              value={message}
+              onChangeText={setMessage}
+              multiline
+            />
+
+            <TouchableOpacity
+              style={styles.button}
+              disabled={!selectedRole}
+              onPress={handleInvite}>
+              <Text style={styles.buttonText}>Отправить приглашение</Text>
+            </TouchableOpacity>
+          </>
+        );
     }
   };
 
@@ -66,38 +164,10 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Пригласить в проект</Text>
-            <Text>Выберите проект:</Text>
-            <Picker
-              selectedValue={selectedProjectId}
-              style={styles.picker}
-              itemStyle={{color: 'black', fontSize: 16}}
-              onValueChange={itemValue => setSelectedProjectId(itemValue)}>
-              <Picker.Item label="Выберите проект" value={''} />
-              {projects && projects.length > 0 ? (
-                projects.map(project => (
-                  <Picker.Item
-                    key={project.id}
-                    label={project.name || 'Без названия'}
-                    value={project.id}
-                  />
-                ))
-              ) : (
-                <Picker.Item label="Нет доступных проектов" value={undefined} />
-              )}
-            </Picker>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Введите ваше сообщение"
-              placeholderTextColor="#A8A8A8"
-              value={message}
-              onChangeText={setMessage}
-              multiline
-            />
-            <TouchableOpacity style={styles.button} onPress={handleInvite}>
-              <Text style={styles.buttonText}>Отправить приглашение</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button2} onPress={onModalClose}>
+            {renderPart()}
+
+            <TouchableOpacity style={styles.button} onPress={onModalClose}>
               <Text style={styles.buttonText}>Закрыть</Text>
             </TouchableOpacity>
           </View>
@@ -136,13 +206,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     top: 175,
   },
-  button2: {
-    backgroundColor: '#BE9DE8',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
-    top: 175,
-  },
+
   buttonText: {
     color: 'white',
   },
