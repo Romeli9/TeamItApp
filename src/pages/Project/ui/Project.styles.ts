@@ -75,7 +75,21 @@ export const ProjectStyles = StyleSheet.create({
     marginTop: 7,
     marginBottom: 5,
   },
-
+  invite: {
+    position: 'relative',
+    top: 25,
+    backgroundColor: '#BE9DE8',
+    width: 225,
+    height: 50,
+    borderRadius: 50,
+    marginTop: 10,
+  },
+  inviteProject: {
+    color: '#FFFFFF',
+    top: 13,
+    fontSize: 18,
+    textAlign: 'center',
+  },
   required_contnainer_2: {
     //width: '95%',
     //flex: 1,

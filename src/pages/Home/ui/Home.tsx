@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {Dimensions} from 'react-native';
 
 import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
@@ -21,21 +22,24 @@ import {
   query,
   where,
 } from 'firebase/firestore';
+import Carousel from 'react-native-reanimated-carousel';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import Carousel from 'react-native-snap-carousel';
 import {useDispatch, useSelector} from 'react-redux';
 import {setOtherProjects, setYourProjects} from 'redux/slices/projectsSlice';
 import 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
 import {SearchIcon} from 'shared/icons';
 import {Colors, IconStyles} from 'shared/libs/helpers';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {HomePagestyles as styles} from './Home.styles';
 
-export const Home: React.FC<{navigation: any}> = ({navigation}) => {
+export const Home = () => {
+  const {navigate} = useAppNavigation();
+
   const [isModalVisible, setModalVisible] = useState(false);
 
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -114,30 +118,11 @@ export const Home: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
 
-  const OpenProject = (projectID: string) => {
-    navigation.navigate('Project', {projectId: projectID});
+  const OpenProject = (projectId: string) => {
+    navigate(Screens.PROJECT, {projectId});
   };
 
-  const renderCarouselItem = ({item, index}: {item: any; index: number}) => {
-    return (
-      <View style={[styles.carouselItem]}>
-        <TouchableOpacity onPress={() => OpenProject(item.id)}>
-          <ImageBackground source={{uri: item.photo}} style={[styles.image]}>
-            <LinearGradient
-              colors={[
-                'rgba(242,240,255, 0)',
-                'rgba(158,115,198, 0.38)',
-                'rgba(82,0,146, 0.4)',
-              ]}
-              style={styles.gradient}></LinearGradient>
-          </ImageBackground>
-        </TouchableOpacity>
-        {index === carouselIndex && (
-          <Text style={styles.projectTitle}>{item.name}</Text>
-        )}
-      </View>
-    );
-  };
+  const screenWidth = Dimensions.get('window').width;
 
   if (!dataLoaded) {
     return (
@@ -208,7 +193,7 @@ export const Home: React.FC<{navigation: any}> = ({navigation}) => {
           </Text>
           <TouchableOpacity
             style={styles.searchButton}
-            onPress={() => navigation.navigate(Screens.SEARCH)}>
+            onPress={() => navigate(Screens.SEARCH)}>
             <SearchIcon
               fill={IconStyles.medium.changeColor(Colors.White100).color}
               width={IconStyles.large.width}
@@ -216,21 +201,49 @@ export const Home: React.FC<{navigation: any}> = ({navigation}) => {
             />
           </TouchableOpacity>
 
-          <View style={styles.carousel}>
+          <View style={{width: screenWidth}}>
             <Image
               source={require('shared/assets/icons/Group1.png')}
-              style={styles.effect}></Image>
+              style={styles.effect}
+            />
 
-            {
-              <Carousel
-                layout="default"
-                data={otherProjects}
-                renderItem={renderCarouselItem}
-                sliderWidth={400}
-                itemWidth={165}
-                onSnapToItem={index => setCarouselIndex(index)}
-              />
-            }
+            <Carousel
+              loop={true}
+              mode="parallax"
+              modeConfig={{
+                parallaxScrollingScale: 0.8,
+                parallaxScrollingOffset: 70,
+              }}
+              width={screenWidth * 0.6}
+              height={320}
+              snapEnabled={true}
+              // pagingEnabled={false}
+              data={otherProjects}
+              style={{width: screenWidth}}
+              onSnapToItem={index => setCarouselIndex(index)}
+              renderItem={({item}) => (
+                <View style={styles.carouselItem}>
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => OpenProject(item.id)}>
+                    <ImageBackground
+                      source={{uri: item.photo}}
+                      style={styles.image}
+                      borderRadius={20}>
+                      <LinearGradient
+                        colors={[
+                          'rgba(242,240,255, 0)',
+                          'rgba(158,115,198, 0.38)',
+                          'rgba(82,0,146, 0.4)',
+                        ]}
+                        style={styles.gradient}
+                      />
+                    </ImageBackground>
+                  </TouchableOpacity>
+                  <Text style={styles.projectTitle}>{item.name}</Text>
+                </View>
+              )}
+            />
           </View>
         </View>
 

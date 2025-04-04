@@ -1,3 +1,4 @@
+import {RouteProp, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
@@ -10,8 +11,8 @@ import {
 
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import EditProfile from 'components/EditProfile';
-import ProfileInfo from 'components/ProfileInfo';
+import {ProfileStackParamsList} from 'app/navigation/navigationTypes';
+import {EditProfile, InviteModal, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';
 import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
@@ -25,7 +26,7 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 import {ProfileStyles as styles} from './Profile.styles';
 
 export const Profile = () => {
-  const navigation = useAppNavigation();
+  const {navigate} = useAppNavigation();
 
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
@@ -85,7 +86,6 @@ export const Profile = () => {
       const imageUrl = await uploadImageToFirebase(result.assets[0].uri);
       if (imageUrl) {
         const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
-        console.log('Current user for image upload:', user); // Проверка текущего пользователя
         if (user) {
           dispatch(
             setUserData({
@@ -101,7 +101,6 @@ export const Profile = () => {
             'Ваш новый аватар успешно обновлен.',
           );
         } else {
-          console.log('User is not signed in while uploading image.');
         }
       }
     }
@@ -126,7 +125,6 @@ export const Profile = () => {
       const imageUrl = await uploadImageToFirebase1(result.assets[0].uri);
       if (imageUrl) {
         const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
-        console.log('Current user for image upload:', user); // Проверка текущего пользователя
         if (user) {
           dispatch(
             setUserData({
@@ -142,7 +140,6 @@ export const Profile = () => {
             'Ваш новый аватар успешно обновлен.',
           );
         } else {
-          console.log('User is not signed in while uploading image.');
         }
       }
     }
@@ -208,7 +205,7 @@ export const Profile = () => {
   const handleSignOut = async () => {
     try {
       await FIREBASE_AUTH.signOut();
-      navigation.navigate(Screens.LOGIN);
+      navigate(Screens.LOGIN);
     } catch (error) {
       console.error('Sign out error:', error);
     }
@@ -246,6 +243,7 @@ export const Profile = () => {
                 </View>
               )}
             </View>
+
             <TouchableOpacity
               style={styles.background_image}
               onPress={backImageLibraryPress}>
@@ -258,15 +256,17 @@ export const Profile = () => {
                 <Text style={styles.add_image__text}>+</Text>
               )}
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.add_image__button}
-              onPress={onImageLibraryPress}>
-              {avatar ? (
-                <Image source={{uri: avatar}} style={styles.selectedImage} />
-              ) : (
-                <Text style={styles.add_image__text}>+</Text>
-              )}
-            </TouchableOpacity>
+            <View style={styles.backselectedImage}>
+              <TouchableOpacity
+                style={styles.add_image__button}
+                onPress={onImageLibraryPress}>
+                {avatar ? (
+                  <Image source={{uri: avatar}} style={styles.selectedImage} />
+                ) : (
+                  <Text style={styles.add_image__text}>+</Text>
+                )}
+              </TouchableOpacity>
+            </View>
             <Text style={styles.text}>@{userName}</Text>
 
             {isEditProfileVisible && (

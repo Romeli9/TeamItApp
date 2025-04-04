@@ -13,18 +13,23 @@
     },
     "ios": {
       "newArchEnabled": true,
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.TeamItApp"
     },
     "android": {
       "newArchEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.TeamItApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font", "expo-build-properties"]
+    "plugins": [
+      "expo-font",
+      "expo-build-properties"
+    ]
   }
 }
