@@ -315,15 +315,6 @@ export const Profile = () => {
               />
             )}
 
-            {
-              //userId && (
-              <TouchableOpacity
-                style={styles.invite}
-                onPress={() => setInviteModalVisible(true)}>
-                <Text style={styles.inviteProject}>Пригласить в проект</Text>
-              </TouchableOpacity>
-            }
-
             {isEditProfileVisible && (
               <EditProfile
                 onModalClose={() => setEditProfileVisible(false)}
