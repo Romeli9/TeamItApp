@@ -3,6 +3,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList, KeyboardAvoidingView, Platform, View} from 'react-native';
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
+import {Screens} from 'app/navigation/navigationEnums';
 import {RootStackParamsList} from 'app/navigation/navigationTypes';
 import {IMessage} from 'entities';
 import {
@@ -21,12 +22,10 @@ import {ChatTextarea, Message} from 'shared/ui';
 
 import {MessengerStyles as styles} from './Messenger.styles';
 
-type MessengerScreenRouteProp = RouteProp<RootStackParamsList, 'Messenger'>;
-
 export const Messenger = () => {
   const {userId, userName} = useSelector((state: RootState) => state.user);
 
-  const route = useRoute<MessengerScreenRouteProp>();
+  const route = useRoute<RouteProp<RootStackParamsList, Screens.MESSENGER>>();
 
   const {chatId} = route.params;
 
@@ -70,7 +69,7 @@ export const Messenger = () => {
       <>
         <Message
           status={item.status}
-          message={item.message}
+          message={item.message.replace(/\n+$/g, '')}
           isCurrentUser={isCurrentUser}
           isRead={item.isRead}
         />
@@ -90,7 +89,7 @@ export const Messenger = () => {
       id: tempMessageId,
       chatId,
       authorId: userId,
-      message,
+      message: message.replace(/\n+$/g, ''),
       createdAt: new Date(),
       isRead: false,
       status: 'sending',

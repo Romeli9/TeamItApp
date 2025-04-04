@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
   Image,
@@ -13,14 +13,14 @@ import {
 
 import * as ImagePicker from 'expo-image-picker';
 import {LinearGradient} from 'expo-linear-gradient';
-import {addDoc, collection} from 'firebase/firestore';
+import {addDoc, collection, doc, getDoc, getDocs} from 'firebase/firestore';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
-import {categories} from 'shared/assets/consts/Categories';
-import {required} from 'shared/assets/consts/Required';
 
+// import {categories} from 'shared/assets/consts/Categories';
+// import {required} from 'shared/assets/consts/Required';
 import {FIREBASE_DB, FIREBASE_STORAGE} from '../../app/FireBaseConfig';
 import {styles} from './styles';
 
@@ -41,6 +41,9 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [projectDescRaw, setProjectDescRaw] = useState('');
   const [projectName, setProjectName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<string[]>();
+  const [roles, setRoles] = useState<string[]>();
 
   const [pickerResponse, setPickerResponse] =
     useState<ImagePicker.ImagePickerResult | null>(null);
@@ -51,19 +54,42 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      let tempCateg: string[] = [];
+      let tempRoles: string[] = [];
+
+      const querySnapshotCategories = await getDocs(
+        collection(FIREBASE_DB, 'categories'),
+      );
+      querySnapshotCategories.forEach(doc => {
+        if (doc.data().name && doc.data().name.length > 0)
+          tempCateg.push(doc.data().name);
+      });
+
+      const querySnapshotRoles = await getDocs(collection(FIREBASE_DB, 'role'));
+      querySnapshotRoles.forEach(doc => {
+        if (doc.data().name && doc.data().name.length > 0)
+          tempRoles.push(doc.data().name);
+      });
+
+      setCategories(tempCateg);
+      setRoles(tempRoles);
+    };
+
+    fetchData();
+  }, []);
+
   const uploadImageToFirebase = async (uri: string) => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
-
       const storageRef = ref(
         FIREBASE_STORAGE,
         `images/${userName}_${Date.now()}`,
       );
       await uploadBytes(storageRef, blob);
-
-      const url = await getDownloadURL(storageRef);
-      return url;
+      return await getDownloadURL(storageRef);
     } catch (error) {
       console.error('Error uploading image: ', error);
       return null;
@@ -80,17 +106,15 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
-      selectionLimit: 1, // Установка лимита на одно изображение
+      selectionLimit: 1,
     });
-
     if (!result.canceled) {
       setPickerResponse(result);
       setSelectedImage(result.assets[0].uri);
-      console.log(result);
     }
   }, []);
 
@@ -124,7 +148,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     }
   };
 
-  const CreateProject = async () => {
+  const сreateProject = async () => {
     try {
       if (
         !projectName.trim() ||
@@ -136,6 +160,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         Alert.alert('Пожалуйста, заполните все поля.');
         return;
       }
+      setLoading(true);
 
       let imageUrl = '';
       if (pickerResponse && !pickerResponse.canceled) {
@@ -162,7 +187,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       const projectsRef = collection(firestore, 'projects');
 
       const docRef = await addDoc(projectsRef, projectData);
-      console.log('Project created with ID: ', docRef.id);
 
       const newProject: ProjectType = {
         id: docRef.id,
@@ -177,9 +201,11 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       setPickerResponse(null);
       setSelectedImage('');
       setMembers([]);
+      setLoading(false);
       setModalVisible(false);
     } catch (error) {
       console.error('Error adding document: ', error);
+      setLoading(false);
     }
   };
 
@@ -260,25 +286,25 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               {requiredOpen && (
                 <ScrollView style={styles.dropdownContainer}>
                   <View style={styles.dropdownWrapper}>
-                    {required.map(item => (
-                      <TouchableOpacity
-                        key={item.key}
-                        style={[
-                          styles.dropdownItem,
-                          requiredSelected.includes(item.value) &&
-                            styles.dropdownItemSelected,
-                        ]}
-                        onPress={() => handleRequiredSelect(item.value)}>
-                        <View style={styles.dropdownItemContainer}>
-                          <View style={styles.dropdownItem_icon}>
-                            <Text style={styles.plus2}>+</Text>
+                    {roles &&
+                      roles.length > 0 &&
+                      roles.map((item, ix) => (
+                        <TouchableOpacity
+                          key={ix}
+                          style={[
+                            styles.dropdownItem,
+                            requiredSelected.includes(item) &&
+                              styles.dropdownItemSelected,
+                          ]}
+                          onPress={() => handleRequiredSelect(item)}>
+                          <View style={styles.dropdownItemContainer}>
+                            <View style={styles.dropdownItem_icon}>
+                              <Text style={styles.plus2}>+</Text>
+                            </View>
+                            <Text style={styles.dropdownItemText}>{item}</Text>
                           </View>
-                          <Text style={styles.dropdownItemText}>
-                            {item.value}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
+                        </TouchableOpacity>
+                      ))}
                   </View>
                 </ScrollView>
               )}
@@ -308,32 +334,33 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               {categoriesOpen && (
                 <ScrollView style={styles.dropdownContainer}>
                   <View style={styles.dropdownWrapper}>
-                    {categories.map(item => (
-                      <TouchableOpacity
-                        key={item.key}
-                        style={[
-                          styles.dropdownItem,
-                          categoriesSelected.includes(item.value) &&
-                            styles.dropdownItemSelected,
-                        ]}
-                        onPress={() => handleCategorySelect(item.value)}>
-                        <View style={styles.dropdownItemContainer}>
-                          <View style={styles.dropdownItem_icon}>
-                            <Text style={styles.plus2}>+</Text>
+                    {categories &&
+                      categories.length > 0 &&
+                      categories.map((item, ix) => (
+                        <TouchableOpacity
+                          key={ix}
+                          style={[
+                            styles.dropdownItem,
+                            categoriesSelected.includes(item) &&
+                              styles.dropdownItemSelected,
+                          ]}
+                          onPress={() => handleCategorySelect(item)}>
+                          <View style={styles.dropdownItemContainer}>
+                            <View style={styles.dropdownItem_icon}>
+                              <Text style={styles.plus2}>+</Text>
+                            </View>
+                            <Text style={styles.dropdownItemText}>{item}</Text>
                           </View>
-                          <Text style={styles.dropdownItemText}>
-                            {item.value}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
+                        </TouchableOpacity>
+                      ))}
                   </View>
                 </ScrollView>
               )}
             </View>
             <TouchableOpacity
+              disabled={loading}
               style={styles.project__button_create}
-              onPress={CreateProject}>
+              onPress={сreateProject}>
               <Text style={styles.project__text_create}>Создать</Text>
             </TouchableOpacity>
           </ScrollView>

@@ -6,48 +6,47 @@ import {ChatList} from 'pages';
 import {HomeIcon, MessageIcon, ProfileIcon} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers/colors';
 
-import {HomeStackNavigator, ProfileStackNavigator} from '.';
-import {Screens} from '../navigationEnums';
-import {MainTabsStackParamsList} from '../navigationTypes';
+import {Screens, Stacks} from '../navigationEnums';
+import {HomeStackNavigator, ProfileStackNavigator} from './';
 
 export const MainTabsNavigator = () => {
-  const MainTabsStack = createBottomTabNavigator<MainTabsStackParamsList>();
-
+  const MainTabs = createBottomTabNavigator();
   return (
-    <MainTabsStack.Navigator
+    <MainTabs.Navigator
       detachInactiveScreens={false}
       screenOptions={({route}) => ({
         tabBarIcon: ({color, size}) => {
           const iconProps = {fill: color, style: {width: size, height: size}};
-          if (route.name === Screens.HOME_TAB)
+          if (route.name === Stacks.HOME_TAB)
             return <HomeIcon {...iconProps} />;
-          if (route.name === Screens.PROFILE_TAB)
+          if (route.name === Stacks.PROFILE_TAB)
             return <ProfileIcon {...iconProps} />;
           if (route.name === Screens.CHATLIST)
             return <MessageIcon {...iconProps} />;
         },
         tabBarActiveTintColor: Colors.Purple100,
         tabBarInactiveTintColor: Colors.Gray500,
-        tabBarStyle: (route => {
+        tabBarStyle: (() => {
           const routeName = getFocusedRouteNameFromRoute(route) ?? '';
-          if (routeName === Screens.MESSENGER) return {display: 'none'};
-        })(route),
+          if (routeName === 'Messenger') return {display: 'none'};
+          return {};
+        })(),
       })}>
-      <MainTabsStack.Screen
-        name={Screens.PROFILE_TAB}
+      <MainTabs.Screen
+        name={Stacks.PROFILE_TAB}
         component={ProfileStackNavigator}
         options={{title: 'Профиль', headerShown: false}}
       />
-      <MainTabsStack.Screen
-        name={Screens.HOME_TAB}
+      <MainTabs.Screen
+        name={Stacks.HOME_TAB}
         component={HomeStackNavigator}
         options={{title: 'Главная', headerShown: false}}
       />
-      <MainTabsStack.Screen
+      <MainTabs.Screen
         name={Screens.CHATLIST}
         component={ChatList}
         options={{title: 'Чаты', headerShown: false}}
       />
-    </MainTabsStack.Navigator>
+    </MainTabs.Navigator>
   );
 };

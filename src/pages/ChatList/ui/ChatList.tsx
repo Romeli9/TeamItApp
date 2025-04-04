@@ -13,25 +13,24 @@ import {ChatItem} from 'shared/ui';
 import {ChatListStyles as styles} from './ChatList.styles';
 
 export const ChatList = () => {
-  const navigation = useAppNavigation();
+  const {navigate} = useAppNavigation();
 
   const {userId} = useSelector((state: RootState) => state.user);
 
   const chats = useChatList(userId);
 
-  const handleNavigate = (chatId: string, chatName: string) => {
-    navigation.navigate(Screens.MESSENGER, {chatId, chatName});
-  };
-
   const renderItem = ({item}: {item: Chat}) => {
-    const handlePress = () => {
-      handleNavigate(item.id, item.name);
+    const handlePress = (chatName: string) => {
+      navigate(Screens.MESSENGER, {chatId: item.id, chatName});
     };
 
     return (
       <ChatItem
-        chatName={item.name}
         lastMessage={item.lastMessage}
+        time={item.time}
+        group={item.group}
+        participants={item.participants}
+        image={item.image}
         onPress={handlePress}
       />
     );
