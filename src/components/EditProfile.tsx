@@ -36,7 +36,7 @@ export const EditProfile: React.FC<{
   const [telegrammInput, setTelegrammInput] = useState('');
   const [skillsOpen, setSkillsOpen] = useState(false);
   const [allSkills, setAllSkills] = useState<string[]>([]);
-  const [selectedSkill, setSelectedSkill] = useState('');
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]); // Теперь массив
   const [loadingSkills, setLoadingSkills] = useState(true);
 
   // Получаем данные из Redux store
@@ -46,13 +46,11 @@ export const EditProfile: React.FC<{
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Инициализация данных формы
     setAboutMeInput(aboutMe || '');
     setExperienceInput(experience || '');
     setTelegrammInput(telegramm || '');
-    setSelectedSkill(skills || '');
+    setSelectedSkills(skills ? skills.split(',') : []); // Преобразуем строку в массив
 
-    // Загружаем навыки при монтировании компонента
     loadSkillsFromDB();
   }, []);
 
@@ -60,14 +58,13 @@ export const EditProfile: React.FC<{
   const loadSkillsFromDB = async () => {
     try {
       setLoadingSkills(true);
-      let skillsFromDB = [''];
+      const skillsFromDB: string[] = [];
 
       const rolesCollection = collection(FIREBASE_DB, 'role');
       const rolesSnapshot = await getDocs(rolesCollection);
 
       rolesSnapshot.forEach(doc => {
         const roleData = doc.data();
-
         if (roleData.name) {
           skillsFromDB.push(roleData.name.trim());
         }
@@ -77,24 +74,32 @@ export const EditProfile: React.FC<{
     } catch (error) {
       console.error('[ERROR] Ошибка загрузки навыков:', error);
       Alert.alert('Ошибка', 'Не удалось загрузить список навыков');
-
-      // Резервные данные на случай ошибки
-      setAllSkills(['']);
+      setAllSkills([]);
     } finally {
       setLoadingSkills(false);
     }
   };
 
+  const toggleSkill = (skill: string) => {
+    setSelectedSkills(prev => {
+      if (prev.includes(skill)) {
+        return prev.filter(s => s !== skill);
+      } else {
+        return [...prev, skill];
+      }
+    });
+  };
+
   const handleSave = async () => {
-    if (!selectedSkill) {
-      Alert.alert('Внимание', 'Пожалуйста, выберите навык');
+    if (selectedSkills.length === 0) {
+      Alert.alert('Внимание', 'Пожалуйста, выберите хотя бы один навык');
       return;
     }
 
     const profileData = {
       AboutMe: aboutMeInput,
       Experience: experienceInput,
-      Skills: selectedSkill,
+      Skills: selectedSkills.join(','), // Сохраняем как строку с разделителем
       Telegramm: telegrammInput,
     };
 
@@ -108,6 +113,25 @@ export const EditProfile: React.FC<{
       console.error('Ошибка сохранения:', error);
       Alert.alert('Ошибка', 'Не удалось сохранить данные');
     }
+  };
+
+  const renderSelectedSkills = () => {
+    if (selectedSkills.length === 0) {
+      return (
+        <Text style={[styles.skillsInputText, {color: '#A8A8A8'}]}>
+          Выберите навыки
+        </Text>
+      );
+    }
+    return (
+      <View style={styles.selectedSkillsContainer}>
+        {selectedSkills.map((skill, index) => (
+          <View key={index} style={styles.selectedSkillTag}>
+            <Text style={styles.selectedSkillText}>{skill}</Text>
+          </View>
+        ))}
+      </View>
+    );
   };
 
   return (
@@ -124,7 +148,6 @@ export const EditProfile: React.FC<{
         style={styles.keyboardAvoidingView}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            {/* Кнопка закрытия */}
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => {
@@ -134,11 +157,9 @@ export const EditProfile: React.FC<{
               <Text style={styles.closeButtonText}>×</Text>
             </TouchableOpacity>
 
-            {/* Прокручиваемое содержимое */}
             <ScrollView
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled">
-              {/* Поле "О себе" */}
               <Text style={styles.sectionTitle}>О себе</Text>
               <TextInput
                 value={aboutMeInput}
@@ -150,7 +171,6 @@ export const EditProfile: React.FC<{
                 numberOfLines={3}
               />
 
-              {/* Поле "Опыт" */}
               <Text style={styles.sectionTitle}>Опыт</Text>
               <TextInput
                 value={experienceInput}
@@ -162,26 +182,21 @@ export const EditProfile: React.FC<{
                 numberOfLines={3}
               />
 
-              {/* Выбор навыка */}
               <Text style={styles.sectionTitle}>Навыки</Text>
               <TouchableOpacity
                 style={styles.skillsInput}
                 onPress={() => setSkillsOpen(!skillsOpen)}
                 disabled={loadingSkills}>
-                <Text
-                  style={[
-                    styles.skillsInputText,
-                    !selectedSkill && {color: '#A8A8A8'},
-                    loadingSkills && {color: '#A8A8A8'},
-                  ]}>
-                  {loadingSkills
-                    ? 'Загрузка навыков...'
-                    : selectedSkill || 'Выберите навык'}
-                </Text>
+                {loadingSkills ? (
+                  <Text style={[styles.skillsInputText, {color: '#A8A8A8'}]}>
+                    Загрузка навыков...
+                  </Text>
+                ) : (
+                  renderSelectedSkills()
+                )}
                 {!loadingSkills && <Text style={styles.arrowIcon}>▼</Text>}
               </TouchableOpacity>
 
-              {/* Выпадающий список навыков */}
               {skillsOpen && (
                 <View style={styles.skillsDropdown}>
                   {loadingSkills ? (
@@ -193,14 +208,12 @@ export const EditProfile: React.FC<{
                           key={index}
                           style={[
                             styles.skillItem,
-                            selectedSkill === skill && styles.selectedSkillItem,
+                            selectedSkills.includes(skill) &&
+                              styles.selectedSkillItem,
                           ]}
-                          onPress={() => {
-                            setSelectedSkill(skill);
-                            setSkillsOpen(false);
-                          }}>
+                          onPress={() => toggleSkill(skill)}>
                           <Text style={styles.skillText}>{skill}</Text>
-                          {selectedSkill === skill && (
+                          {selectedSkills.includes(skill) && (
                             <Text style={styles.selectedIcon}>✓</Text>
                           )}
                         </TouchableOpacity>
@@ -212,7 +225,6 @@ export const EditProfile: React.FC<{
                 </View>
               )}
 
-              {/* Поле "Telegram" */}
               <Text style={styles.sectionTitle}>Telegram</Text>
               <TextInput
                 value={telegrammInput}
@@ -224,7 +236,6 @@ export const EditProfile: React.FC<{
               />
             </ScrollView>
 
-            {/* Кнопка сохранения (фиксированная внизу) */}
             <View style={styles.fixedBottom}>
               <TouchableOpacity
                 style={styles.saveButton}
@@ -384,5 +395,20 @@ const styles = StyleSheet.create({
     padding: 15,
     color: '#999',
     fontSize: 16,
+  },
+  selectedSkillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  selectedSkillTag: {
+    backgroundColor: '#E0D0FF',
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  selectedSkillText: {
+    color: '#5E3B9E',
+    fontSize: 14,
   },
 });

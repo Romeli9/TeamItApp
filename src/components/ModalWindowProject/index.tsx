@@ -69,7 +69,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 
       const querySnapshotRoles = await getDocs(collection(FIREBASE_DB, 'role'));
       querySnapshotRoles.forEach(doc => {
-        console.log(doc.data().name);
         if (doc.data().name && doc.data().name.length > 0)
           tempRoles.push(doc.data().name);
       });
@@ -205,7 +204,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       setLoading(false);
       setModalVisible(false);
     } catch (error) {
-      console.log('error');
       console.error('Error adding document: ', error);
       setLoading(false);
     }

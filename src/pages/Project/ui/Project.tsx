@@ -1,10 +1,5 @@
-import {
-  NavigationProp,
-  RouteProp,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import {RouteProp, useRoute} from '@react-navigation/native';
+import React, {useRef, useState} from 'react';
 import {
   Image,
   ImageBackground,
@@ -286,6 +281,7 @@ export const Project = () => {
             onUserSelect={handleUserClick}
             visible={isSearchModal}
             onClose={() => setSearchModal(false)}
+            requiredRoles={projectData.required}
           />
           <TouchableOpacity
             onPress={() => setSearchModal(true)}
