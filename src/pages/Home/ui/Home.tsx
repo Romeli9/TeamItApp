@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   Image,
   ImageBackground,
   ScrollView,
@@ -16,13 +17,14 @@ import ProjectModal from 'components/ModalWindowProject';
 import {LinearGradient} from 'expo-linear-gradient';
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
   query,
   where,
 } from 'firebase/firestore';
-import Carousel from 'react-native-reanimated-carousel';
+// import Carousel from 'react-native-reanimated-carousel';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -132,6 +134,40 @@ export const Home = () => {
     );
   }
 
+  const ProjectsList = ({projects, OpenProject}: any) => (
+    <FlatList
+      data={projects}
+      renderItem={props => renderProjectItem(props, OpenProject)}
+      keyExtractor={item => item.id}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{paddingHorizontal: 16}}
+    />
+  );
+
+  const renderProjectItem = ({item}: any, OpenProject: any) => (
+    <View style={styles.carouselItem}>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => OpenProject(item.id)}>
+        <ImageBackground
+          source={{uri: item.photo}}
+          style={styles.image}
+          borderRadius={20}>
+          <LinearGradient
+            colors={[
+              'rgba(242,240,255, 0)',
+              'rgba(158,115,198, 0.38)',
+              'rgba(82,0,146, 0.4)',
+            ]}
+            style={styles.gradient}
+          />
+        </ImageBackground>
+      </TouchableOpacity>
+      <Text style={styles.projectTitle}>{item.name}</Text>
+    </View>
+  );
+
   return (
     <SafeAreaProvider>
       <View
@@ -206,7 +242,9 @@ export const Home = () => {
               source={require('shared/assets/icons/Group1.png')}
               style={styles.effect}
             />
-            <Carousel
+            <ProjectsList projects={otherProjects} OpenProject={OpenProject} />
+
+            {/* <Carousel
               loop={true}
               mode="parallax"
               modeConfig={{
@@ -242,7 +280,7 @@ export const Home = () => {
                   <Text style={styles.projectTitle}>{item.name}</Text>
                 </View>
               )}
-            />
+            /> */}
           </View>
         </View>
 
