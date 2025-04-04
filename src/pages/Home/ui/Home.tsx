@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   Image,
   ImageBackground,
   ScrollView,
@@ -17,7 +16,6 @@ import ProjectModal from 'components/ModalWindowProject';
 import {LinearGradient} from 'expo-linear-gradient';
 import {
   collection,
-  deleteDoc,
   doc,
   getDoc,
   getDocs,

@@ -60,8 +60,6 @@ export const Profile = () => {
         }),
       );
       dispatch(setProfileData(userInfo));
-
-      // setUser(userInfo);
     }
   };
 
@@ -313,9 +311,7 @@ export const Profile = () => {
               <InviteModal
                 onModalClose={() => setInviteModalVisible(false)}
                 userDocRef={userDocRef}
-                Project={{
-                  projectId: '',
-                }}
+                userName={userName}
               />
             )}
 

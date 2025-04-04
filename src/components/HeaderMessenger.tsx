@@ -1,10 +1,14 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
+import {Screens} from 'app/navigation/navigationEnums';
 import {LinearGradient} from 'expo-linear-gradient';
 import {BellIcon, SearchIcon} from 'shared/assets/icons/icons';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 export const HeaderMessenger = () => {
+  const {navigate} = useAppNavigation();
+
   return (
     <LinearGradient
       style={styles.container}
@@ -12,9 +16,16 @@ export const HeaderMessenger = () => {
       <TouchableOpacity>
         <SearchIcon style={{width: 24, height: 24}} />
       </TouchableOpacity>
-      <TouchableOpacity>
-        <BellIcon style={{width: 24, height: 24}} />
-      </TouchableOpacity>
+      <View style={styles.rightIcons}>
+        <TouchableOpacity
+          onPress={() => {
+            console.log('hui');
+            navigate(Screens.PROJECT_REQUESTS);
+          }}
+          style={styles.iconMargin}>
+          <BellIcon style={{width: 24, height: 24}} />
+        </TouchableOpacity>
+      </View>
     </LinearGradient>
   );
 };
@@ -29,5 +40,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderBottomRightRadius: 30,
     borderBottomLeftRadius: 30,
+  },
+  rightIcons: {
+    flexDirection: 'row',
+  },
+  iconMargin: {
+    marginRight: 16,
   },
 });

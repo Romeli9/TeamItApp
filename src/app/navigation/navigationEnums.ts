@@ -13,6 +13,8 @@ export enum Screens {
   MESSENGER = 'Messenger',
   PROJECT = 'Project',
   SEARCH = 'Search',
+  PROJECT_REQUESTS = 'ProjectRequests',
+  VIEW_PROFILE = 'ViewProfile',
 }
 
 export type AllRoutes = Screens | Stacks;
