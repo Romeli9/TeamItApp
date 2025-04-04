@@ -11,10 +11,7 @@ import {
 
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import {
-  ProfileStackParamsList,
-  RootStackParamsList,
-} from 'app/navigation/navigationTypes';
+import {ProfileStackParamsList} from 'app/navigation/navigationTypes';
 import {EditProfile, InviteModal, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';

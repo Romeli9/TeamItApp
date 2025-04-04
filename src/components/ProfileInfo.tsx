@@ -23,11 +23,7 @@ import {
   where,
 } from 'firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
-import projectsSlice, {
-  ProjectType,
-  projectsState,
-  setYourProjects,
-} from 'redux/slices/projectsSlice';
+import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
 import 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
@@ -45,7 +41,6 @@ export const ProfileInfo = () => {
   }, []);
   useSelector((state: RootState) => state.projects);
 
-  const [dataLoaded, setDataLoaded] = useState(false);
   const [showMoreInfo, setShowMoreInfo] = useState(false);
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const animatedHeight = useState(new Animated.Value(0))[0];
@@ -105,8 +100,6 @@ export const ProfileInfo = () => {
             setProjects(projectsData);
             dispatch(setYourProjects(projectsData));
           }
-
-          setDataLoaded(true);
         }
       }
     } catch (error) {
@@ -214,9 +207,4 @@ const styles = StyleSheet.create({
     paddingBottom: 150,
     width: '100%',
   },
-  // additionalInfoContainer121221212: {
-  //   overflow: 'hidden',
-  //   width: 250,
-  //   height: 175,
-  // },
 });
