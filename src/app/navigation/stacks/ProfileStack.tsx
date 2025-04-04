@@ -28,9 +28,6 @@ export const ProfileStackNavigator = () => {
         name={Screens.VIEW_PROFILE}
         component={ProfileView}
         initialParams={{userId: undefined}}
-        options={() => ({
-          header: () => <Header showBackButton onBackPress={handleGoBack} />,
-        })}
       />
     </ProfileStack.Navigator>
   );
