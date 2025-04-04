@@ -19,9 +19,8 @@ import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {setProfileData, setUserData, userState} from 'redux/slices/userSlice';
+import {setProfileData, setUserData} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
-import {getUserById} from 'services/getUserById';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
@@ -29,9 +28,7 @@ import {ProfileStyles as styles} from './Profile.styles';
 export const Profile = () => {
   const {navigate} = useAppNavigation();
 
-  const [isUserInProject, setIsUserInProject] = useState(false);
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
-  const [isInviteModalVisible, setInviteModalVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
   const dispatch = useDispatch();
 
@@ -271,13 +268,6 @@ export const Profile = () => {
               </TouchableOpacity>
             </View>
             <Text style={styles.text}>@{userName}</Text>
-            {isInviteModalVisible && (
-              <InviteModal
-                onModalClose={() => setInviteModalVisible(false)}
-                userDocRef={userDocRef}
-                userName={userName}
-              />
-            )}
 
             {isEditProfileVisible && (
               <EditProfile

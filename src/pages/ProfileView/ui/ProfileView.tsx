@@ -46,6 +46,7 @@ export const ProfileView = () => {
   const [userProjects, setUserProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [projectsLoading, setProjectsLoading] = useState(true);
+  const [isInviteModalVisible, setInviteModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -152,6 +153,12 @@ export const ProfileView = () => {
             )}
           </View>
 
+          <TouchableOpacity
+            style={styles.invite}
+            onPress={() => setInviteModalVisible(true)}>
+            <Text style={styles.inviteProject}>Пригласить в проект</Text>
+          </TouchableOpacity>
+
           {/* Проекты */}
           <Text style={styles.projectsTitle}>Проекты:</Text>
         </View>
@@ -166,6 +173,14 @@ export const ProfileView = () => {
           />
         ) : (
           <Text style={styles.noProjectsText}>Нет созданных проектов</Text>
+        )}
+
+        {isInviteModalVisible && userId && (
+          <InviteModal
+            onModalClose={() => setInviteModalVisible(false)}
+            userData={userData}
+            userIdRec={userId}
+          />
         )}
 
         <TouchableOpacity
