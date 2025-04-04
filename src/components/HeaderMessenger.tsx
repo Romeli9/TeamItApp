@@ -19,7 +19,6 @@ export const HeaderMessenger = () => {
       <View style={styles.rightIcons}>
         <TouchableOpacity
           onPress={() => {
-            console.log('hui');
             navigate(Screens.PROJECT_REQUESTS);
           }}
           style={styles.iconMargin}>

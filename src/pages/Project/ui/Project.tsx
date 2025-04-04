@@ -54,7 +54,6 @@ export const Project = () => {
   const buttonRef = useRef<any>(null);
 
   const handleUserClick = (user: UserFrom) => {
-    console.log('clicked');
     navigate(Stacks.MAIN, {
       screen: Stacks.PROFILE_TAB,
       params: {

@@ -32,6 +32,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {setProfileData, setUserData, userState} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
 import {getUserById} from 'services/getUserById';
+import {ArrowLeftIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileViewStyles as styles} from './ProfileView.styles';
@@ -45,8 +46,6 @@ export const ProfileView = () => {
   const [userProjects, setUserProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [projectsLoading, setProjectsLoading] = useState(true);
-
-  console.log('NEW MEGA SUPER DUPER PROFILE VIEW');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,7 +85,7 @@ export const ProfileView = () => {
         navigation.navigate(Screens.PROJECT, {projectId: item.id})
       }>
       <Image source={{uri: item.photo}} style={styles.projectImage} />
-      <Text style={styles.projectTitle}>{item.name}</Text>
+      <Text style={styles.projectName}>{item.name}</Text>
     </TouchableOpacity>
   );
 
@@ -108,66 +107,72 @@ export const ProfileView = () => {
 
   return (
     <SafeAreaProvider>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Аватар и основная информация */}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Фон профиля */}
+        <View style={styles.backgroundContainer}>
+          {userData.background && (
+            <Image
+              source={{uri: userData.background}}
+              style={styles.backgroundImage}
+            />
+          )}
+        </View>
+
+        {/* Аватар */}
         <View style={styles.avatarContainer}>
           {userData.avatar ? (
             <Image source={{uri: userData.avatar}} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarText}>Фото</Text>
+              <Text style={styles.avatarText}>+</Text>
             </View>
           )}
         </View>
 
+        {/* Основная информация */}
         <View style={styles.infoContainer}>
           <Text style={styles.username}>@{userData.username}</Text>
 
-          {userData.aboutMe && (
-            <Text style={styles.aboutMe}>{userData.aboutMe}</Text>
-          )}
+          {/* Информация о профиле */}
+          <View style={styles.profileInfoContainer}>
+            {userData.AboutMe && (
+              <Text style={styles.text}>Обо мне: {userData.AboutMe}</Text>
+            )}
 
-          {/* Навыки */}
-          {userData.skills && userData.skills.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Навыки</Text>
-              <View style={styles.skillsContainer}>
-                {userData.skills.map((skill: string, index: number) => (
-                  <View key={index} style={styles.skillTag}>
-                    <Text style={styles.skillText}>{skill}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
+            {userData.Experience && (
+              <Text style={styles.text}>Опыт: {userData.Experience}</Text>
+            )}
 
-          {/* Опыт */}
-          {userData.experience && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Опыт</Text>
-              <Text style={styles.experience}>{userData.experience}</Text>
-            </View>
-          )}
+            {userData.Skills && (
+              <Text style={styles.text}>Навыки: {userData.Skills}</Text>
+            )}
 
-          {/* Проекты пользователя */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Проекты</Text>
-            {projectsLoading ? (
-              <ActivityIndicator size="small" color="#BE9DE8" />
-            ) : userProjects.length > 0 ? (
-              <FlatList
-                horizontal
-                data={userProjects}
-                renderItem={renderProjectItem}
-                keyExtractor={item => item.id}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.projectsList}
-              />
-            ) : (
-              <Text style={styles.noProjectsText}>Нет созданных проектов</Text>
+            {userData.Telegramm && (
+              <Text style={styles.text}>Телеграм: {userData.Telegramm}</Text>
             )}
           </View>
+
+          {/* Проекты */}
+          <Text style={styles.projectsTitle}>Проекты:</Text>
         </View>
+        {userProjects.length > 0 ? (
+          <FlatList
+            scrollEnabled={false}
+            data={userProjects}
+            renderItem={renderProjectItem}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            contentContainerStyle={styles.projectsList}
+          />
+        ) : (
+          <Text style={styles.noProjectsText}>Нет созданных проектов</Text>
+        )}
+
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.goback}>
+          <ArrowLeftIcon />
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaProvider>
   );
