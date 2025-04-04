@@ -222,7 +222,7 @@ export const ProjectRequests = () => {
         <FlatList
           data={requests}
           renderItem={renderRequestItem}
-          keyExtractor={item => item.id}
+          keyExtractor={item => `${item.id}_${item.type}`}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

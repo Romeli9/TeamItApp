@@ -27,14 +27,14 @@ import {RootState} from 'redux/store';
 
 type InviteModalProps = {
   onModalClose: () => void;
-  userDocRef: DocumentReference<any> | undefined;
-  userName: string;
+  userData: any;
+  userIdRec: string;
 };
 
 export const InviteModal: React.FC<InviteModalProps> = ({
   onModalClose,
-  userDocRef,
-  userName,
+  userData,
+  userIdRec, // юзер id получателя
 }) => {
   const [selectedProject, setSelectedProject] = useState<ProjectType | null>(
     null,
@@ -47,9 +47,10 @@ export const InviteModal: React.FC<InviteModalProps> = ({
     (state: RootState) => state.projects.yourProjects,
   );
 
-  const {userId} = useSelector((state: RootState) => state.user);
+  const {userId, userName} = useSelector((state: RootState) => state.user);
 
   const handleInvite = async () => {
+    console.log(userData);
     if (selectedProject?.id) {
       try {
         const requestData = {
@@ -57,8 +58,8 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           projectName: selectedProject.name,
           senderId: userId,
           senderName: userName,
-          recipientId: selectedProject.creatorId,
-          recipientName: selectedProject.creator,
+          recipientId: userIdRec,
+          recipientName: userData.username,
           role: selectedRole,
           message,
           status: 'pending',

@@ -67,9 +67,7 @@ export const ProfileViewStyles = StyleSheet.create({
     color: '#333',
     fontFamily: 'Inter-Regular',
   },
-  profileInfoContainer: {
-    marginBottom: 20,
-  },
+  profileInfoContainer: {},
   text: {
     fontSize: 15,
     marginBottom: 15,
@@ -105,6 +103,22 @@ export const ProfileViewStyles = StyleSheet.create({
     color: '#999',
     fontStyle: 'italic',
     marginBottom: 20,
+  },
+  invite: {
+    display: 'flex',
+    backgroundColor: '#BE9DE8',
+    width: 200,
+    height: 40,
+    borderRadius: 10,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginBottom: 15,
+  },
+  inviteProject: {
+    color: '#FFFFFF',
+    top: 7,
+    fontSize: 18,
+    textAlign: 'center',
   },
   goback: {
     width: 55,
