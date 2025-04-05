@@ -1,8 +1,7 @@
 import {RouteProp, useRoute} from '@react-navigation/native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   ScrollView,
@@ -11,26 +10,12 @@ import {
   View,
 } from 'react-native';
 
-import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
+import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import {ProfileStackParamsList} from 'app/navigation/navigationTypes';
-import {EditProfile, InviteModal, ProfileInfo} from 'components';
-import * as ImagePicker from 'expo-image-picker';
-import {onAuthStateChanged} from 'firebase/auth';
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from 'firebase/firestore';
-import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
+import {InviteModal} from 'components';
+import {collection, getDocs, query, where} from 'firebase/firestore';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {useDispatch, useSelector} from 'react-redux';
-import {setProfileData, setUserData, userState} from 'redux/slices/userSlice';
-import {RootState} from 'redux/store';
 import {getUserById} from 'services/getUserById';
 import {ArrowLeftIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';

@@ -15,12 +15,7 @@ import {
 
 import {Picker} from '@react-native-picker/picker';
 import {FIREBASE_DB} from 'app/FireBaseConfig';
-import {
-  DocumentReference,
-  addDoc,
-  collection,
-  updateDoc,
-} from 'firebase/firestore';
+import {addDoc, collection} from 'firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
@@ -50,7 +45,6 @@ export const InviteModal: React.FC<InviteModalProps> = ({
   const {userId, userName} = useSelector((state: RootState) => state.user);
 
   const handleInvite = async () => {
-    console.log(userData);
     if (selectedProject?.id) {
       try {
         const requestData = {
@@ -63,7 +57,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           role: selectedRole,
           message,
           status: 'pending',
-          createdAt: new Date(),
+          createdAt: Date.now(),
         };
 
         await addDoc(collection(FIREBASE_DB, 'projectRequests'), requestData);
