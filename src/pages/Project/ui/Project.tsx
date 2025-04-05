@@ -23,7 +23,6 @@ import {
 import {useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
-import {getUserById} from 'services/getUserById';
 import {required} from 'shared/assets/consts/Required';
 import {ArrowLeftIcon, CheckIcon, CloseIcon, PlusIcon} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers';

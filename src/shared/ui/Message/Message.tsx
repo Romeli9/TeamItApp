@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 import {CheckIcon, DoubleCheckIcon} from 'shared/icons';
-import {formatMessageTime} from 'shared/libs';
 import {Colors, IconStyles} from 'shared/libs/helpers';
 
 import {MessageStyles as styles} from './Message.styles';

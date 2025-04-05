@@ -5,7 +5,6 @@ import {
   FlatList,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -15,7 +14,6 @@ import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import {ProjectRequest} from 'entities';
 import {
-  arrayUnion,
   collection,
   deleteDoc,
   doc,

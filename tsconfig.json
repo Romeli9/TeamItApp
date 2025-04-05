@@ -4,17 +4,13 @@
     "baseUrl": "./src",
     "paths": {
       "shared/*": ["shared/*"],
-      "features/*": ["features/*"],
       "entities/*": ["entities/*"],
       "pages/*": ["pages/*"],
       "app/*": ["app/*"],
       "navigation/*": ["app/navigation/*"],
       "widgets/*": ["widgets/*"],
       "redux/*": ["redux/*"],
-      "services/*": ["services/*"],
-
-      "@firebase/auth": ["../node_modules/@firebase/auth/dist/index.rn.d.ts"]
-      
+      "services/*": ["services/*"]      
     }
   },
 }

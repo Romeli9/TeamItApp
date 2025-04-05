@@ -3,7 +3,6 @@ import React from 'react';
 
 import {Profile, ProfileView} from 'pages';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
-import {Header} from 'widgets';
 
 import {Screens} from '../navigationEnums';
 import {ProfileStackParamsList} from '../navigationTypes';

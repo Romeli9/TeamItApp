@@ -19,8 +19,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
 
-// import {categories} from 'shared/assets/consts/Categories';
-// import {required} from 'shared/assets/consts/Required';
 import {FIREBASE_DB, FIREBASE_STORAGE} from '../../app/FireBaseConfig';
 import {styles} from './styles';
 

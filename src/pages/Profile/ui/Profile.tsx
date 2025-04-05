@@ -1,4 +1,3 @@
-import {RouteProp, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
@@ -11,8 +10,7 @@ import {
 
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import {ProfileStackParamsList} from 'app/navigation/navigationTypes';
-import {EditProfile, InviteModal, ProfileInfo} from 'components';
+import {EditProfile, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';
 import {collection, doc, getDoc, setDoc} from 'firebase/firestore';

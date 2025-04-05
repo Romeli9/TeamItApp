@@ -15,12 +15,7 @@ import {
 
 import {Picker} from '@react-native-picker/picker';
 import {FIREBASE_DB} from 'app/FireBaseConfig';
-import {
-  DocumentReference,
-  addDoc,
-  collection,
-  updateDoc,
-} from 'firebase/firestore';
+import {addDoc, collection} from 'firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
