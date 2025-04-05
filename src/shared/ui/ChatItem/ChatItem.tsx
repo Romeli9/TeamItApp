@@ -94,7 +94,9 @@ export const ChatItem = memo(
               numberOfLines={1}
               ellipsizeMode="tail"
               style={styles.messageText}>
-              {`${userNameLast}${userNameLast && ':'} ${chatData.lastMessage}`}
+              {`${userNameLast}${userNameLast ? ':' : ''} ${
+                chatData.lastMessage
+              }`}
             </Text>
           </View>
         </View>
