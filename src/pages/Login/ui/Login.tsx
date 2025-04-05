@@ -32,7 +32,6 @@ export const LoginPage = () => {
           screen: Stacks.PROFILE_TAB,
           params: {
             screen: Screens.PROFILE,
-            params: {userId: undefined},
           },
         }),
       );

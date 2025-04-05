@@ -1,11 +1,8 @@
-import {NavigationProp, useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
   Animated,
-  Button,
   FlatList,
   Image,
-  ListRenderItem,
   ScrollView,
   StyleSheet,
   Text,
