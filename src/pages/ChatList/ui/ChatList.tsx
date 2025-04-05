@@ -1,5 +1,5 @@
 import React from 'react';
-import {FlatList, StyleSheet, Text, View} from 'react-native';
+import {FlatList, View} from 'react-native';
 
 import {Screens} from 'app/navigation/navigationEnums';
 import {HeaderMessenger} from 'components';
@@ -29,8 +29,10 @@ export const ChatList = () => {
         lastMessage={item.lastMessage}
         time={item.time}
         group={item.group}
+        lastMessageAuthorId={item.lastMessageAuthorId}
         participants={item.participants}
         image={item.image}
+        name={item.name}
         onPress={handlePress}
       />
     );

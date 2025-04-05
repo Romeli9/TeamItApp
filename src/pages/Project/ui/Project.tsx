@@ -114,7 +114,7 @@ export const Project = () => {
         role,
         message,
         status: 'pending',
-        createdAt: new Date(),
+        createdAt: Date.now(),
       };
 
       await addDoc(collection(FIREBASE_DB, 'projectRequests'), requestData);

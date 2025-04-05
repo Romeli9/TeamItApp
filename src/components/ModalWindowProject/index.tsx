@@ -192,6 +192,20 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         id: docRef.id,
         ...projectData,
       };
+
+      const chatData = {
+        group: true,
+        image: imageUrl,
+        name: projectName,
+        participants: [userId],
+        projectId: docRef.id,
+        lastMessage: 'Чат создан',
+        time: Date.now(),
+      };
+
+      const chatsRef = collection(firestore, 'chats');
+      await addDoc(chatsRef, chatData);
+
       dispatch(setYourProjects([newProject, ...yourProjects]));
 
       setProjectName('');

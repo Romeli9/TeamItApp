@@ -7,7 +7,7 @@ export interface IMessage {
   chatId: string;
   message: string;
   authorId: string;
-  createdAt: Date;
+  createdAt: number;
   isRead: boolean;
   status: 'sending' | 'sent' | 'read';
 }
@@ -29,6 +29,8 @@ export interface Chat {
   lastMessage: string;
   time: number;
   group: boolean;
-  image: string | undefined;
+  image?: string;
+  lastMessageAuthorId?: string;
   participants: string[];
+  projectId?: string;
 }
