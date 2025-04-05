@@ -57,7 +57,7 @@ export const Messenger = () => {
           const user = await getUserById(userId);
           dataMap[userId] = {
             avatar: user.avatar,
-            userName: user.username, // или user.name — как у тебя в бэке
+            userName: user.username,
           };
         }),
       );
