@@ -1,23 +1,42 @@
 import {Spinner} from '@ui-kitten/components';
 import React, {memo} from 'react';
-import {GestureResponderEvent, Pressable, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  GestureResponderEvent,
+  Image,
+  Pressable,
+  Text,
+  View,
+} from 'react-native';
 
 import {CheckIcon, DoubleCheckIcon} from 'shared/icons';
+import {formatMessageTime} from 'shared/libs';
 import {Colors, IconStyles} from 'shared/libs/helpers';
 
 import {MessageStyles as styles} from './Message.styles';
 
 type MessageProps = {
-  isRead?: boolean;
   message: string;
   status: 'sending' | 'sent' | 'read';
   onLongPress?: (event: GestureResponderEvent) => void;
-  isSending?: boolean;
   isCurrentUser?: boolean;
+  avatar?: string;
+  timestamp: any;
+  userName?: string;
 };
 
 export const Message = memo(
-  ({isRead, message, status, onLongPress, isCurrentUser}: MessageProps) => {
+  ({
+    message,
+    status,
+    onLongPress,
+    isCurrentUser,
+    avatar,
+    timestamp,
+    userName,
+  }: MessageProps) => {
+    const date = new Date(timestamp);
+    const formData = date.getHours() + ':' + date.getMinutes();
     const renderIcon = () => {
       if (status === 'sending') {
         return (
@@ -52,34 +71,45 @@ export const Message = memo(
         style={[
           styles.messageContainer,
           isCurrentUser
-            ? styles.messageContainerRight
-            : styles.messageContainerLeft,
+            ? styles.currentUserContainer
+            : styles.otherUserContainer,
         ]}>
-        <Pressable
-          style={({pressed}) => [
-            styles.bubble,
-            isCurrentUser ? styles.bubbleRight : styles.bubbleLeft,
-            pressed &&
-              (isCurrentUser
-                ? styles.backGroundChangeRight
-                : styles.backGroundChangeLeft),
-          ]}
-          onLongPress={onLongPress}>
-          <View style={styles.messageContent}>
-            <Text
-              style={[
-                styles.messageText,
-                isCurrentUser
-                  ? styles.messageTextRight
-                  : styles.messageTextLeft,
-              ]}>
-              {message}
-            </Text>
-          </View>
-          {isCurrentUser && (
-            <View style={styles.statusIcon}>{renderIcon()}</View>
-          )}
-        </Pressable>
+        {!isCurrentUser &&
+          (avatar ? (
+            <Image source={{uri: avatar}} style={styles.avatar} />
+          ) : (
+            <ActivityIndicator
+              style={styles.avatar}
+              size="large"
+              color="#BE9DE8"
+            />
+          ))}
+
+        <View style={styles.messageContentWrapper}>
+          <Pressable
+            style={({pressed}) => [
+              styles.bubble,
+              isCurrentUser ? styles.bubbleRight : styles.bubbleLeft,
+              pressed && styles.pressedEffect,
+            ]}
+            onLongPress={onLongPress}>
+            <View>
+              {!isCurrentUser && userName && (
+                <Text style={styles.userName}>{userName}</Text>
+              )}
+            </View>
+            <View style={styles.contentMessage}>
+              <Text style={styles.messageText}>{message}</Text>
+
+              <View style={styles.messageMeta}>
+                <Text style={styles.timeText}>{formData}</Text>
+                {isCurrentUser && (
+                  <View style={styles.statusIcon}>{renderIcon()}</View>
+                )}
+              </View>
+            </View>
+          </Pressable>
+        </View>
       </View>
     );
   },

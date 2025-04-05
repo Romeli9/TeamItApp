@@ -15,11 +15,13 @@ import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import {ProjectRequest} from 'entities';
 import {
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
   getDoc,
   getDocs,
+  limit,
   query,
   updateDoc,
   where,
@@ -116,6 +118,29 @@ export const ProjectRequests = () => {
     }
   };
 
+  const addUserToProjectChat = async (projectId: string, userId: string) => {
+    try {
+      const chatsQuery = query(
+        collection(FIREBASE_DB, 'chats'),
+        where('projectId', '==', projectId),
+        limit(1),
+      );
+
+      const querySnapshot = await getDocs(chatsQuery);
+
+      if (!querySnapshot.empty) {
+        const chatDoc = querySnapshot.docs[0];
+
+        await updateDoc(chatDoc.ref, {
+          participants: [...chatDoc.data().participants, userId],
+        });
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleAccept = async (request: ProjectRequest) => {
     try {
       // Добавляем пользователя в проект
@@ -129,13 +154,22 @@ export const ProjectRequests = () => {
         throw new Error('Не удалось добавить пользователя в проект');
       }
 
+      // Добавляем пользователя в чат
+      const chatUpdateSuccess = await addUserToProjectChat(
+        request.projectId,
+        request.senderId,
+      );
+
+      if (!chatUpdateSuccess) {
+        console.warn('Пользователь добавлен в проект, но не в чат');
+      }
+
       // Удаляем заявку
       await deleteDoc(doc(FIREBASE_DB, 'projectRequests', request.id));
 
       setRequests(requests.filter(req => req.id !== request.id));
-      Alert.alert('Успешно', 'Заявка принята и пользователь добавлен в проект');
+      Alert.alert('Успешно', 'Заявка принята');
     } catch (error) {
-      console.error('Error accepting request:', error);
       Alert.alert('Ошибка', 'Не удалось принять заявку');
     }
   };

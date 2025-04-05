@@ -5,97 +5,68 @@ import {Colors} from 'shared/libs/helpers';
 export const MessageStyles = StyleSheet.create({
   messageContainer: {
     flexDirection: 'row',
-    marginVertical: 5,
-    borderRadius: 100,
+    marginVertical: 8,
+    paddingHorizontal: 12,
   },
-  bubbleLeft: {
-    backgroundColor: Colors.Gray200,
-    borderTopLeftRadius: 0,
-  },
-  bubbleRight: {
-    backgroundColor: Colors.Green100Opacity30,
-    borderTopRightRadius: 0,
-  },
-  backGroundChangeLeft: {
-    backgroundColor: Colors.Gray100,
-  },
-  backGroundChangeRight: {
-    backgroundColor: Colors.Green100,
-  },
-  messageContainerLeft: {
-    justifyContent: 'flex-start',
-  },
-  messageContainerRight: {
-    width: '100%',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
+  currentUserContainer: {
     justifyContent: 'flex-end',
   },
-  bubble: {
+  otherUserContainer: {
+    justifyContent: 'flex-start',
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 8,
+    marginTop: 'auto',
+  },
+  messageContentWrapper: {
     maxWidth: '80%',
+  },
+  userName: {
+    fontSize: 12,
+    color: Colors.Black100,
+    marginBottom: 4,
+    // marginLeft: 8,
+  },
+  bubble: {
+    borderRadius: 16,
     paddingHorizontal: 8,
     paddingVertical: 8,
-    borderRadius: 10,
   },
-  messageContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingRight: 15,
+  bubbleLeft: {
+    backgroundColor: Colors.Gray100,
+    borderBottomLeftRadius: 4,
+  },
+  bubbleRight: {
+    backgroundColor: Colors.Pink100,
+    borderBottomRightRadius: 4,
+  },
+  pressedEffect: {
+    opacity: 0.8,
   },
   messageText: {
     fontSize: 16,
-  },
-  messageTextLeft: {
     color: Colors.Black100,
   },
-  messageTextRight: {
-    color: Colors.Black100,
-  },
-  inlineStatusIcon: {
-    position: 'absolute',
-    bottom: 0,
-    right: 2,
-    marginRight: -10,
-    marginBottom: -5,
-  },
-  reactionsContainer: {
+  messageMeta: {
     flexDirection: 'row',
-    flexWrap: 'nowrap',
-    gap: 10,
-    marginTop: 5,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: 8,
   },
-  reactionsAndStatusContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  reaction: {
-    padding: 5,
-    borderRadius: 10,
-    backgroundColor: Colors.Blue200,
+  timeText: {
+    fontSize: 12,
+    color: Colors.Gray400,
+    marginRight: 4,
   },
   statusIcon: {
-    // marginLeft: 'auto',
-    // marginTop: 10,
-    // marginRight: -7,
-    // marginBottom: -5,
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
+    marginLeft: 4,
   },
-  spaceBetween: {
+  contentMessage: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    gap: 10,
-  },
-  messageImage: {
-    width: 150,
-    height: 150,
-    marginRight: 10,
-    borderRadius: 10,
-    marginBottom: 5,
+    gap: 8,
   },
 });
