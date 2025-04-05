@@ -28,7 +28,6 @@ export const MessageStyles = StyleSheet.create({
     fontSize: 12,
     color: Colors.Black100,
     marginBottom: 4,
-    // marginLeft: 8,
   },
   bubble: {
     borderRadius: 16,

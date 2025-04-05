@@ -1,7 +1,3 @@
-import {ImageSourcePropType} from 'react-native';
-
-import {userState} from 'redux/slices/userSlice';
-
 export interface IMessage {
   id: string;
   chatId: string;
