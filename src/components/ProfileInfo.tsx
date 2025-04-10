@@ -131,7 +131,7 @@ export const ProfileInfo = () => {
             {showMoreInfo && (
               <>
                 <Text style={styles.text}>Опыт: {experience}</Text>
-                <Text style={styles.text}>Навыки: {skills}</Text>
+                <Text style={styles.text}>Роли: {skills}</Text>
                 <Text style={styles.text}>Телеграм: {telegramm}</Text>
               </>
             )}

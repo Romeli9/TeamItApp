@@ -119,7 +119,7 @@ export const EditProfile: React.FC<{
     if (selectedSkills.length === 0) {
       return (
         <Text style={[styles.skillsInputText, {color: '#A8A8A8'}]}>
-          Выберите навыки
+          Выберите роли
         </Text>
       );
     }
@@ -182,7 +182,7 @@ export const EditProfile: React.FC<{
                 numberOfLines={3}
               />
 
-              <Text style={styles.sectionTitle}>Навыки</Text>
+              <Text style={styles.sectionTitle}>Роли</Text>
               <TouchableOpacity
                 style={styles.skillsInput}
                 onPress={() => setSkillsOpen(!skillsOpen)}
