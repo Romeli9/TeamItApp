@@ -130,7 +130,7 @@ export const ProfileView = () => {
             )}
 
             {userData.Skills && (
-              <Text style={styles.text}>Навыки: {userData.Skills}</Text>
+              <Text style={styles.text}>Роли: {userData.Skills}</Text>
             )}
 
             {userData.Telegramm && (

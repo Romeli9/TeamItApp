@@ -37,31 +37,7 @@ const SearchModal = ({
   const [searchText, setSearchText] = useState('');
   const [users, setUsers] = useState<UserFrom[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserFrom[]>([]);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-
-  const fetchUsers = async () => {
-    const firestore = FIREBASE_DB;
-    const usersRef = collection(firestore, 'users');
-    const snapshot = await getDocs(usersRef);
-
-    const allUsers = snapshot.docs
-      .map(doc => {
-        const data = doc.data();
-        const skillsArray =
-          typeof data.Skills === 'string'
-            ? data.Skills.split(',').map(s => s.trim())
-            : data.Skills || [];
-
-        return {
-          username: data.username,
-          id: doc.id,
-          skills: skillsArray,
-        } as UserFrom;
-      })
-      .filter(user => user.username);
-
-    setUsers(allUsers);
-  };
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(requiredRoles);
 
   useEffect(() => {
     if (visible) {
@@ -88,6 +64,30 @@ const SearchModal = ({
 
     setFilteredUsers(filtered);
   }, [searchText, users, selectedRoles]);
+
+  const fetchUsers = async () => {
+    const firestore = FIREBASE_DB;
+    const usersRef = collection(firestore, 'users');
+    const snapshot = await getDocs(usersRef);
+
+    const allUsers = snapshot.docs
+      .map(doc => {
+        const data = doc.data();
+        const skillsArray =
+          typeof data.Skills === 'string'
+            ? data.Skills.split(',').map(s => s.trim())
+            : data.Skills || [];
+
+        return {
+          username: data.username,
+          id: doc.id,
+          skills: skillsArray,
+        } as UserFrom;
+      })
+      .filter(user => user.username);
+
+    setUsers(allUsers);
+  };
 
   const toggleRole = (role: string) => {
     setSelectedRoles(prev =>
