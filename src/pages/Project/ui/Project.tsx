@@ -1,11 +1,7 @@
+import {RouteProp, useRoute} from '@react-navigation/native';
+import React, {useRef, useState} from 'react';
 import {
-  NavigationProp,
-  RouteProp,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
-import {
+  Alert,
   Image,
   ImageBackground,
   Modal,
@@ -15,16 +11,18 @@ import {
   View,
 } from 'react-native';
 
+import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {ProjectRouteParams} from 'app/navigation/navigationTypes';
 import SearchModal, {UserFrom} from 'components/SearchModal';
+import {addDoc, collection} from 'firebase/firestore';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import {useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
-import {getUserById} from 'services/getUserById';
+import {RootState} from 'redux/store';
 import {required} from 'shared/assets/consts/Required';
 import {ArrowLeftIcon, CheckIcon, CloseIcon, PlusIcon} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers';
@@ -36,6 +34,9 @@ import {ProjectStyles as styles} from './Project.styles';
 export const Project = () => {
   const route = useRoute<RouteProp<{params: ProjectRouteParams}>>();
   const {navigate, goBack} = useAppNavigation();
+
+  const {userId} = useSelector((state: RootState) => state.user);
+  const userData = useSelector((state: RootState) => state.user);
 
   const {projectId} = route.params;
   const projectData: ProjectType | undefined = useSelector(
@@ -55,7 +56,7 @@ export const Project = () => {
     navigate(Stacks.MAIN, {
       screen: Stacks.PROFILE_TAB,
       params: {
-        screen: Screens.PROFILE,
+        screen: Screens.VIEW_PROFILE,
         params: {userId: user.id},
       },
     });
@@ -72,6 +73,10 @@ export const Project = () => {
   };
 
   const showConfirmation = () => {
+    if (openSendIndex !== null) {
+      const role = projectData?.required[openSendIndex] ?? '';
+      sendRequest(role);
+    }
     setConfirmationVisible(true);
     const timer = setTimeout(() => {
       setModalVisible(false);
@@ -87,6 +92,36 @@ export const Project = () => {
 
   const handleApplicationSend = (value: string) => {
     setSelectedItem(value);
+    sendRequest(value); // Отправляем заявку с выбранной ролью
+    toggleRequired(); // Закрываем модальное окно
+  };
+
+  const sendRequest = async (
+    role: string,
+    message: string = 'Хочу присоединиться к проекту!',
+  ) => {
+    try {
+      if (!projectData) return;
+
+      const requestData = {
+        projectId,
+        projectName: projectData.name,
+        senderId: userId,
+        senderName: userData.userName,
+        recipientId: projectData.creatorId,
+        recipientName: projectData.creator,
+        role,
+        message,
+        status: 'pending',
+        createdAt: Date.now(),
+      };
+
+      await addDoc(collection(FIREBASE_DB, 'projectRequests'), requestData);
+      Alert.alert('Успешно', 'Заявка отправлена');
+    } catch (error) {
+      console.error('Error sending request:', error);
+      Alert.alert('Ошибка', 'Не удалось отправить заявку');
+    }
   };
 
   if (!projectData) {
@@ -286,12 +321,15 @@ export const Project = () => {
             onUserSelect={handleUserClick}
             visible={isSearchModal}
             onClose={() => setSearchModal(false)}
+            requiredRoles={projectData.required}
           />
-          <TouchableOpacity
-            onPress={() => setSearchModal(true)}
-            style={styles.invite}>
-            <Text style={styles.inviteProject}>Поиск участников</Text>
-          </TouchableOpacity>
+          {projectData.creatorId === userId && (
+            <TouchableOpacity
+              onPress={() => setSearchModal(true)}
+              style={styles.invite}>
+              <Text style={styles.inviteProject}>Поиск участников</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={goBack} style={styles.goback}>
             <ArrowLeftIcon />
           </TouchableOpacity>

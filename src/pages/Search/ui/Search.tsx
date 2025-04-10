@@ -1,8 +1,8 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
-import {Button, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useEffect} from 'react';
+import {Button, Text, TouchableOpacity, View} from 'react-native';
 
-import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
+import {FIREBASE_DB} from 'app/FireBaseConfig';
 import Checkbox from 'expo-checkbox';
 import {collection, getDocs, query, where} from 'firebase/firestore';
 import {

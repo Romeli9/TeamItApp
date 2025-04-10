@@ -15,7 +15,6 @@ const customConfig = {
       ...defaultConfig.resolver.extraNodeModules,
       shared: path.resolve(__dirname, 'src/shared'),
       entities: path.resolve(__dirname, 'src/entities'),
-      features: path.resolve(__dirname, 'src/features'),
       pages: path.resolve(__dirname, 'src/pages'),
       app: path.resolve(__dirname, 'src/app'),
       navigation: path.resolve(__dirname, 'src/app/navigation'),

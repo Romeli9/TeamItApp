@@ -49,7 +49,6 @@ export const RegisterPage = () => {
           screen: Stacks.PROFILE_TAB,
           params: {
             screen: Screens.PROFILE,
-            params: {userId: undefined},
           },
         }),
       );
