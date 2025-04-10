@@ -6,3 +6,5 @@ export * from './Profile/ui/Profile';
 export * from './Project/ui/Project';
 export * from './Register/ui/Register';
 export * from './Search/ui/Search';
+export * from './ProjectRequests/ProjectRequests';
+export * from './ProfileView/ui/ProfileView';

@@ -1,13 +1,9 @@
-import {ImageSourcePropType} from 'react-native';
-
-import {userState} from 'redux/slices/userSlice';
-
 export interface IMessage {
   id: string;
   chatId: string;
   message: string;
   authorId: string;
-  createdAt: Date;
+  createdAt: number;
   isRead: boolean;
   status: 'sending' | 'sent' | 'read';
 }
@@ -29,6 +25,8 @@ export interface Chat {
   lastMessage: string;
   time: number;
   group: boolean;
-  image: string | undefined;
+  image?: string;
+  lastMessageAuthorId?: string;
   participants: string[];
+  projectId?: string;
 }

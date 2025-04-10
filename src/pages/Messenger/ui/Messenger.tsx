@@ -9,21 +9,29 @@ import {IMessage} from 'entities';
 import {
   addDoc,
   collection,
+  doc,
   getDocs,
   query,
   serverTimestamp,
+  updateDoc,
   where,
   writeBatch,
 } from 'firebase/firestore';
 import {useSelector} from 'react-redux';
 import {RootState} from 'redux/store';
+import {getUserById} from 'services/getUserById';
 import {useChatMessages} from 'shared/hooks';
 import {ChatTextarea, Message} from 'shared/ui';
 
 import {MessengerStyles as styles} from './Messenger.styles';
 
+type UserData = {
+  avatar: string;
+  userName: string;
+};
+
 export const Messenger = () => {
-  const {userId, userName} = useSelector((state: RootState) => state.user);
+  const {userId} = useSelector((state: RootState) => state.user);
 
   const route = useRoute<RouteProp<RootStackParamsList, Screens.MESSENGER>>();
 
@@ -32,11 +40,33 @@ export const Messenger = () => {
   const {messages, setMessages} = useChatMessages(chatId);
   const reversedMessages = useMemo(() => [...messages].reverse(), [messages]);
 
+  const [userDataMap, setUserDataMap] = useState<Record<string, UserData>>({});
   const [currentMessage, setCurrentMessage] = useState<string>('');
 
   useEffect(() => {
     markMessagesAsRead(chatId, userId);
   }, [chatId, userId, messages]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const uniqueUserIds = [...new Set(messages.map(m => m.authorId))];
+      const dataMap: Record<string, UserData> = {};
+
+      await Promise.all(
+        uniqueUserIds.map(async userId => {
+          const user = await getUserById(userId);
+          dataMap[userId] = {
+            avatar: user.avatar,
+            userName: user.username,
+          };
+        }),
+      );
+
+      setUserDataMap(dataMap);
+    };
+
+    fetchUserData();
+  }, [messages]);
 
   const markMessagesAsRead = async (chatId: string, userId: string) => {
     try {
@@ -64,16 +94,17 @@ export const Messenger = () => {
 
   const renderMessage = ({item}: {item: IMessage}) => {
     const isCurrentUser = item.authorId === userId;
+    const userData = userDataMap[item.authorId];
 
     return (
-      <>
-        <Message
-          status={item.status}
-          message={item.message.replace(/\n+$/g, '')}
-          isCurrentUser={isCurrentUser}
-          isRead={item.isRead}
-        />
-      </>
+      <Message
+        status={item.status}
+        message={item.message.replace(/\n+$/g, '')}
+        isCurrentUser={isCurrentUser}
+        avatar={userData?.avatar}
+        userName={userData?.userName}
+        timestamp={item.createdAt}
+      />
     );
   };
 
@@ -83,14 +114,17 @@ export const Messenger = () => {
     userId: string,
   ) => {
     const messagesRef = collection(FIREBASE_DB, 'messages');
+    const chatsRef = collection(FIREBASE_DB, 'chats');
     const tempMessageId = `temp-${Date.now()}`;
+
+    const cleanMessage = message.replace(/\n+$/g, '');
 
     const newMessage: IMessage = {
       id: tempMessageId,
       chatId,
       authorId: userId,
-      message: message.replace(/\n+$/g, ''),
-      createdAt: new Date(),
+      message: cleanMessage,
+      createdAt: Date.now(),
       isRead: false,
       status: 'sending',
     };
@@ -101,10 +135,17 @@ export const Messenger = () => {
       const docRef = await addDoc(messagesRef, {
         chatId,
         authorId: userId,
-        message,
-        createdAt: serverTimestamp(),
+        message: cleanMessage,
+        createdAt: Date.now(),
         isRead: false,
         status: 'sent',
+      });
+
+      const chatDocRef = doc(chatsRef, chatId);
+      await updateDoc(chatDocRef, {
+        lastMessage: cleanMessage,
+        time: Date.now(),
+        lastMessageAuthorId: userId,
       });
 
       setMessages(prev =>
@@ -127,7 +168,7 @@ export const Messenger = () => {
   };
 
   const handleAttachFile = () => {
-    // заглушка
+    console.log('А не нужно сюда тыкать');
   };
 
   return (

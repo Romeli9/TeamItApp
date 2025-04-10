@@ -180,10 +180,7 @@ export const HomePagestyles = StyleSheet.create({
     width: screenWidth * 0.7,
     height: 340,
     borderRadius: 20,
-    // overflow: 'hidden',
     marginLeft: screenWidth / 5,
-    // justifyContent: 'center',
-    // alignItems: 'center',
   },
   activeItem: {
     transform: [{scale: 1}],

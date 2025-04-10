@@ -2,7 +2,13 @@ import {useEffect, useState} from 'react';
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Chat} from 'entities';
-import {collection, onSnapshot, query, where} from 'firebase/firestore';
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from 'firebase/firestore';
 
 export const useChatList = (userId: string) => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -12,6 +18,7 @@ export const useChatList = (userId: string) => {
     const chatsQuery = query(
       chatsRef,
       where('participants', 'array-contains', userId),
+      orderBy('time', 'desc'),
     );
 
     const unsubscribe = onSnapshot(
@@ -21,6 +28,7 @@ export const useChatList = (userId: string) => {
           id: doc.id,
           ...doc.data(),
         })) as Chat[];
+
         setChats(fetchedChats);
       },
       error => {

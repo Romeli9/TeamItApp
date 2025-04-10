@@ -1,4 +1,3 @@
-import {RouteProp, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
@@ -11,20 +10,15 @@ import {
 
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import {
-  ProfileStackParamsList,
-  RootStackParamsList,
-} from 'app/navigation/navigationTypes';
-import {EditProfile, InviteModal, ProfileInfo} from 'components';
+import {EditProfile, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';
 import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {setProfileData, setUserData, userState} from 'redux/slices/userSlice';
+import {setProfileData, setUserData} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
-import {getUserById} from 'services/getUserById';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
@@ -32,41 +26,13 @@ import {ProfileStyles as styles} from './Profile.styles';
 export const Profile = () => {
   const {navigate} = useAppNavigation();
 
-  const route = useRoute<RouteProp<ProfileStackParamsList, Screens.PROFILE>>();
-
-  const {userId} = route.params || {};
-
-  const [isUserInProject, setIsUserInProject] = useState(false);
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
-  const [isInviteModalVisible, setInviteModalVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
   const dispatch = useDispatch();
 
   const {userName, aboutMe, avatar, background} = useSelector(
     (state: RootState) => state.user,
   );
-
-  useEffect(() => {
-    getUser();
-  }, [userId]);
-
-  const getUser = async () => {
-    if (userId) {
-      let userInfo = await getUserById(userId);
-      dispatch(
-        setUserData({
-          userId: userId,
-          username: userInfo.username,
-          email: userInfo.email,
-          avatar: userInfo.avatar,
-          background: userInfo.background,
-        }),
-      );
-      dispatch(setProfileData(userInfo));
-
-      // setUser(userInfo);
-    }
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -243,18 +209,6 @@ export const Profile = () => {
     }
   };
 
-  useEffect(() => {
-    const checkUserInProject = () => {
-      const currentUser = FIREBASE_AUTH.currentUser;
-      //console.log(currentUser);
-      /*  if (currentUser) {
-        setIsUserInProject(currentUser.uid === userId); // Сравниваем текущий uid с переданным userId
-      }*/
-    };
-
-    checkUserInProject();
-  }, [userId]);
-
   return (
     <SafeAreaProvider>
       <FlatList
@@ -312,24 +266,6 @@ export const Profile = () => {
               </TouchableOpacity>
             </View>
             <Text style={styles.text}>@{userName}</Text>
-            {isInviteModalVisible && (
-              <InviteModal
-                onModalClose={() => setInviteModalVisible(false)}
-                userDocRef={userDocRef}
-                Project={{
-                  projectId: '',
-                }}
-              />
-            )}
-
-            {
-              //userId && (
-              <TouchableOpacity
-                style={styles.invite}
-                onPress={() => setInviteModalVisible(true)}>
-                <Text style={styles.inviteProject}>Пригласить в проект</Text>
-              </TouchableOpacity>
-            }
 
             {isEditProfileVisible && (
               <EditProfile

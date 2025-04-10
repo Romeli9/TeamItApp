@@ -19,8 +19,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
 
-// import {categories} from 'shared/assets/consts/Categories';
-// import {required} from 'shared/assets/consts/Required';
 import {FIREBASE_DB, FIREBASE_STORAGE} from '../../app/FireBaseConfig';
 import {styles} from './styles';
 
@@ -69,7 +67,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 
       const querySnapshotRoles = await getDocs(collection(FIREBASE_DB, 'role'));
       querySnapshotRoles.forEach(doc => {
-        console.log(doc.data().name);
         if (doc.data().name && doc.data().name.length > 0)
           tempRoles.push(doc.data().name);
       });
@@ -193,6 +190,20 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         id: docRef.id,
         ...projectData,
       };
+
+      const chatData = {
+        group: true,
+        image: imageUrl,
+        name: projectName,
+        participants: [userId],
+        projectId: docRef.id,
+        lastMessage: 'Чат создан',
+        time: Date.now(),
+      };
+
+      const chatsRef = collection(firestore, 'chats');
+      await addDoc(chatsRef, chatData);
+
       dispatch(setYourProjects([newProject, ...yourProjects]));
 
       setProjectName('');
@@ -205,7 +216,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       setLoading(false);
       setModalVisible(false);
     } catch (error) {
-      console.log('error');
       console.error('Error adding document: ', error);
       setLoading(false);
     }
