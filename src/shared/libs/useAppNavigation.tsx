@@ -24,9 +24,11 @@ export const useAppNavigation = (): AuthNavigationProp => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    console.log('123123');
     getToken();
 
     const unsubscribe = auth.onAuthStateChanged(user => {
+      console.log(user);
       setIsAuthenticated(!!user);
       setIsAuthChecked(true);
     });
