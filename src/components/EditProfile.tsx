@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 
+import {getSkills} from 'api';
 import {
   DocumentReference,
   collection,
@@ -36,8 +37,11 @@ export const EditProfile: React.FC<{
   const [telegrammInput, setTelegrammInput] = useState('');
   const [skillsOpen, setSkillsOpen] = useState(false);
   const [allSkills, setAllSkills] = useState<string[]>([]);
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]); // Теперь массив
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [loadingSkills, setLoadingSkills] = useState(true);
+  const [skillsInput, setSkillsInput] = useState('');
+  const [skillsInputDeb, setSkillsInputDeb] = useState('');
+  const [skillsList, setSkillsList] = useState([]);
 
   // Получаем данные из Redux store
   const {aboutMe, experience, skills, telegramm} = useSelector(
@@ -53,6 +57,18 @@ export const EditProfile: React.FC<{
 
     loadSkillsFromDB();
   }, []);
+
+  useEffect(() => {
+    const timeOutId = setTimeout(() => {
+      getSkills(skillsInput, 10).then(res => {
+        console.log(res.data);
+        setSkillsList(res.data);
+      });
+
+      setSkillsInputDeb(skillsInput);
+    }, 500);
+    return () => clearTimeout(timeOutId);
+  }, [skillsInput, 500]);
 
   // Функция загрузки навыков из Firestore
   const loadSkillsFromDB = async () => {
@@ -196,6 +212,18 @@ export const EditProfile: React.FC<{
                 )}
                 {!loadingSkills && <Text style={styles.arrowIcon}>▼</Text>}
               </TouchableOpacity>
+
+              <Text style={styles.sectionTitle}>Навыки</Text>
+
+              <TextInput
+                value={skillsInput}
+                onChangeText={setSkillsInput}
+                style={styles.input}
+                placeholder="Введите свои навыки"
+                placeholderTextColor="#A8A8A8"
+                multiline
+                numberOfLines={3}
+              />
 
               {skillsOpen && (
                 <View style={styles.skillsDropdown}>
