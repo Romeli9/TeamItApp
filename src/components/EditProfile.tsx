@@ -60,10 +60,14 @@ export const EditProfile: React.FC<{
 
   useEffect(() => {
     const timeOutId = setTimeout(() => {
-      getSkills(skillsInput, 10).then(res => {
-        console.log(res.data);
-        setSkillsList(res.data);
-      });
+      getSkills(skillsInput, 10)
+        .then(res => {
+          console.log(res.data);
+          setSkillsList(res.data);
+        })
+        .catch(error => {
+          console.log(error);
+        });
 
       setSkillsInputDeb(skillsInput);
     }, 500);
