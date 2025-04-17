@@ -1,7 +1,6 @@
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 
-import {getToken} from 'api';
 import {auth} from 'app/FireBaseConfig';
 import {AllRoutes, Screens, Stacks} from 'app/navigation/navigationEnums';
 import {RootStackParamsList} from 'app/navigation/navigationTypes';
@@ -24,11 +23,7 @@ export const useAppNavigation = (): AuthNavigationProp => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    console.log('123123');
-    getToken();
-
     const unsubscribe = auth.onAuthStateChanged(user => {
-      console.log(user);
       setIsAuthenticated(!!user);
       setIsAuthChecked(true);
     });

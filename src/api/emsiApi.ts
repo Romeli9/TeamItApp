@@ -14,15 +14,24 @@ export const getToken = async () => {
       scope: process.env.EXPO_PUBLIC_SCOPE,
       grant_type: 'client_credentials',
     },
-  }).then(async res => {
-    const token = JSON.stringify(res.data.access_token);
-    await AsyncStorage.setItem('token', token);
-    console.log(res);
-  });
+  })
+    .then(async res => {
+      await AsyncStorage.setItem('token', res.data.access_token);
+      console.log('res in getToken', res.data);
+    })
+    .catch(error => {
+      console.log(error);
+    });
 };
 
 export const getSkills = (q?: string, limit?: number) => {
   return api.get('/skills/versions/latest/skills', {
     params: {q, limit},
+  });
+};
+
+export const getRelatedSkills = (ids: string[], limit = 10) => {
+  return api.post('/skills/versions/latest/related', {
+    ids,
   });
 };
