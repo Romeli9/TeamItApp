@@ -5,11 +5,10 @@ const api = axios.create({
   baseURL: 'https://emsiservices.com',
 });
 
-api.interceptors.request.use(config => {
-  const token = AsyncStorage.getItem('token');
-
+api.interceptors.request.use(async config => {
+  const token = await AsyncStorage.getItem('token');
   if (token) {
-    config.headers.set('Authorization', `Bearer ${token}`);
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
