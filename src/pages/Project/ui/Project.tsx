@@ -14,6 +14,7 @@ import {
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {ProjectRouteParams} from 'app/navigation/navigationTypes';
+import {Skill} from 'components';
 import SearchModal, {UserFrom} from 'components/SearchModal';
 import {addDoc, collection} from 'firebase/firestore';
 import {
@@ -309,6 +310,25 @@ export const Project = () => {
               ))}
             </View>
           </View>
+
+          {projectData.skills && (
+            <View style={styles.skillsContainer}>
+              <Text style={styles.sectionTitle}>Требуемые навыки:</Text>
+              <View style={styles.skillsList}>
+                {typeof projectData.skills === 'string'
+                  ? JSON.parse(projectData.skills).map((skill: Skill) => (
+                      <View key={skill.id} style={styles.skillItem}>
+                        <Text style={styles.skillText}>{skill.name}</Text>
+                      </View>
+                    ))
+                  : projectData.skills.map((skill: Skill) => (
+                      <View key={skill.id} style={styles.skillItem}>
+                        <Text style={styles.skillText}>{skill.name}</Text>
+                      </View>
+                    ))}
+              </View>
+            </View>
+          )}
 
           <View style={styles.author_container}>
             <Text style={styles.author_name}>Автор идеи:</Text>

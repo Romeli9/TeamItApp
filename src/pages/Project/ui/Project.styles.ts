@@ -338,4 +338,34 @@ export const ProjectStyles = StyleSheet.create({
     left: -65,
     //width: '100%',
   },
+
+  skillsContainer: {
+    width: '94%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 30,
+    padding: 15,
+    marginTop: 14,
+  },
+  sectionTitle: {
+    fontFamily: 'Inter-ExtraBold',
+    fontSize: 15,
+    color: 'rgba(0, 0, 0, 0.9)',
+    marginBottom: 10,
+  },
+  skillsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  skillItem: {
+    backgroundColor: '#E8D9FF',
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  skillText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 12,
+    color: '#6A3BB5',
+  },
 });

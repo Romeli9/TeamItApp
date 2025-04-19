@@ -5,10 +5,11 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
   },
   modalContent: {
     width: 316,
-    height: '91.25%',
+    maxHeight: '91.25%',
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 30,
@@ -22,6 +23,7 @@ export const styles = StyleSheet.create({
   scrollViewContainer: {
     flexGrow: 1,
     alignItems: 'center',
+    paddingBottom: 20,
   },
   closeButton: {
     marginLeft: '90%',
@@ -231,5 +233,43 @@ export const styles = StyleSheet.create({
   },
   dropdownItemSelected: {
     //backgroundColor: '#F2F2F2',
+  },
+  skillsInputContainer: {
+    width: 274,
+    marginBottom: 16,
+  },
+  skillsInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 8,
+  },
+  selectedSkillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 10,
+  },
+  skillPill: {
+    backgroundColor: '#dedede',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  skillPillText: {
+    color: '#333',
+  },
+  skillsDropdown: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: 'white',
+    maxHeight: 150,
+  },
+  skillDropdownItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
 });

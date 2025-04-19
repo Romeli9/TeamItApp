@@ -4,6 +4,7 @@ import axios from 'axios';
 import api from './api';
 
 export const getToken = async () => {
+  console.log('getToken');
   return axios({
     method: 'post',
     url: 'https://auth.emsicloud.com/connect/token',
@@ -27,11 +28,5 @@ export const getToken = async () => {
 export const getSkills = (q?: string, limit?: number) => {
   return api.get('/skills/versions/latest/skills', {
     params: {q, limit},
-  });
-};
-
-export const getRelatedSkills = (ids: string[], limit = 10) => {
-  return api.post('/skills/versions/latest/related', {
-    ids,
   });
 };
