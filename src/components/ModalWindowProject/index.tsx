@@ -1,9 +1,12 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
+  FlatList,
   Image,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -11,6 +14,8 @@ import {
   View,
 } from 'react-native';
 
+import {getSkills} from 'api';
+import {Skill} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {LinearGradient} from 'expo-linear-gradient';
 import {addDoc, collection, doc, getDoc, getDocs} from 'firebase/firestore';
@@ -42,6 +47,10 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>();
   const [roles, setRoles] = useState<string[]>();
+
+  const [requiredSkills, setRequiredSkills] = useState<Skill[]>([]);
+  const [skillsSearchTerm, setSkillsSearchTerm] = useState('');
+  const [skillsSuggestions, setSkillsSuggestions] = useState<Skill[]>([]);
 
   const [pickerResponse, setPickerResponse] =
     useState<ImagePicker.ImagePickerResult | null>(null);
@@ -77,6 +86,40 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 
     fetchData();
   }, []);
+
+  // Эффект для поиска навыков
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (skillsSearchTerm.trim()) {
+        getSkills(skillsSearchTerm, 10)
+          .then(res => {
+            console.log(res.data.data);
+            setSkillsSuggestions(res.data.data);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      } else {
+        setSkillsSuggestions([]);
+      }
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [skillsSearchTerm]);
+
+  // Добавление навыка
+  const handleAddSkill = (skill: Skill) => {
+    if (!requiredSkills.find(s => s.id === skill.id)) {
+      setRequiredSkills([...requiredSkills, skill]);
+      setSkillsSearchTerm('');
+      setSkillsSuggestions([]);
+    }
+  };
+
+  // Удаление навыка
+  const handleRemoveSkill = (skillId: string) => {
+    setRequiredSkills(requiredSkills.filter(skill => skill.id !== skillId));
+  };
 
   const uploadImageToFirebase = async (uri: string) => {
     try {
@@ -179,6 +222,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         creator: userName,
         creatorId: userId,
         members: members,
+        skills: JSON.stringify(requiredSkills),
       };
 
       const firestore = FIREBASE_DB;
@@ -189,6 +233,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       const newProject: ProjectType = {
         id: docRef.id,
         ...projectData,
+        skills: requiredSkills,
       };
 
       const chatData = {
@@ -223,161 +268,209 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 
   return (
     <Modal visible={isModalVisible} animationType="slide" transparent>
-      <LinearGradient
-        style={styles.modalContainer}
-        colors={[
-          'rgba(46, 10, 95, 0.94)',
-          'rgba(177, 170, 219, 0.6043)',
-          'rgba(31, 24, 75, 0.94)',
-        ]}>
-        <View style={styles.modalContent}>
-          <ScrollView
-            contentContainerStyle={styles.scrollViewContainer}
-            keyboardShouldPersistTaps="handled">
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}>
-              <Image source={require('shared/assets/icons/cros.png')} />
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Создание проекта</Text>
-            <TouchableOpacity
-              style={styles.add_image__button}
-              onPress={onImageLibraryPress}>
-              {selectedImage ? (
-                <Image
-                  source={{uri: selectedImage}}
-                  style={styles.selectedImage}
-                />
-              ) : (
-                <Text style={styles.add_image__text}>+</Text>
-              )}
-            </TouchableOpacity>
-            <TextInput
-              value={projectName}
-              placeholder="Введите название"
-              autoCapitalize="none"
-              placeholderTextColor="#A8A8A8"
-              onChangeText={text => setProjectName(text)}
-              style={styles.project_name__placeholder}
-            />
-            <View style={styles.project__about__container}>
-              <Text style={styles.project__text}>О проекте:</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.modalContainer}>
+        <LinearGradient
+          style={styles.modalContainer}
+          colors={[
+            'rgba(46, 10, 95, 0.94)',
+            'rgba(177, 170, 219, 0.6043)',
+            'rgba(31, 24, 75, 0.94)',
+          ]}>
+          <View style={styles.modalContent}>
+            <ScrollView
+              contentContainerStyle={styles.scrollViewContainer}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}>
+                <Image source={require('shared/assets/icons/cros.png')} />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Создание проекта</Text>
+              <TouchableOpacity
+                style={styles.add_image__button}
+                onPress={onImageLibraryPress}>
+                {selectedImage ? (
+                  <Image
+                    source={{uri: selectedImage}}
+                    style={styles.selectedImage}
+                  />
+                ) : (
+                  <Text style={styles.add_image__text}>+</Text>
+                )}
+              </TouchableOpacity>
               <TextInput
-                value={projectDescRaw}
-                placeholder="Описание"
+                value={projectName}
+                placeholder="Введите название"
                 autoCapitalize="none"
                 placeholderTextColor="#A8A8A8"
-                onChangeText={text => setProjectDescRaw(text)}
-                style={styles.project_name__placeholder_about}
-                multiline={true}
-                keyboardType="default"
+                onChangeText={text => setProjectName(text)}
+                style={styles.project_name__placeholder}
               />
-            </View>
-
-            <View style={styles.project__container_with_plus}>
-              <Text style={styles.project__text_2}>Требуются:</Text>
-              <View style={styles.fdrow}>
-                <TouchableOpacity
-                  style={styles.project__button_plus}
-                  onPress={toggleRequired}>
-                  <Text style={styles.plus1}>+</Text>
-                </TouchableOpacity>
-                {requiredSelected.map(item => (
-                  <View key={item} style={styles.selectedItem}>
-                    <Text style={styles.selectedItemText}>{item}</Text>
-                    <TouchableOpacity
-                      onPress={() => handleRequiredSelect(item)}
-                      style={styles.removeSelectedItem}>
-                      <View style={styles.removeSelectedItemTextContainer}>
-                        <Text style={styles.cross1}>+</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                ))}
+              <View style={styles.project__about__container}>
+                <Text style={styles.project__text}>О проекте:</Text>
+                <TextInput
+                  value={projectDescRaw}
+                  placeholder="Описание"
+                  autoCapitalize="none"
+                  placeholderTextColor="#A8A8A8"
+                  onChangeText={text => setProjectDescRaw(text)}
+                  style={styles.project_name__placeholder_about}
+                  multiline={true}
+                  keyboardType="default"
+                />
               </View>
-              {requiredOpen && (
-                <ScrollView style={styles.dropdownContainer}>
-                  <View style={styles.dropdownWrapper}>
-                    {roles &&
-                      roles.length > 0 &&
-                      roles.map((item, ix) => (
-                        <TouchableOpacity
-                          key={ix}
-                          style={[
-                            styles.dropdownItem,
-                            requiredSelected.includes(item) &&
-                              styles.dropdownItemSelected,
-                          ]}
-                          onPress={() => handleRequiredSelect(item)}>
-                          <View style={styles.dropdownItemContainer}>
-                            <View style={styles.dropdownItem_icon}>
-                              <Text style={styles.plus2}>+</Text>
+
+              <View style={styles.project__container_with_plus}>
+                <Text style={styles.project__text_2}>Требуются:</Text>
+                <View style={styles.fdrow}>
+                  <TouchableOpacity
+                    style={styles.project__button_plus}
+                    onPress={toggleRequired}>
+                    <Text style={styles.plus1}>+</Text>
+                  </TouchableOpacity>
+                  {requiredSelected.map(item => (
+                    <View key={item} style={styles.selectedItem}>
+                      <Text style={styles.selectedItemText}>{item}</Text>
+                      <TouchableOpacity
+                        onPress={() => handleRequiredSelect(item)}
+                        style={styles.removeSelectedItem}>
+                        <View style={styles.removeSelectedItemTextContainer}>
+                          <Text style={styles.cross1}>+</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+                {requiredOpen && (
+                  <ScrollView style={styles.dropdownContainer}>
+                    <View style={styles.dropdownWrapper}>
+                      {roles &&
+                        roles.length > 0 &&
+                        roles.map((item, ix) => (
+                          <TouchableOpacity
+                            key={ix}
+                            style={[
+                              styles.dropdownItem,
+                              requiredSelected.includes(item) &&
+                                styles.dropdownItemSelected,
+                            ]}
+                            onPress={() => handleRequiredSelect(item)}>
+                            <View style={styles.dropdownItemContainer}>
+                              <View style={styles.dropdownItem_icon}>
+                                <Text style={styles.plus2}>+</Text>
+                              </View>
+                              <Text style={styles.dropdownItemText}>
+                                {item}
+                              </Text>
                             </View>
-                            <Text style={styles.dropdownItemText}>{item}</Text>
-                          </View>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  </ScrollView>
+                )}
+              </View>
+
+              <View style={styles.project__container_with_plus}>
+                <Text style={styles.project__text_2}>Категории:</Text>
+                <View style={styles.fdrow}>
+                  <TouchableOpacity
+                    style={styles.project__button_plus}
+                    onPress={toggleCategory}>
+                    <Text style={styles.plus1}>+</Text>
+                  </TouchableOpacity>
+                  {categoriesSelected.map(item => (
+                    <View key={item} style={styles.selectedItem}>
+                      <Text style={styles.selectedItemText}>{item}</Text>
+                      <TouchableOpacity
+                        onPress={() => handleCategorySelect(item)}
+                        style={styles.removeSelectedItem}>
+                        <View style={styles.removeSelectedItemTextContainer}>
+                          <Text style={styles.cross1}>+</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+                {categoriesOpen && (
+                  <ScrollView style={styles.dropdownContainer}>
+                    <View style={styles.dropdownWrapper}>
+                      {categories &&
+                        categories.length > 0 &&
+                        categories.map((item, ix) => (
+                          <TouchableOpacity
+                            key={ix}
+                            style={[
+                              styles.dropdownItem,
+                              categoriesSelected.includes(item) &&
+                                styles.dropdownItemSelected,
+                            ]}
+                            onPress={() => handleCategorySelect(item)}>
+                            <View style={styles.dropdownItemContainer}>
+                              <View style={styles.dropdownItem_icon}>
+                                <Text style={styles.plus2}>+</Text>
+                              </View>
+                              <Text style={styles.dropdownItemText}>
+                                {item}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  </ScrollView>
+                )}
+              </View>
+
+              <View style={styles.skillsInputContainer}>
+                <Text style={styles.project__text}>Требуемые навыки:</Text>
+                <TextInput
+                  placeholder="Введите навык"
+                  value={skillsSearchTerm}
+                  onChangeText={setSkillsSearchTerm}
+                  style={styles.skillsInput}
+                />
+
+                {/* Выбранные навыки */}
+                <View style={styles.selectedSkillsContainer}>
+                  {requiredSkills.map(skill => (
+                    <TouchableOpacity
+                      key={skill.id}
+                      onPress={() => handleRemoveSkill(skill.id)}
+                      style={styles.skillPill}>
+                      <Text style={styles.skillPillText}>{skill.name} ×</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Список предложений */}
+                {skillsSuggestions.length > 0 && (
+                  <View style={styles.skillsDropdown}>
+                    <ScrollView nestedScrollEnabled style={{maxHeight: 150}}>
+                      {skillsSuggestions.map(item => (
+                        <TouchableOpacity
+                          key={item.id}
+                          onPress={() => handleAddSkill(item)}
+                          style={styles.skillDropdownItem}>
+                          <Text>{item.name}</Text>
                         </TouchableOpacity>
                       ))}
+                    </ScrollView>
                   </View>
-                </ScrollView>
-              )}
-            </View>
-
-            <View style={styles.project__container_with_plus}>
-              <Text style={styles.project__text_2}>Категории:</Text>
-              <View style={styles.fdrow}>
-                <TouchableOpacity
-                  style={styles.project__button_plus}
-                  onPress={toggleCategory}>
-                  <Text style={styles.plus1}>+</Text>
-                </TouchableOpacity>
-                {categoriesSelected.map(item => (
-                  <View key={item} style={styles.selectedItem}>
-                    <Text style={styles.selectedItemText}>{item}</Text>
-                    <TouchableOpacity
-                      onPress={() => handleCategorySelect(item)}
-                      style={styles.removeSelectedItem}>
-                      <View style={styles.removeSelectedItemTextContainer}>
-                        <Text style={styles.cross1}>+</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                ))}
+                )}
               </View>
-              {categoriesOpen && (
-                <ScrollView style={styles.dropdownContainer}>
-                  <View style={styles.dropdownWrapper}>
-                    {categories &&
-                      categories.length > 0 &&
-                      categories.map((item, ix) => (
-                        <TouchableOpacity
-                          key={ix}
-                          style={[
-                            styles.dropdownItem,
-                            categoriesSelected.includes(item) &&
-                              styles.dropdownItemSelected,
-                          ]}
-                          onPress={() => handleCategorySelect(item)}>
-                          <View style={styles.dropdownItemContainer}>
-                            <View style={styles.dropdownItem_icon}>
-                              <Text style={styles.plus2}>+</Text>
-                            </View>
-                            <Text style={styles.dropdownItemText}>{item}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      ))}
-                  </View>
-                </ScrollView>
-              )}
-            </View>
-            <TouchableOpacity
-              disabled={loading}
-              style={styles.project__button_create}
-              onPress={сreateProject}>
-              <Text style={styles.project__text_create}>Создать</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-      </LinearGradient>
+
+              <TouchableOpacity
+                disabled={loading}
+                style={styles.project__button_create}
+                onPress={сreateProject}>
+                <Text style={styles.project__text_create}>Создать</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </LinearGradient>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

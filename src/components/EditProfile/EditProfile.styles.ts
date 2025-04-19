@@ -1,0 +1,186 @@
+import {StyleSheet} from 'react-native';
+
+export const EditProfileStyles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    maxHeight: '90%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  scrollContent: {
+    paddingBottom: 70,
+  },
+  fixedBottom: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    color: 'black',
+    lineHeight: 30,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 15,
+    marginBottom: 8,
+    color: '#333',
+  },
+  input: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    marginBottom: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  skillsInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  skillsInputText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+  },
+  arrowIcon: {
+    color: '#9260D1',
+    fontSize: 14,
+    marginLeft: 10,
+  },
+  skillsDropdown: {
+    marginTop: -10,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 10,
+    backgroundColor: 'white',
+    maxHeight: 200,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  skillItem: {
+    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  selectedSkillItem: {
+    backgroundColor: '#F8F0FF',
+  },
+  skillText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  selectedIcon: {
+    color: '#9260D1',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  saveButton: {
+    backgroundColor: '#9260D1',
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 30,
+    width: '80%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyText: {
+    textAlign: 'center',
+    padding: 15,
+    color: '#999',
+    fontSize: 16,
+  },
+  selectedSkillsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  selectedSkillTag: {
+    backgroundColor: '#E0D0FF',
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  selectedSkillText: {
+    color: '#5E3B9E',
+    fontSize: 14,
+  },
+  skillsButtonsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 10,
+  },
+
+  skillButton: {
+    backgroundColor: '#F0F0F0',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    margin: 4,
+  },
+
+  skillButtonSelected: {
+    backgroundColor: '#9260D1',
+  },
+
+  skillButtonText: {
+    color: '#333',
+    fontSize: 14,
+  },
+
+  skillButtonTextSelected: {
+    color: '#fff',
+  },
+});

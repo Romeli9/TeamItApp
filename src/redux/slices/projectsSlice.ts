@@ -1,5 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
+import {Skill} from 'components';
 import {RootState} from 'redux/store';
 
 export type ProjectType = {
@@ -11,6 +12,7 @@ export type ProjectType = {
   photo: string;
   required: string[];
   categories: string[];
+  skills: Skill[];
   members: string[];
 };
 
