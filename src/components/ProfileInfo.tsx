@@ -93,6 +93,7 @@ export const ProfileInfo = () => {
               required: doc.data().required,
               categories: doc.data().categories,
               members: doc.data().members,
+              skills: doc.data().skills,
             }));
             setProjects(projectsData);
             dispatch(setYourProjects(projectsData));

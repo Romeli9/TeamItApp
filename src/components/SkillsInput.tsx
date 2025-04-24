@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 
-import {getSkills} from 'api';
+import {getSkills, getToken} from 'api';
 
 export type Skill = {
   id: string;
@@ -33,9 +33,16 @@ export const SkillsInput: React.FC<SkillsInputProps> = ({
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchTerm.trim()) {
-        getSkills(searchTerm, 15).then(res => {
-          setSkillsSuggestions(res.data.data);
-        });
+        getSkills(searchTerm, 15)
+          .then(res => {
+            setSkillsSuggestions(res.data.data);
+          })
+          .catch(async err => {
+            console.log(err);
+            if (err.response.status === 401) {
+              await getToken();
+            }
+          });
       } else {
         setSkillsSuggestions([]);
       }

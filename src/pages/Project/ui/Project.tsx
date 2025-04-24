@@ -43,6 +43,8 @@ export const Project = () => {
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
+
+  console.log(projectData);
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
@@ -65,7 +67,6 @@ export const Project = () => {
 
   const openApplicationModal = (index: number) => {
     setOpenSendIndex(index);
-
     setModalVisible(true);
   };
 

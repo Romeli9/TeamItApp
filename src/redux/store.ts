@@ -1,8 +1,8 @@
 import {configureStore} from '@reduxjs/toolkit';
 
-import user from './slices/userSlice';
-import projects from './slices/projectsSlice';
 import filter from './slices/filterSlice';
+import projects from './slices/projectsSlice';
+import user from './slices/userSlice';
 
 export const store = configureStore({
   reducer: {
