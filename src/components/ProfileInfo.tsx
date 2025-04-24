@@ -3,13 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   Animated,
   Image,
   TouchableOpacity,
   FlatList,
-  ListRenderItem,
   ScrollView,
+  Modal,
+  TextInput,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from 'redux/store';
@@ -22,9 +22,7 @@ import {
   getDoc,
 } from 'firebase/firestore';
 import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
-import {} from 'redux/slices/userSlice';
 import projectsSlice, {
-  projectsState,
   ProjectType,
   setYourProjects,
 } from 'redux/slices/projectsSlice';
@@ -54,8 +52,12 @@ function ProfileInfo() {
   const [buttonImage, setButtonImage] = useState(
     require('shared/assets/profile/down.png'),
   );
-  const [subscribed, setSubscribed] = useState(false);
 
+  // Основное описание, которое отображается на странице
+  const [additionalDescription, setAdditionalDescription] = useState('');
+  // Временное описание для модального окна
+  const [tempDescription, setTempDescription] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
   const toggleMoreInfo = () => {
     setShowMoreInfo(prevState => !prevState);
@@ -65,7 +67,6 @@ function ProfileInfo() {
       useNativeDriver: false,
     }).start();
 
-    // Изменяем изображение кнопки
     setButtonImage(
       showMoreInfo
         ? require('shared/assets/profile/down.png')
@@ -75,7 +76,7 @@ function ProfileInfo() {
 
   const additionalInfoHeight = animatedHeight.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 200], // Увеличиваем максимальную высоту
+    outputRange: [0, 200],
   });
 
   const fetchUserProjects = async () => {
@@ -130,6 +131,22 @@ function ProfileInfo() {
     navigation.navigate(Screens.PROJECT, {projectId: projectID});
   };
 
+  const openModal = () => {
+    setTempDescription(additionalDescription);
+    setModalVisible(true);
+  };
+
+  // При сохранении — переносим tempDescription в основной state и закрываем модал
+  const saveDescription = () => {
+    setAdditionalDescription(tempDescription);
+    setModalVisible(false);
+  };
+
+  const cancelEditing = () => {
+    setTempDescription('');
+    setModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.additionalInfoContainer}>
@@ -148,6 +165,59 @@ function ProfileInfo() {
             </>
           )}
         </Animated.View>
+
+        {/* Кнопка для открытия модального окна */}
+        <TouchableOpacity
+          style={styles.additionalButton}
+          onPress={openModal}
+        >
+          <Text style={{ color: '#fff' }}>Дополнительное описание</Text>
+        </TouchableOpacity>
+
+        {/* Модальное окно */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={cancelEditing}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>
+                Введите дополнительное описание
+              </Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Ваше дополнительное описание..."
+                value={tempDescription}
+                onChangeText={setTempDescription}
+                multiline
+              />
+              <View style={styles.modalButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={saveDescription}
+                >
+                  <Text style={styles.saveButtonText}>Сохранить</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={cancelEditing}
+                >
+                  <Text style={styles.cancelButtonText}>Отмена</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Отображение дополнительного описания */}
+        {additionalDescription.length > 0 && (
+          <View style={styles.additionalDescriptionBox}>
+            <Text style={{ fontWeight: 'bold' }}>Дополнительное описание:</Text>
+            <Text>{additionalDescription}</Text>
+          </View>
+        )}
 
         <Text style={styles.text_project}>Проекты:</Text>
         <ScrollView contentContainerStyle={styles.projectList}>
@@ -219,9 +289,71 @@ const styles = StyleSheet.create({
   projectList: {
     paddingBottom: 150,
   },
-  // additionalInfoContainer121221212: {
-  //   overflow: 'hidden',
-  //   width: 250,
-  //   height: 175,
-  // },
+  additionalButton: {
+    backgroundColor: '#B39DDB', // Лавандовый цвет
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 24, 
+    marginBottom: 15,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    width: 300,
+    elevation: 5,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
+  additionalDescriptionBox: {
+    backgroundColor: '#F0F0F0',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+    width: '100%',
+    alignItems: 'flex-start',
+  },
+  modalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  saveButton: {
+    backgroundColor: '#B39DDB', // Лавандовый цвет
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+    flex: 1,
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    backgroundColor: '#f44336', // красный цвет для отмены
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+    flex: 1,
+    marginLeft: 10,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });
