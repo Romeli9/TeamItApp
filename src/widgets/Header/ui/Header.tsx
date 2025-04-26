@@ -31,9 +31,9 @@ export const Header = ({
         {showBackButton && (
           <TouchableOpacity onPress={onBackPress}>
             <ArrowBack
-              fill={IconStyles.medium.changeColor(Colors.Gray500).color}
-              width={IconStyles.medium.width}
-              height={IconStyles.medium.height}
+              fill={IconStyles.large.changeColor(Colors.Gray500).color}
+              width={IconStyles.large.width}
+              height={IconStyles.large.height}
             />
           </TouchableOpacity>
         )}

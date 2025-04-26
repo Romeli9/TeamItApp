@@ -1,3 +1,4 @@
+import {RouteProp, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -12,7 +13,8 @@ import {
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import {ProjectRequest} from 'entities';
+import {ProjectRouteParams} from 'app/navigation/navigationTypes';
+import {ProjectRequest} from 'entities/ProjectRequest';
 import {
   collection,
   deleteDoc,
@@ -31,28 +33,25 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 import {ProjectRequestsStyles as styles} from './ProjectRequests.styles';
 
 export const ProjectRequests = () => {
+  const route = useRoute<RouteProp<{params: ProjectRouteParams}>>();
+
   const {userId} = useSelector((state: RootState) => state.user);
   const navigation = useAppNavigation();
   const [requests, setRequests] = useState<ProjectRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const {projectId} = route.params;
+
   const fetchRequests = async () => {
     try {
       const q = query(
         collection(FIREBASE_DB, 'projectRequests'),
         where('recipientId', '==', userId),
+        where('projectId', '==', projectId),
       );
 
-      const sentQ = query(
-        collection(FIREBASE_DB, 'projectRequests'),
-        where('senderId', '==', userId),
-      );
-
-      const [receivedSnapshot, sentSnapshot] = await Promise.all([
-        getDocs(q),
-        getDocs(sentQ),
-      ]);
+      const receivedSnapshot = await getDocs(q);
 
       const receivedRequests = receivedSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -60,13 +59,7 @@ export const ProjectRequests = () => {
         type: 'received',
       })) as ProjectRequest[];
 
-      const sentRequests = sentSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        type: 'sent',
-      })) as ProjectRequest[];
-
-      setRequests([...receivedRequests, ...sentRequests]);
+      setRequests(receivedRequests);
     } catch (error) {
       console.error('Error fetching requests:', error);
       Alert.alert('Ошибка', 'Не удалось загрузить заявки');
@@ -78,7 +71,7 @@ export const ProjectRequests = () => {
 
   useEffect(() => {
     fetchRequests();
-  }, [userId]);
+  }, [projectId]);
 
   const onRefresh = () => {
     setRefreshing(true);

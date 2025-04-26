@@ -14,15 +14,16 @@ import {
   View,
 } from 'react-native';
 
-import {getSkills} from 'api';
+import {getSkills, getToken} from 'api';
 import {Skill} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {LinearGradient} from 'expo-linear-gradient';
-import {addDoc, collection, doc, getDoc, getDocs} from 'firebase/firestore';
+import {addDoc, collection, getDocs} from 'firebase/firestore';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
+import {PhotoIcon} from 'shared/assets/icons/icons';
 
 import {FIREBASE_DB, FIREBASE_STORAGE} from '../../app/FireBaseConfig';
 import {styles} from './styles';
@@ -96,8 +97,11 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
             console.log(res.data.data);
             setSkillsSuggestions(res.data.data);
           })
-          .catch(error => {
+          .catch(async error => {
             console.log(error);
+            if (error.response.status === 401) {
+              await getToken();
+            }
           });
       } else {
         setSkillsSuggestions([]);
@@ -298,7 +302,23 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                     style={styles.selectedImage}
                   />
                 ) : (
-                  <Text style={styles.add_image__text}>+</Text>
+                  <View
+                    style={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 30,
+                      borderColor: '#000000',
+                      borderWidth: 2,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <PhotoIcon
+                      style={{
+                        width: 32,
+                        height: 32,
+                      }}
+                    />
+                  </View>
                 )}
               </TouchableOpacity>
               <TextInput
@@ -394,6 +414,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                     </View>
                   ))}
                 </View>
+                {/*  TODO: сделать так, что бы если уже выл выбран, то вместо 
+                плюсика ставим красный минусик */}
                 {categoriesOpen && (
                   <ScrollView style={styles.dropdownContainer}>
                     <View style={styles.dropdownWrapper}>

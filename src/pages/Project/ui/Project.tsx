@@ -108,9 +108,9 @@ export const Project = () => {
       const requestData = {
         projectId,
         projectName: projectData.name,
-        senderId: userId,
+        senderId: projectData.creatorId,
         senderName: userData.userName,
-        recipientId: projectData.creatorId,
+        recipientId: userId,
         recipientName: projectData.creator,
         role,
         message,

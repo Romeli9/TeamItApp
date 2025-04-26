@@ -4,7 +4,7 @@ import {Colors} from 'shared/libs/helpers/colors';
 
 export const ProjectRequestsStyles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#fff',
     padding: 16,
     paddingTop: 110,

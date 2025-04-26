@@ -4,10 +4,10 @@ import {Colors} from 'shared/libs/helpers';
 
 export const HeaderStyles = StyleSheet.create({
   container: {
-    paddingTop: 15,
-    marginTop: 15,
+    paddingTop: 35,
+    marginTop: 5,
     flexDirection: 'row',
-    height: 60,
+    height: 90,
     gap: 30,
     width: '100%',
     justifyContent: 'space-between',
@@ -21,7 +21,7 @@ export const HeaderStyles = StyleSheet.create({
   },
   chatTitle: {
     position: 'absolute',
-    top: 50,
+    top: 60,
     left: '50%',
     transform: [{translateX: '-50%'}, {translateY: '-50%'}],
   },

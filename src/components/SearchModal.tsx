@@ -52,6 +52,7 @@ const SearchModal = ({
       const nameMatch = user.username
         ?.toLowerCase()
         .includes(searchText.toLowerCase());
+        
       const rolesMatch =
         selectedRoles.length === 0 ||
         selectedRoles.some(role =>
