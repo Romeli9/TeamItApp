@@ -24,7 +24,7 @@ export const ProjectStyles = StyleSheet.create({
     width: '100%',
     height: 236,
     borderRadius: 40,
-    marginBottom: 5,
+    marginBottom: 15,
     overflow: 'hidden',
   },
 
@@ -139,9 +139,9 @@ export const ProjectStyles = StyleSheet.create({
     width: '94%',
     height: 'auto',
     backgroundColor: '#FFFFFF',
-    borderRadius: 30,
+    borderRadius: 25,
     paddingTop: 14,
-    paddingBottom: 17,
+    paddingBottom: 14,
   },
 
   categories_container_2: {

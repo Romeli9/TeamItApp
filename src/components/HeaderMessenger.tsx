@@ -13,16 +13,16 @@ export const HeaderMessenger = () => {
     <LinearGradient
       style={styles.container}
       colors={['rgba(114, 47, 181, 0.29)', 'rgba(200, 178, 246, 1)']}>
-      <TouchableOpacity>
-        <SearchIcon style={{width: 24, height: 24}} />
+      <TouchableOpacity style={styles.iconMargin}>
+        <SearchIcon style={{width: 32, height: 32}} />
       </TouchableOpacity>
       <View style={styles.rightIcons}>
         <TouchableOpacity
           onPress={() => {
-            navigate(Screens.PROJECT_REQUESTS);
+            navigate(Screens.PROJECT_LIST_REQUESTS);
           }}
           style={styles.iconMargin}>
-          <BellIcon style={{width: 24, height: 24}} />
+          <BellIcon style={{width: 32, height: 32}} />
         </TouchableOpacity>
       </View>
     </LinearGradient>
@@ -31,9 +31,9 @@ export const HeaderMessenger = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 25,
     width: '100%',
-    height: 106,
+    height: 120,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -44,6 +44,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   iconMargin: {
-    marginRight: 16,
+    paddingTop: 20,
   },
 });

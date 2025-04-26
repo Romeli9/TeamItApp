@@ -14,6 +14,7 @@ export enum Screens {
   PROJECT = 'Project',
   SEARCH = 'Search',
   PROJECT_REQUESTS = 'ProjectRequests',
+  PROJECT_LIST_REQUESTS='ProjectListRequests',
   VIEW_PROFILE = 'ViewProfile',
 }
 

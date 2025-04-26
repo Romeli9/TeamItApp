@@ -1,3 +1,6 @@
+import {ProjectRequest} from 'entities/ProjectRequest';
+import {ProjectType} from 'redux/slices/projectsSlice';
+
 export const formatMessageTime = (timestamp: number) => {
   const now = new Date();
   const messageDate = new Date(timestamp);
@@ -92,4 +95,15 @@ function getRussianNoun(
   return five;
 }
 
-
+export function matchHandler(prev: ProjectType[], project: ProjectType) {
+  // Проверяем на дублирование
+  if (prev.length) {
+    let newListProjects = [...prev];
+    if (!prev.find(item => item.id === project.id)) {
+      newListProjects.push(project);
+    }
+    return newListProjects;
+  } else {
+    return [project];
+  }
+}

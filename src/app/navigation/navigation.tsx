@@ -11,6 +11,7 @@ import {
   ProjectRequests,
   RegisterPage,
 } from 'pages';
+import {ProjectRequestsList} from 'pages/ProjectRequestsList/ProjectRequestsList.tsx';
 import {useAppNavigation} from 'shared/libs/useAppNavigation.tsx';
 import {Header} from 'widgets';
 
@@ -72,6 +73,13 @@ export const RootNavigator = () => {
         name={Screens.PROJECT}
         component={Project}
         options={{headerShown: false}}
+      />
+      <RootStack.Screen
+        name={Screens.PROJECT_LIST_REQUESTS}
+        component={ProjectRequestsList}
+        options={() => ({
+          header: () => <Header showBackButton onBackPress={handleGoBack} />,
+        })}
       />
       <RootStack.Screen
         name={Screens.PROJECT_REQUESTS}
