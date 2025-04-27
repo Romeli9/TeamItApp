@@ -36,10 +36,15 @@ export const projectsSlice = createSlice({
     setOtherProjects(state, action: PayloadAction<ProjectType[]>) {
       state.otherProjects = action.payload;
     },
+    clearProjects(state) {
+      state.yourProjects = [];
+      state.otherProjects = [];
+    },
   },
 });
 
-export const {setYourProjects, setOtherProjects} = projectsSlice.actions;
+export const {setYourProjects, setOtherProjects, clearProjects} =
+  projectsSlice.actions;
 
 export const selectProjectById = (projectId: string) => (state: RootState) => {
   return (

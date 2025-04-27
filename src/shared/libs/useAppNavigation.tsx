@@ -24,8 +24,8 @@ export const useAppNavigation = (): AuthNavigationProp => {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
-      setIsAuthenticated(!!user);
-      setIsAuthChecked(true);
+      setIsAuthenticated(!!user); // Обновляем состояние авторизации
+      setIsAuthChecked(true); // Устанавливаем флаг, что проверка авторизации завершена
     });
     return unsubscribe;
   }, []);

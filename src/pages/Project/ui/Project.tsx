@@ -343,6 +343,10 @@ export const Project = () => {
             visible={isSearchModal}
             onClose={() => setSearchModal(false)}
             requiredRoles={projectData.required}
+            projectSkills={
+              typeof projectData.skills === 'string' &&
+              JSON.parse(projectData.skills)
+            }
           />
           {projectData.creatorId === userId && (
             <TouchableOpacity

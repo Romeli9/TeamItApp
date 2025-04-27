@@ -14,18 +14,22 @@ import {
 import {collection, getDocs} from 'firebase/firestore';
 
 import {FIREBASE_DB} from '../app/FireBaseConfig';
+import {Skill} from './SkillsInput';
 
 type SearchModalProps = {
   visible: boolean;
   onClose: () => void;
   onUserSelect: (username: UserFrom) => void;
   requiredRoles: string[];
+  projectSkills: Skill[];
 };
 
 export type UserFrom = {
+  priorityScore: number;
   username: string;
   id: string;
   skills?: string[];
+  projectsParticipated?: string[];
 };
 
 const SearchModal = ({
@@ -33,11 +37,16 @@ const SearchModal = ({
   onClose,
   onUserSelect,
   requiredRoles,
+  projectSkills, // Навыки проекта
 }: SearchModalProps) => {
   const [searchText, setSearchText] = useState('');
   const [users, setUsers] = useState<UserFrom[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserFrom[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>(requiredRoles);
+
+  const skills = projectSkills.map(skill => skill.name);
+
+  console.log('зашел');
 
   useEffect(() => {
     if (visible) {
@@ -52,7 +61,7 @@ const SearchModal = ({
       const nameMatch = user.username
         ?.toLowerCase()
         .includes(searchText.toLowerCase());
-        
+      console.log(nameMatch);
       const rolesMatch =
         selectedRoles.length === 0 ||
         selectedRoles.some(role =>
@@ -62,38 +71,77 @@ const SearchModal = ({
         );
       return nameMatch && rolesMatch;
     });
-
+    console.log(filtered);
     setFilteredUsers(filtered);
   }, [searchText, users, selectedRoles]);
 
   const fetchUsers = async () => {
-    const firestore = FIREBASE_DB;
-    const usersRef = collection(firestore, 'users');
-    const snapshot = await getDocs(usersRef);
+    try {
+      console.log('123');
+      const firestore = FIREBASE_DB;
+      const usersRef = collection(firestore, 'tempUsers');
+      const snapshot = await getDocs(usersRef);
 
-    const allUsers = snapshot.docs
-      .map(doc => {
-        const data = doc.data();
-        const skillsArray =
-          typeof data.Skills === 'string'
-            ? data.Skills.split(',').map(s => s.trim())
-            : data.Skills || [];
+      const allUsers = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          console.log(data);
+          const skillsArray =
+            typeof data.Skills === 'string'
+              ? JSON.parse(data.Skills).map((s: Skill) => s.name)
+              : data.Skills || [];
+
+          return {
+            username: data.username,
+            id: doc.id,
+            skills: skillsArray,
+            projectsParticipated: data.projects || [],
+          } as UserFrom;
+        })
+        .filter(user => user.username);
+
+      // Вычисление приоритета пользователей
+      const prioritizedUsers = allUsers.map(user => {
+        let matchingSkillsCount = 0;
+        const userSkills = user.skills || [];
+        const totalUserSkills = userSkills.length;
+        const totalProjectSkills = skills.length;
+
+        // Считаем совпадения навыков
+        skills.forEach(skill => {
+          if (userSkills.includes(skill)) {
+            matchingSkillsCount += 1;
+          }
+        });
+
+        // Вычисляем приоритет
+        const matchScore =
+          matchingSkillsCount / Math.sqrt(totalUserSkills * totalProjectSkills);
+        let participationScore = 0;
+        if (user.projectsParticipated && user.projectsParticipated.length > 0) {
+          participationScore = 1; // Если есть проекты, увеличиваем на 0.2
+        }
+
+        const finalScore = matchScore * 0.8 + participationScore * 0.2;
 
         return {
-          username: data.username,
-          id: doc.id,
-          skills: skillsArray,
-        } as UserFrom;
-      })
-      .filter(user => user.username);
+          ...user,
+          priorityScore: finalScore,
+        };
+      });
 
-    setUsers(allUsers);
-  };
+      console.log('prioritizedUsers', prioritizedUsers);
 
-  const toggleRole = (role: string) => {
-    setSelectedRoles(prev =>
-      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role],
-    );
+      // Сортировка пользователей по приоритету
+      const sortedUsers = prioritizedUsers.sort(
+        (a, b) => b.priorityScore - a.priorityScore,
+      );
+      console.log('sortedUsers', sortedUsers);
+      setUsers(sortedUsers);
+    } catch (error) {
+      console.error('Error fetching users or processing data:', error);
+      // Здесь можно показать уведомление пользователю или выполнить другие действия
+    }
   };
 
   return (
@@ -111,26 +159,6 @@ const SearchModal = ({
             keyboardShouldPersistTaps="handled">
             <Text style={styles.title}>Поиск участников</Text>
 
-            <View style={styles.rolesContainer}>
-              {requiredRoles.map((role, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.roleButton,
-                    selectedRoles.includes(role) && styles.selectedRoleButton,
-                  ]}
-                  onPress={() => toggleRole(role)}>
-                  <Text
-                    style={[
-                      styles.roleText,
-                      selectedRoles.includes(role) && styles.selectedRoleText,
-                    ]}>
-                    {role}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
             <TextInput
               style={styles.searchInput}
               placeholder="Введите имя пользователя..."
@@ -138,19 +166,24 @@ const SearchModal = ({
               onChangeText={setSearchText}
             />
 
-            {selectedRoles.length > 0 && (
-              <Text style={styles.selectedRoleInfo}>
-                Подходящие на роли: {selectedRoles.join(', ')}
-              </Text>
-            )}
-
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user, index) => (
                 <TouchableOpacity
                   key={index}
                   onPress={() => onUserSelect(user)}
                   style={styles.userItemContainer}>
-                  <Text style={styles.userItem}>{user.username}</Text>
+                  <View style={styles.headerContent}>
+                    <Text style={styles.userItem}>{user.username}</Text>
+                    <Text
+                      style={
+                        user.priorityScore > 0.6
+                          ? styles.userScoreHigh
+                          : styles.userScore
+                      }>
+                      {user.priorityScore.toFixed(2)}
+                    </Text>
+                  </View>
+
                   <Text style={styles.userSkills}>
                     {user.skills?.join(', ')}
                   </Text>
@@ -236,6 +269,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
+  userScoreHigh: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'green',
+  },
+  userScore: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'red',
+  },
   userSkills: {
     fontSize: 12,
     color: '#666',
@@ -257,6 +300,11 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  headerContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 

@@ -17,7 +17,12 @@ import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {setProfileData, setUserData} from 'redux/slices/userSlice';
+import {clearProjects} from 'redux/slices/projectsSlice';
+import {
+  clearProfileData,
+  setProfileData,
+  setUserData,
+} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
@@ -37,7 +42,7 @@ export const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       const user = FIREBASE_AUTH.currentUser;
-
+      console.log(user);
       if (user) {
         const firestore = FIREBASE_DB;
         const usersRef = collection(firestore, 'users');
@@ -204,6 +209,8 @@ export const Profile = () => {
     try {
       await FIREBASE_AUTH.signOut();
       navigate(Screens.LOGIN);
+      dispatch(clearProfileData());
+      dispatch(clearProjects());
     } catch (error) {
       console.error('Sign out error:', error);
     }

@@ -41,9 +41,17 @@ export const userSlice = createSlice({
       state.skills = action.payload.Skills;
       state.telegramm = action.payload.Telegramm;
     },
+    clearProfileData(state) {
+      state.userId = '';
+      state.avatar = '';
+      state.background = '';
+      state.email = '';
+      state.userName = '';
+    },
   },
 });
 
-export const {setUserData, setProfileData} = userSlice.actions;
+export const {setUserData, setProfileData, clearProfileData} =
+  userSlice.actions;
 
 export default userSlice.reducer;

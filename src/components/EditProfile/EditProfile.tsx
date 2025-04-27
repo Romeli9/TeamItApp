@@ -46,10 +46,17 @@ export const EditProfile: React.FC<{
   useEffect(() => {
     if (skills) {
       try {
-        const parsedSkills = JSON.parse(skills);
-        setSelectedSkills(parsedSkills);
+        console.log(skills);
+
+        if (typeof skills === 'string') {
+          const parsedSkills = JSON.parse(skills);
+          setSelectedSkills(parsedSkills);
+        } else {
+          setSelectedSkills(skills);
+        }
       } catch (e) {
         console.error('Ошибка при парсинге навыков:', e);
+        setSelectedSkills([]);
       }
     }
   }, [skills]);
