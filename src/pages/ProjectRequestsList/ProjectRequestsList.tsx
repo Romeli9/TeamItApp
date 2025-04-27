@@ -4,6 +4,8 @@ import {
   Alert,
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   RefreshControl,
   ScrollView,
   Text,
@@ -14,7 +16,7 @@ import {
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import {ProjectRequest} from 'entities/ProjectRequest';
+import {ProjectRequest} from 'entities/projectRequest';
 import {
   collection,
   deleteDoc,
@@ -43,11 +45,22 @@ export const ProjectRequestsList = () => {
   const [projectsWithApplication, setProjectsWithApplication] = useState<
     ProjectType[]
   >([]);
+  const [filteredProjects, setFilteredProjects] = useState<ProjectType[]>([]);
 
   const {yourProjects} = useSelector((state: RootState) => state.projects);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {}, 400);
+    const timeout = setTimeout(() => {
+      setFilteredProjects(
+        projectsWithApplication.filter(item =>
+          item.name.toLowerCase().includes(projectNameInput.toLowerCase()),
+        ),
+      );
+    }, 400);
+
+    if (projectNameInput === '') {
+      setFilteredProjects(projectsWithApplication);
+    }
 
     return () => clearTimeout(timeout);
   }, [projectNameInput]);
@@ -104,32 +117,37 @@ export const ProjectRequestsList = () => {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }>
-      <Text>Поиск проекта, по которому хотим посмотреть заявки</Text>
-      <TextInput
-        value={projectNameInput}
-        onChangeText={setProjectNameInput}
-        style={styles.input}
-        placeholder="Введите название проекта"
-        placeholderTextColor="#A8A8A8"
-      />
-
-      {projectsWithApplication.length > 0 ? (
-        <FlatList 
-          scrollEnabled={false}
-          data={projectsWithApplication}
-          renderItem={renderProjectItem}
-          keyExtractor={item => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.projectsList}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <Text>Поиск проекта, по которому хотим посмотреть заявки</Text>
+        <TextInput
+          value={projectNameInput}
+          onChangeText={setProjectNameInput}
+          style={styles.input}
+          placeholder="Введите название проекта"
+          placeholderTextColor="#A8A8A8"
         />
-      ) : (
-        <Text style={styles.noProjectsText}>Нет созданных проектов</Text>
-      )}
-    </ScrollView>
+
+        {projectsWithApplication.length > 0 ? (
+          <FlatList
+            scrollEnabled={false}
+            data={filteredProjects}
+            renderItem={renderProjectItem}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            contentContainerStyle={styles.projectsList}
+          />
+        ) : (
+          <Text style={styles.noProjectsText}>
+            Нет заявок ни на один проект
+          </Text>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };

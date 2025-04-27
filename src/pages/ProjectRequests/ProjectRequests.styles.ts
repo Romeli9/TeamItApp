@@ -4,10 +4,8 @@ import {Colors} from 'shared/libs/helpers/colors';
 
 export const ProjectRequestsStyles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#fff',
-    padding: 16,
-    paddingTop: 110,
   },
   loadingContainer: {
     flex: 1,
@@ -16,7 +14,7 @@ export const ProjectRequestsStyles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    paddingTop: 80,
+    paddingTop: 110,
     paddingBottom: 32,
   },
   emptyContainer: {
@@ -27,7 +25,6 @@ export const ProjectRequestsStyles = StyleSheet.create({
   requestRole: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 4,
   },
   requestItem: {
     backgroundColor: '#f5f5f5',
@@ -42,8 +39,15 @@ export const ProjectRequestsStyles = StyleSheet.create({
   },
   requestMessage: {
     fontSize: 14,
-    marginBottom: 12,
     color: '#555',
+    marginBottom: 4,
+  },
+  // Новый стиль для отображения коэффициента приоритета
+  requestPriority: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4CAF50', // Зеленый цвет для приоритета
+    marginBottom: 12,
   },
   buttonsContainer: {
     flexDirection: 'row',
@@ -74,6 +78,14 @@ export const ProjectRequestsStyles = StyleSheet.create({
   projectLink: {
     color: '#2196F3',
     textDecorationLine: 'underline',
+    marginTop: 12,
+  },
+  // Новый стиль для перехода на профиль
+  profileLink: {
+    color: '#2196F3',
+    textDecorationLine: 'underline',
+    marginTop: 12,
+    fontSize: 14,
   },
   emptyText: {
     textAlign: 'center',

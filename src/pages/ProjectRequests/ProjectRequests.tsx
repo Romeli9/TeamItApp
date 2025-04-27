@@ -12,8 +12,9 @@ import {
 } from 'react-native';
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
-import {Screens} from 'app/navigation/navigationEnums';
+import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {ProjectRouteParams} from 'app/navigation/navigationTypes';
+import {Skill, UserFrom} from 'components';
 import {ProjectRequest} from 'entities/ProjectRequest';
 import {
   collection,
@@ -27,21 +28,32 @@ import {
   where,
 } from 'firebase/firestore';
 import {useSelector} from 'react-redux';
+import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
+import {getUserById} from 'services/getUserById';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProjectRequestsStyles as styles} from './ProjectRequests.styles';
 
 export const ProjectRequests = () => {
+  const {navigate} = useAppNavigation();
+
   const route = useRoute<RouteProp<{params: ProjectRouteParams}>>();
 
   const {userId} = useSelector((state: RootState) => state.user);
-  const navigation = useAppNavigation();
   const [requests, setRequests] = useState<ProjectRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const {projectId} = route.params;
+
+  const projectData: ProjectType | undefined = useSelector(
+    selectProjectById(projectId),
+  );
+
+  useEffect(() => {
+    fetchRequests();
+  }, [projectId]);
 
   const fetchRequests = async () => {
     try {
@@ -53,13 +65,75 @@ export const ProjectRequests = () => {
 
       const receivedSnapshot = await getDocs(q);
 
-      const receivedRequests = receivedSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        type: 'received',
-      })) as ProjectRequest[];
+      const receivedRequests = await Promise.all(
+        receivedSnapshot.docs.map(async doc => {
+          const data = doc.data();
+          console.log(data);
 
-      setRequests(receivedRequests);
+          const user = await getUserById(userId);
+          let skillsArray = user.Skills || []; // Навыки пользователя, подавшего заявку
+
+          // Вычисление приоритета заявки
+          let matchingSkillsCount = 0;
+
+          const skills =
+            typeof projectData?.skills === 'string' &&
+            JSON.parse(projectData.skills).map(
+              (item: {name: Skill}) => item.name,
+            );
+
+          console.log('skillsArray 1', skillsArray);
+
+          if (typeof skillsArray === 'string') {
+            skillsArray = JSON.parse(skillsArray);
+          }
+
+          console.log('skillsArray 2', skillsArray);
+
+          if (Array.isArray(skillsArray) && skillsArray.length !== 0) {
+            skillsArray = skillsArray.map((item: {name: string}) => item.name);
+          }
+          console.log('skills', skills);
+          console.log('skillsArray', skillsArray);
+
+          // Считаем совпадения навыков
+          skills.forEach((skill: string) => {
+            if (skillsArray.includes(skill)) {
+              matchingSkillsCount += 1;
+            }
+          });
+
+          const totalUserSkills = skillsArray.length;
+          const totalProjectSkills = skills.length;
+
+          console.log('matchingSkillsCount', matchingSkillsCount);
+
+          const matchScore =
+            matchingSkillsCount /
+            Math.sqrt(totalUserSkills * totalProjectSkills);
+          const finalScore = matchScore;
+
+          console.log(finalScore);
+
+          return {
+            id: doc.id,
+            senderId: data.senderId,
+            projectId: data.projectId,
+            projectName: data.projectName,
+            senderName: data.senderName,
+            recipientId: data.recipientId,
+            recipientName: data.recipientName,
+            role: data.role,
+            message: data.message,
+            status: data.status,
+            createdAt: data.createdAt,
+            type: 'received' as 'received',
+            priorityScore: finalScore, // Добавляем приоритет
+          };
+        }),
+      );
+
+      setRequests(receivedRequests); // Now you are setting an array of ProjectRequest objects
     } catch (error) {
       console.error('Error fetching requests:', error);
       Alert.alert('Ошибка', 'Не удалось загрузить заявки');
@@ -68,10 +142,6 @@ export const ProjectRequests = () => {
       setRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    fetchRequests();
-  }, [projectId]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -196,9 +266,15 @@ export const ProjectRequests = () => {
       <Text style={styles.requestTitle}>
         {item.type === 'received' ? 'Входящая заявка' : 'Исходящая заявка'}
       </Text>
-      <Text style={styles.requestRole}>Роль: {item.role}</Text>
+      <Text style={styles.requestMessage}>Имя: {item.senderName}</Text>
+      <Text style={styles.requestMessage}>Роль: {item.role}</Text>
       <Text style={styles.requestMessage}>{item.message}</Text>
 
+      <Text style={styles.requestPriority}>
+        Коэффициент приоритета: {item.priorityScore.toFixed(2)}
+      </Text>
+
+      {/* Кнопки для принятия/отклонения заявки */}
       {item.type === 'received' ? (
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
@@ -220,14 +296,22 @@ export const ProjectRequests = () => {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate(Screens.PROJECT, {projectId: item.projectId})
-        }>
-        <Text style={styles.projectLink}>Перейти к проекту</Text>
+      {/* Кнопка для перехода на профиль пользователя */}
+      <TouchableOpacity onPress={() => handleUserClick(item.senderId)}>
+        <Text style={styles.profileLink}>Перейти в профиль</Text>
       </TouchableOpacity>
     </View>
   );
+
+  const handleUserClick = (userId: string) => {
+    navigate(Stacks.MAIN, {
+      screen: Stacks.PROFILE_TAB,
+      params: {
+        screen: Screens.VIEW_PROFILE,
+        params: {userId: userId},
+      },
+    });
+  };
 
   return (
     <View style={styles.container}>

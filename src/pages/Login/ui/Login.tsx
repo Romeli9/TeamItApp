@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,29 +12,34 @@ import {
 import {FIREBASE_AUTH} from 'app/FireBaseConfig';
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {signInWithEmailAndPassword} from 'firebase/auth';
-import {PhotoIcon} from 'shared/assets/icons/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {LoginPagestyles as styles} from './Login.styles';
 
 export const LoginPage = () => {
-  const {navigate} = useAppNavigation();
-
+  const {navigate, isAuthenticated} = useAppNavigation(); // Используем информацию об авторизации
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const auth = FIREBASE_AUTH;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(Stacks.MAIN, {
+        screen: Stacks.PROFILE_TAB,
+        params: {screen: Screens.PROFILE},
+      });
+    }
+  }, [isAuthenticated, navigate]); // Перенаправление, если пользователь уже авторизован
 
   const SignIn = async () => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password).then(() =>
-        navigate(Stacks.MAIN, {
-          screen: Stacks.PROFILE_TAB,
-          params: {
-            screen: Screens.PROFILE,
-          },
-        }),
+      await signInWithEmailAndPassword(FIREBASE_AUTH, email, password).then(
+        () =>
+          navigate(Stacks.MAIN, {
+            screen: Stacks.PROFILE_TAB,
+            params: {screen: Screens.PROFILE},
+          }),
       );
     } catch (error: any) {
       Alert.alert('Sign In failed: ' + error.message);
@@ -49,23 +54,10 @@ export const LoginPage = () => {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.image_teamIT}>
         <Image
           source={require('shared/assets/teamIt/Case2.png')}
           style={{width: 150, height: 150}}
-        />
-      </View>
-      <View style={styles.image_teamIT}>
-        <Image
-          source={require('shared/assets/teamIt/Case1.png')}
-          style={{width: 150, height: 150}}
-        />
-      </View>
-      <View style={styles.image_team_IT}>
-        <Image
-          source={require('shared/assets/teamIt/imageTeamIt.png')}
-          style={{width: 75, height: 75}}
         />
       </View>
       <KeyboardAvoidingView behavior="padding">
@@ -74,7 +66,7 @@ export const LoginPage = () => {
           style={styles.input}
           placeholder="Email"
           autoCapitalize="none"
-          onChangeText={text => setEmail(text)}
+          onChangeText={setEmail}
           keyboardType="email-address"
         />
         <TextInput
@@ -83,7 +75,7 @@ export const LoginPage = () => {
           style={styles.input}
           placeholder="Password"
           autoCapitalize="none"
-          onChangeText={text => setPassword(text)}
+          onChangeText={setPassword}
         />
 
         {loading ? (
@@ -95,18 +87,6 @@ export const LoginPage = () => {
           </>
         )}
       </KeyboardAvoidingView>
-      <View style={styles.image_teamIT_down}>
-        <Image
-          source={require('shared/assets/teamIt/Case3.png')}
-          style={{width: 450, height: 300}}
-        />
-      </View>
-      <View style={styles.image_teamIT_down}>
-        <Image
-          source={require('shared/assets/teamIt/Case4.png')}
-          style={{width: 450, height: 300}}
-        />
-      </View>
     </View>
   );
 };
