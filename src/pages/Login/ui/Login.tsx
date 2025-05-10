@@ -12,6 +12,7 @@ import {
 import {FIREBASE_AUTH} from 'app/FireBaseConfig';
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {signInWithEmailAndPassword} from 'firebase/auth';
+import {MapIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {LoginPagestyles as styles} from './Login.styles';
@@ -55,6 +56,7 @@ export const LoginPage = () => {
   return (
     <View style={styles.container}>
       <View style={styles.image_teamIT}>
+        <MapIcon />
         <Image
           source={require('shared/assets/teamIt/Case2.png')}
           style={{width: 150, height: 150}}

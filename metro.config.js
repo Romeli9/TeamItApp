@@ -29,4 +29,11 @@ const customConfig = {
   projectRoot: path.resolve(__dirname),
 };
 
+customConfig.resolver.sourceExts = customConfig.resolver.sourceExts || [];
+if (!customConfig.resolver.sourceExts.includes('cjs')) {
+  customConfig.resolver.sourceExts.push('cjs');
+}
+
+customConfig.resolver.unstable_enablePackageExports = false;
+
 module.exports = wrapWithReanimatedMetroConfig(customConfig);

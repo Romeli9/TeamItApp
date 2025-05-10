@@ -197,9 +197,8 @@ export const Home = () => {
             style={styles.searchButton}
             onPress={() => navigate(Screens.SEARCH)}>
             <SearchIcon
-              fill={IconStyles.medium.changeColor(Colors.White100).color}
-              width={IconStyles.large.width}
-              height={IconStyles.large.height}
+              color={IconStyles.medium.changeColor(Colors.White100).color}
+              size={24}
             />
           </TouchableOpacity>
 

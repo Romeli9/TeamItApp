@@ -1,97 +1,87 @@
-import {Icon} from '@ui-kitten/components';
 import React from 'react';
 
-import {Colors} from 'shared/libs/helpers';
+import {
+  Feather,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from '@expo/vector-icons';
+
+// Feather = легкие, острые и понятные
+// MaterialCommunityIcons = больше вариаций, если нет в Feather
+// Ionicons/MaterialIcons — если нужно точное соответствие
 
 export const CartIcon = (props: any) => (
-  <Icon {...props} name="shopping-cart-outline" />
+  <Feather name="shopping-cart" {...props} />
 );
-export const HomeIcon = (props: any) => <Icon {...props} name="home-outline" />;
-export const CatalogIcon = (props: any) => (
-  <Icon {...props} name="book-outline" />
-);
-export const ProfileIcon = (props: any) => (
-  <Icon {...props} name="person-outline" />
-);
+export const HomeIcon = (props: any) => <Feather name="home" {...props} />;
+export const CatalogIcon = (props: any) => <Feather name="book" {...props} />;
+export const ProfileIcon = (props: any) => <Feather name="user" {...props} />;
 export const CardIcon = (props: any) => (
-  <Icon {...props} name="credit-card-outline" />
+  <Feather name="credit-card" {...props} />
 );
 export const ForwardIcon = (props: any) => (
-  <Icon {...props} name="arrow-ios-forward-outline" />
+  <Feather name="chevron-right" {...props} />
 );
-export const LogOutIcon = (props: any) => (
-  <Icon {...props} name="log-out-outline" />
-);
+export const LogOutIcon = (props: any) => <Feather name="log-out" {...props} />;
 export const HistoryIcon = (props: any) => (
-  <Icon {...props} name="archive-outline" />
+  <Feather name="archive" {...props} />
 );
 export const SettingsIcon = (props: any) => (
-  <Icon {...props} name="settings-2-outline" />
+  <Feather name="settings" {...props} />
 );
 export const HeartOutlineIcon = (props: any) => (
-  <Icon {...props} name="heart-outline" />
+  <Feather name="heart" {...props} />
 );
 export const PenOutlineIcon = (props: any) => (
-  <Icon {...props} name="edit-outline" />
+  <Feather name="edit" {...props} />
 );
 export const CopyOutlineIcon = (props: any) => (
-  <Icon {...props} name="copy-outline" />
+  <Feather name="copy" {...props} />
 );
-export const SearchIcon = (props: any) => (
-  <Icon {...props} name="search-outline" />
-);
-export const CloseIcon = (props: any) => (
-  <Icon {...props} name="close-outline" />
-);
+export const SearchIcon = (props: any) => <Feather name="search" {...props} />;
+export const CloseIcon = (props: any) => <Feather name="x" {...props} />;
 export const CloseCircleIcon = (props: any) => (
-  <Icon {...props} name="close-circle-outline" />
+  <MaterialIcons name="cancel" {...props} />
 );
-export const ProductIcon = (props: any) => (
-  <Icon {...props} name="gift-outline" />
-);
-export const ReviewIcon = (props: any) => (
-  <Icon {...props} name="award-outline" />
-);
+export const ProductIcon = (props: any) => <Feather name="gift" {...props} />;
+export const ReviewIcon = (props: any) => <Feather name="award" {...props} />;
 export const MessageIcon = (props: any) => (
-  <Icon {...props} name="message-square-outline" />
+  <Feather name="message-circle" {...props} />
 );
-export const TrashIcon = (props: any) => (
-  <Icon {...props} name="trash-2-outline" />
-);
+export const TrashIcon = (props: any) => <Feather name="trash-2" {...props} />;
 export const AddImgIcon = (props: any) => (
-  <Icon {...props} name="file-add-outline" />
+  <Feather name="file-plus" {...props} />
 );
-export const SendIcon = (props: any) => (
-  <Icon {...props} name="arrow-upward-outline" />
-);
+export const SendIcon = (props: any) => <Feather name="send" {...props} />;
 export const PlusSquareIcon = (props: any) => (
-  <Icon {...props} name="plus-square-outline" />
+  <Feather name="plus-square" {...props} />
 );
-export const CubeIcon = (props: any) => <Icon {...props} name="cube-outline" />;
-export const HeartFilledIcon = (props: any) => <Icon {...props} name="heart" />;
-export const ArrowBack = (props: any) => <Icon {...props} name="arrow-back" />;
-export const MapIcon = (props: any) => <Icon {...props} name="map-outline" />;
-export const StarIcon = (props: any) => <Icon {...props} name="star" />;
-export const RemoveIcon = (props: any) => <Icon {...props} name="trash-2" />;
-export const FlagIcon = (props: any) => <Icon {...props} name="flag-outline" />;
-export const BackIcon = (props: any) => <Icon {...props} name="arrow-back" />;
-
-export const CheckIcon = (props: any) => (
-  <Icon {...props} name="checkmark-outline" />
+export const CubeIcon = (props: any) => <Feather name="box" {...props} />;
+export const HeartFilledIcon = (props: any) => (
+  <Feather name="heart" {...props} />
 );
+export const ArrowBack = (props: any) => (
+  <Ionicons name="arrow-back" {...props} />
+);
+export const MapIcon = (props: any) => <Feather name="map" {...props} />;
+export const StarIcon = (props: any) => <Feather name="star" {...props} />;
+export const RemoveIcon = (props: any) => <Feather name="trash" {...props} />;
+export const FlagIcon = (props: any) => <Feather name="flag" {...props} />;
+export const BackIcon = (props: any) => (
+  <Ionicons name="arrow-back" {...props} />
+);
+export const CheckIcon = (props: any) => <Feather name="check" {...props} />;
 export const DoubleCheckIcon = (props: any) => (
-  <Icon {...props} name="done-all-outline" />
+  <MaterialIcons name="done-all" {...props} />
 );
 export const AlertIcon = (props: any) => (
-  <Icon {...props} name="alert-circle-outline" />
+  <Feather name="alert-circle" {...props} />
 );
-
 export const ArrowLeftIcon = (props: any) => (
-  <Icon {...props} name="arrow-back-outline" />
+  <Feather name="arrow-left" {...props} />
 );
-
 export const ArrowRightIcon = (props: any) => (
-  <Icon {...props} name="arrow-forward-outline" />
+  <Feather  name="arrow-right" {...props} />
 );
-
-export const PlusIcon = (props: any) => <Icon {...props} name="plus-outline" />;
+export const PlusIcon = (props: any) => <Feather name="plus" {...props} />;

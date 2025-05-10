@@ -23,11 +23,7 @@ export const ChatTextarea = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={onAttachFile}>
-        <AddImgIcon
-          fill={Colors.Gray500}
-          width={IconStyles.medium.width}
-          height={IconStyles.medium.height}
-        />
+        <AddImgIcon color={Colors.Gray500} size={IconStyles.medium.width} />
       </TouchableOpacity>
       <View style={styles.inputContainer}>
         <TextInput
@@ -40,11 +36,7 @@ export const ChatTextarea = ({
         />
       </View>
       <TouchableOpacity style={styles.button} onPress={onSendMessage}>
-        <SendIcon
-          fill={Colors.Gray500}
-          width={IconStyles.medium.width}
-          height={IconStyles.medium.height}
-        />
+        <SendIcon color={Colors.Gray500} size={IconStyles.medium.width} />
       </TouchableOpacity>
     </View>
   );
