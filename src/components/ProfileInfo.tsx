@@ -30,7 +30,7 @@ import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
 export const ProfileInfo = () => {
   const {navigate} = useAppNavigation();
   const dispatch = useDispatch();
-  const {telegramm, skills, experience, aboutMe} = useSelector(
+  const {telegramm, hardSkills, softSkills, experience, aboutMe} = useSelector(
     (state: RootState) => state.user,
   );
   useEffect(() => {
@@ -93,7 +93,8 @@ export const ProfileInfo = () => {
               required: doc.data().required,
               categories: doc.data().categories,
               members: doc.data().members,
-              skills: doc.data().skills,
+              hardSkills: doc.data().HardSkills,
+              softSkills: doc.data().SoftSkills,
             }));
             setProjects(projectsData);
             dispatch(setYourProjects(projectsData));
@@ -132,7 +133,8 @@ export const ProfileInfo = () => {
             {showMoreInfo && (
               <>
                 <Text style={styles.text}>Опыт: {experience}</Text>
-                <Text style={styles.text}>Роли: {skills}</Text>
+                <Text style={styles.text}>Hard Skills: {hardSkills}</Text>
+                <Text style={styles.text}>Soft Skills: {softSkills}</Text>
                 <Text style={styles.text}>Телеграм: {telegramm}</Text>
               </>
             )}

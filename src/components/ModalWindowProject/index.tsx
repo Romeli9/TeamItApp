@@ -49,17 +49,19 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const [categories, setCategories] = useState<string[]>();
   const [roles, setRoles] = useState<string[]>();
 
-  const [requiredSkills, setRequiredSkills] = useState<Skill[]>([]);
-  const [skillsSearchTerm, setSkillsSearchTerm] = useState('');
-  const [skillsSuggestions, setSkillsSuggestions] = useState<Skill[]>([]);
+  // New states for hard and soft skills
+  const [hardSkills, setHardSkills] = useState<Skill[]>([]);
+  const [softSkills, setSoftSkills] = useState<Skill[]>([]);
+  const [hardSearchTerm, setHardSearchTerm] = useState('');
+  const [softSearchTerm, setSoftSearchTerm] = useState('');
+  const [hardSuggestions, setHardSuggestions] = useState<Skill[]>([]);
+  const [softSuggestions, setSoftSuggestions] = useState<Skill[]>([]);
 
   const [pickerResponse, setPickerResponse] =
     useState<ImagePicker.ImagePickerResult | null>(null);
 
   const {userName, userId} = useSelector((state: RootState) => state.user);
-
   const {yourProjects} = useSelector((state: RootState) => state.projects);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -88,41 +90,60 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     fetchData();
   }, []);
 
-  // Эффект для поиска навыков
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (skillsSearchTerm.trim()) {
-        getSkills(skillsSearchTerm, 10)
+      if (hardSearchTerm.trim()) {
+        getSkills('ST1', hardSearchTerm, 10)
           .then(res => {
-            console.log(res.data.data);
-            setSkillsSuggestions(res.data.data);
+            setHardSuggestions(res.data.data);
           })
           .catch(async error => {
-            console.log(error);
             if (error.response.status === 401) {
               await getToken();
             }
           });
-      } else {
-        setSkillsSuggestions([]);
-      }
+      } else setHardSuggestions([]);
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [skillsSearchTerm]);
+  }, [hardSearchTerm]);
 
-  // Добавление навыка
-  const handleAddSkill = (skill: Skill) => {
-    if (!requiredSkills.find(s => s.id === skill.id)) {
-      setRequiredSkills([...requiredSkills, skill]);
-      setSkillsSearchTerm('');
-      setSkillsSuggestions([]);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (softSearchTerm.trim()) {
+        getSkills('ST2', softSearchTerm, 10)
+          .then(res => setSoftSuggestions(res.data.data))
+          .catch(async error => {
+            if (error.response.status === 401) {
+              await getToken();
+            }
+          });
+      } else setSoftSuggestions([]);
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [softSearchTerm]);
+
+  // Handlers for adding/removing skills
+  const handleAddHard = (skill: Skill) => {
+    if (!hardSkills.find(s => s.id === skill.id)) {
+      setHardSkills([...hardSkills, skill]);
+      setHardSearchTerm('');
+      setHardSuggestions([]);
     }
   };
-
-  // Удаление навыка
-  const handleRemoveSkill = (skillId: string) => {
-    setRequiredSkills(requiredSkills.filter(skill => skill.id !== skillId));
+  const handleRemoveHard = (id: string) => {
+    setHardSkills(hardSkills.filter(s => s.id !== id));
+  };
+  const handleAddSoft = (skill: Skill) => {
+    if (!softSkills.find(s => s.id === skill.id)) {
+      setSoftSkills([...softSkills, skill]);
+      setSoftSearchTerm('');
+      setSoftSuggestions([]);
+    }
+  };
+  const handleRemoveSoft = (id: string) => {
+    setSoftSkills(softSkills.filter(s => s.id !== id));
   };
 
   const uploadImageToFirebase = async (uri: string) => {
@@ -161,14 +182,13 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       setPickerResponse(result);
       setSelectedImage(result.assets[0].uri);
     }
-  }, []);
+  }, [userName]);
 
   const toggleRequired = () => {
     setRequiredOpen(!requiredOpen);
     setCategoriesOpen(false);
     Keyboard.dismiss();
   };
-
   const toggleCategory = () => {
     setCategoriesOpen(!categoriesOpen);
     setRequiredOpen(false);
@@ -184,7 +204,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       setMembers([...members, '-']);
     }
   };
-
   const handleCategorySelect = (value: string) => {
     if (categoriesSelected.includes(value)) {
       setCategoriesSelected(categoriesSelected.filter(item => item !== value));
@@ -194,52 +213,46 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   };
 
   const сreateProject = async () => {
+    if (
+      !projectName.trim() ||
+      !projectDescRaw.trim() ||
+      !requiredSelected.length ||
+      !categoriesSelected.length ||
+      !pickerResponse
+    ) {
+      Alert.alert('Пожалуйста, заполните все поля.');
+      return;
+    }
+    setLoading(true);
+
+    let imageUrl = '';
+    if (pickerResponse && !pickerResponse.canceled) {
+      const url = await uploadImageToFirebase(pickerResponse.assets[0].uri);
+      if (url) imageUrl = url;
+    }
+
+    const projectData = {
+      photo: imageUrl,
+      name: projectName,
+      description: projectDescRaw,
+      required: requiredSelected,
+      categories: categoriesSelected,
+      creator: userName,
+      creatorId: userId,
+      members: members,
+      hardSkills: JSON.stringify(hardSkills),
+      softSkills: JSON.stringify(softSkills),
+    };
+
     try {
-      if (
-        !projectName.trim() ||
-        !projectDescRaw.trim() ||
-        !requiredSelected.length ||
-        !categoriesSelected.length ||
-        !pickerResponse
-      ) {
-        Alert.alert('Пожалуйста, заполните все поля.');
-        return;
-      }
-      setLoading(true);
-
-      let imageUrl = '';
-      if (pickerResponse && !pickerResponse.canceled) {
-        const uploadedImageUrl = await uploadImageToFirebase(
-          pickerResponse.assets[0].uri,
-        );
-        if (uploadedImageUrl) {
-          imageUrl = uploadedImageUrl;
-        }
-      }
-
-      const projectData = {
-        photo: imageUrl,
-        name: projectName,
-        description: projectDescRaw,
-        required: requiredSelected,
-        categories: categoriesSelected,
-        creator: userName,
-        creatorId: userId,
-        members: members,
-        skills: JSON.stringify(requiredSkills),
-      };
-
-      const firestore = FIREBASE_DB;
-      const projectsRef = collection(firestore, 'projects');
-
+      const projectsRef = collection(FIREBASE_DB, 'projects');
       const docRef = await addDoc(projectsRef, projectData);
-
       const newProject: ProjectType = {
         id: docRef.id,
         ...projectData,
-        skills: requiredSkills,
+        hardSkills,
+        softSkills,
       };
-
       const chatData = {
         group: true,
         image: imageUrl,
@@ -249,12 +262,9 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         lastMessage: 'Чат создан',
         time: Date.now(),
       };
-
-      const chatsRef = collection(firestore, 'chats');
-      await addDoc(chatsRef, chatData);
-
+      await addDoc(collection(FIREBASE_DB, 'chats'), chatData);
       dispatch(setYourProjects([newProject, ...yourProjects]));
-
+      // Reset form
       setProjectName('');
       setProjectDescRaw('');
       setRequiredSelected([]);
@@ -262,10 +272,12 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       setPickerResponse(null);
       setSelectedImage('');
       setMembers([]);
+      setHardSkills([]);
+      setSoftSkills([]);
       setLoading(false);
       setModalVisible(false);
     } catch (error) {
-      console.error('Error adding document: ', error);
+      console.error(error);
       setLoading(false);
     }
   };
@@ -441,34 +453,67 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               </View>
 
               <View style={styles.skillsInputContainer}>
-                <Text style={styles.project__text}>Требуемые навыки:</Text>
+                <Text style={styles.project__text}>Hard навыки:</Text>
                 <TextInput
-                  placeholder="Введите навык"
-                  value={skillsSearchTerm}
-                  onChangeText={setSkillsSearchTerm}
+                  placeholder="Введите hard-навык"
+                  value={hardSearchTerm}
+                  onChangeText={setHardSearchTerm}
                   style={styles.skillsInput}
+                  placeholderTextColor="#A8A8A8"
                 />
-
-                {/* Выбранные навыки */}
                 <View style={styles.selectedSkillsContainer}>
-                  {requiredSkills.map(skill => (
+                  {hardSkills.map(s => (
                     <TouchableOpacity
-                      key={skill.id}
-                      onPress={() => handleRemoveSkill(skill.id)}
+                      key={s.id}
+                      onPress={() => handleRemoveHard(s.id)}
                       style={styles.skillPill}>
-                      <Text style={styles.skillPillText}>{skill.name} ×</Text>
+                      <Text style={styles.skillPillText}>{s.name} ×</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-
-                {/* Список предложений */}
-                {skillsSuggestions.length > 0 && (
+                {hardSuggestions.length > 0 && (
                   <View style={styles.skillsDropdown}>
                     <ScrollView nestedScrollEnabled style={{maxHeight: 150}}>
-                      {skillsSuggestions.map(item => (
+                      {hardSuggestions.map(item => (
                         <TouchableOpacity
                           key={item.id}
-                          onPress={() => handleAddSkill(item)}
+                          onPress={() => handleAddHard(item)}
+                          style={styles.skillDropdownItem}>
+                          <Text>{item.name}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+              </View>
+
+              {/* Soft Skills Input */}
+              <View style={styles.skillsInputContainer}>
+                <Text style={styles.project__text}>Soft навыки:</Text>
+                <TextInput
+                  placeholder="Введите soft-навык"
+                  value={softSearchTerm}
+                  onChangeText={setSoftSearchTerm}
+                  style={styles.skillsInput}
+                  placeholderTextColor="#A8A8A8"
+                />
+                <View style={styles.selectedSkillsContainer}>
+                  {softSkills.map(s => (
+                    <TouchableOpacity
+                      key={s.id}
+                      onPress={() => handleRemoveSoft(s.id)}
+                      style={styles.skillPill}>
+                      <Text style={styles.skillPillText}>{s.name} ×</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {softSuggestions.length > 0 && (
+                  <View style={styles.skillsDropdown}>
+                    <ScrollView nestedScrollEnabled style={{maxHeight: 150}}>
+                      {softSuggestions.map(item => (
+                        <TouchableOpacity
+                          key={item.id}
+                          onPress={() => handleAddSoft(item)}
                           style={styles.skillDropdownItem}>
                           <Text>{item.name}</Text>
                         </TouchableOpacity>
