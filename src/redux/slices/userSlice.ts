@@ -6,7 +6,8 @@ export interface userState {
   email: string;
   avatar: string;
   telegramm: string;
-  skills: string;
+  hardSkills: string;
+  softSkills: string;
   experience: string;
   aboutMe: string;
   background: string;
@@ -18,7 +19,8 @@ const initialState: userState = {
   email: '',
   avatar: '',
   telegramm: '',
-  skills: '',
+  hardSkills: '',
+  softSkills: '',
   experience: '',
   aboutMe: '',
   background: '',
@@ -38,7 +40,8 @@ export const userSlice = createSlice({
     setProfileData(state, action) {
       state.aboutMe = action.payload.AboutMe;
       state.experience = action.payload.Experience;
-      state.skills = action.payload.Skills;
+      state.hardSkills = action.payload.hardSkills;
+      state.softSkills = action.payload.softSkills;
       state.telegramm = action.payload.Telegramm;
     },
     clearProfileData(state) {

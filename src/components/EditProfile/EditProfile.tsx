@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -29,13 +29,21 @@ export const EditProfile: React.FC<{
   const [experienceInput, setExperienceInput] = useState('');
   const [telegrammInput, setTelegrammInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
+  const [selectedHardSkills, setSelectedHardSkills] = useState<Skill[]>([]);
+  const [selectedSoftSkills, setSelectedSoftSkills] = useState<Skill[]>([]);
 
   // Получаем данные из Redux store
-  const {aboutMe, experience, skills, telegramm} = useSelector(
+  const {aboutMe, experience, hardSkills, softSkills, telegramm} = useSelector(
     (state: RootState) => state.user,
   );
   const dispatch = useDispatch();
+
+  const skills = useMemo(() => {
+    if (hardSkills?.length && softSkills?.length) {
+      return [...hardSkills, ...softSkills];
+    }
+    return [];
+  }, [hardSkills, softSkills]);
 
   useEffect(() => {
     setAboutMeInput(aboutMe || '');
@@ -44,26 +52,31 @@ export const EditProfile: React.FC<{
   }, []);
 
   useEffect(() => {
-    if (skills) {
-      try {
-        console.log(skills);
+    if (!skills || skills.length === 0) return;
 
-        if (typeof skills === 'string') {
-          const parsedSkills = JSON.parse(skills);
-          setSelectedSkills(parsedSkills);
-        } else {
-          setSelectedSkills(skills);
-        }
-      } catch (e) {
-        console.error('Ошибка при парсинге навыков:', e);
-        setSelectedSkills([]);
-      }
+    try {
+      const parsedSkills =
+        typeof skills === 'string' ? JSON.parse(skills) : skills;
+
+      setSelectedHardSkills(
+        parsedSkills.filter((s: Skill) => s.type.includes('ST1')),
+      );
+      setSelectedSoftSkills(
+        parsedSkills.filter((s: Skill) => s.type.includes('ST2')),
+      );
+    } catch (e) {
+      console.error('Ошибка при парсинге навыков:', e);
+      setSelectedHardSkills([]);
+      setSelectedSoftSkills([]);
     }
   }, [skills]);
 
   const handleSave = async () => {
     setLoading(true);
-    if (selectedSkills.length === 0) {
+
+    const allSkills = [...selectedHardSkills, ...selectedSoftSkills];
+
+    if (allSkills.length === 0) {
       Alert.alert('Внимание', 'Пожалуйста, выберите хотя бы один навык');
       return;
     }
@@ -71,7 +84,8 @@ export const EditProfile: React.FC<{
     const profileData = {
       AboutMe: aboutMeInput,
       Experience: experienceInput,
-      Skills: JSON.stringify(selectedSkills),
+      HardSkills: JSON.stringify(selectedHardSkills),
+      softSkills: JSON.stringify(selectedSoftSkills),
       Telegramm: telegrammInput,
     };
 
@@ -137,10 +151,18 @@ export const EditProfile: React.FC<{
                 numberOfLines={3}
               />
 
-              <Text style={styles.sectionTitle}>Навыки</Text>
+              <Text style={styles.sectionTitle}>Hard Skills</Text>
               <SkillsInput
-                selectedSkills={selectedSkills}
-                setSelectedSkills={setSelectedSkills}
+                selectedSkills={selectedHardSkills}
+                setSelectedSkills={setSelectedHardSkills}
+                type="ST1"
+              />
+
+              <Text style={styles.sectionTitle}>Soft Skills</Text>
+              <SkillsInput
+                selectedSkills={selectedSoftSkills}
+                setSelectedSkills={setSelectedSoftSkills}
+                type="ST2"
               />
 
               <Text style={styles.sectionTitle}>Telegram</Text>

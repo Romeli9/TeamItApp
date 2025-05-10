@@ -21,11 +21,13 @@ export type Skill = {
 type SkillsInputProps = {
   selectedSkills: Skill[];
   setSelectedSkills: (skills: Skill[]) => void;
+  type: 'ST1' | 'ST2';
 };
 
 export const SkillsInput: React.FC<SkillsInputProps> = ({
   selectedSkills,
   setSelectedSkills,
+  type,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [skillsSuggestions, setSkillsSuggestions] = useState<Skill[]>([]);
@@ -33,13 +35,13 @@ export const SkillsInput: React.FC<SkillsInputProps> = ({
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchTerm.trim()) {
-        getSkills(searchTerm, 15)
+        getSkills(type, searchTerm, 15)
           .then(res => {
             setSkillsSuggestions(res.data.data);
           })
           .catch(async err => {
             console.log(err);
-            if (err.response.status === 401) {
+            if (err.response?.status === 401) {
               await getToken();
             }
           });
@@ -49,7 +51,7 @@ export const SkillsInput: React.FC<SkillsInputProps> = ({
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [searchTerm]);
+  }, [searchTerm, type]);
 
   const handleSelect = (skill: Skill) => {
     if (!selectedSkills.find(s => s.id === skill.id)) {
