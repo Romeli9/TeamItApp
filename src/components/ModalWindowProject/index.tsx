@@ -312,12 +312,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}>
-                    <PhotoIcon
-                      style={{
-                        width: 32,
-                        height: 32,
-                      }}
-                    />
+                    <PhotoIcon size={32} />
                   </View>
                 )}
               </TouchableOpacity>

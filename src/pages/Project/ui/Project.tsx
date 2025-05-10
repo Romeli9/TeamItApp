@@ -223,18 +223,10 @@ export const Project = () => {
                                 Подать заявку?
                               </Text>
                               <TouchableOpacity onPress={showConfirmation}>
-                                <CheckIcon
-                                  width={20}
-                                  height={23}
-                                  fill={Colors.White100}
-                                />
+                                <CheckIcon size={20} color={Colors.White100} />
                               </TouchableOpacity>
                               <TouchableOpacity onPress={closeApplicationModal}>
-                                <CloseIcon
-                                  width={20}
-                                  height={23}
-                                  fill={Colors.White100}
-                                />
+                                <CloseIcon size={20} color={Colors.White100} />
                               </TouchableOpacity>
                             </View>
                           )}
@@ -256,18 +248,10 @@ export const Project = () => {
                           Вы хотите подать заявку на "{selectedItem}"?
                         </Text>
                         <TouchableOpacity onPress={toggleRequired}>
-                          <CheckIcon
-                            width={20}
-                            height={23}
-                            fill={Colors.White100}
-                          />
+                          <CheckIcon size={20} color={Colors.White100} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={toggleRequired}>
-                          <CloseIcon
-                            width={20}
-                            height={23}
-                            fill={Colors.White100}
-                          />
+                          <CloseIcon size={20} color={Colors.White100} />
                         </TouchableOpacity>
                       </View>
                     ) : (
@@ -283,7 +267,7 @@ export const Project = () => {
                               onPress={() => handleApplicationSend(item.value)}>
                               <View style={styles.dropdownItemContainer}>
                                 <View style={styles.dropdownItem_icon}>
-                                  <PlusIcon />
+                                  <PlusIcon size={12} />
                                 </View>
                                 <Text style={styles.dropdownItemText}>
                                   {item.value}
@@ -356,7 +340,7 @@ export const Project = () => {
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={goBack} style={styles.goback}>
-            <ArrowLeftIcon />
+            <ArrowLeftIcon size={32} />
           </TouchableOpacity>
         </ScrollView>
       </View>
