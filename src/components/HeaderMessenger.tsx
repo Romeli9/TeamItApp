@@ -14,7 +14,7 @@ export const HeaderMessenger = () => {
       style={styles.container}
       colors={['rgba(114, 47, 181, 0.29)', 'rgba(200, 178, 246, 1)']}>
       <TouchableOpacity style={styles.iconMargin}>
-        <SearchIcon style={{width: 32, height: 32}} />
+        <SearchIcon size={24} />
       </TouchableOpacity>
       <View style={styles.rightIcons}>
         <TouchableOpacity
@@ -22,7 +22,7 @@ export const HeaderMessenger = () => {
             navigate(Screens.PROJECT_LIST_REQUESTS);
           }}
           style={styles.iconMargin}>
-          <BellIcon style={{width: 32, height: 32}} />
+          <BellIcon size={24} />
         </TouchableOpacity>
       </View>
     </LinearGradient>

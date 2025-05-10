@@ -16,7 +16,7 @@ export const MainTabsNavigator = () => {
       detachInactiveScreens={false}
       screenOptions={({route}) => ({
         tabBarIcon: ({color, size}) => {
-          const iconProps = {fill: color, style: {width: size, height: size}};
+          const iconProps = {color: color, size};
           if (route.name === Stacks.HOME_TAB)
             return <HomeIcon {...iconProps} />;
           if (route.name === Stacks.PROFILE_TAB)
