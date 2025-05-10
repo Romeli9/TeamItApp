@@ -14,8 +14,8 @@ import {
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {ProjectRouteParams} from 'app/navigation/navigationTypes';
-import {Skill, UserFrom} from 'components';
-import {ProjectRequest} from 'entities/ProjectRequest';
+import {Skill} from 'components';
+import {ProjectRequest} from 'entities';
 import {
   collection,
   deleteDoc,
@@ -128,12 +128,12 @@ export const ProjectRequests = () => {
             status: data.status,
             createdAt: data.createdAt,
             type: 'received' as 'received',
-            priorityScore: finalScore, // Добавляем приоритет
+            priorityScore: finalScore,
           };
         }),
       );
 
-      setRequests(receivedRequests); // Now you are setting an array of ProjectRequest objects
+      setRequests(receivedRequests);
     } catch (error) {
       console.error('Error fetching requests:', error);
       Alert.alert('Ошибка', 'Не удалось загрузить заявки');

@@ -1,5 +1,4 @@
 export type ProjectRequest = {
-  priorityScore: any;
   id: string;
   projectId: string;
   projectName: string;
@@ -12,6 +11,7 @@ export type ProjectRequest = {
   status: ProjectRequestStatus;
   createdAt: Date;
   type?: 'sent' | 'received';
+  priorityScore: number;
 };
 
 export type ProjectRequestStatus =
