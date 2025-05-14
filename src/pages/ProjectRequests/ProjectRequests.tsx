@@ -151,7 +151,7 @@ export const ProjectRequests = () => {
   const addUserToProject = async (
     projectId: string,
     role: string,
-    userId: string,
+    userIdToAdd: string,
   ) => {
     try {
       const projectRef = doc(FIREBASE_DB, 'projects', projectId);
@@ -162,15 +162,23 @@ export const ProjectRequests = () => {
         const roleIndex = projectData?.required?.indexOf(role);
 
         if (roleIndex !== -1) {
-          // Создаем новый массив members с обновленным пользователем
           const newMembers = [...(projectData?.members || [])];
-          newMembers[roleIndex] = userId;
+          newMembers[roleIndex] = userIdToAdd;
 
           await updateDoc(projectRef, {
             members: newMembers,
           });
           return true;
+        } else {
+          const newRequired = [...(projectData?.required || []), role];
+          const newMembers = [...(projectData?.members || []), userIdToAdd];
+
+          await updateDoc(projectRef, {
+            required: newRequired,
+            members: newMembers,
+          });
         }
+        return true;
       }
       return false;
     } catch (error) {
@@ -179,7 +187,10 @@ export const ProjectRequests = () => {
     }
   };
 
-  const addUserToProjectChat = async (projectId: string, userId: string) => {
+  const addUserToProjectChat = async (
+    projectId: string,
+    userIdToAdd: string,
+  ) => {
     try {
       const chatsQuery = query(
         collection(FIREBASE_DB, 'chats'),
@@ -193,7 +204,7 @@ export const ProjectRequests = () => {
         const chatDoc = querySnapshot.docs[0];
 
         await updateDoc(chatDoc.ref, {
-          participants: [...chatDoc.data().participants, userId],
+          participants: [...chatDoc.data().participants, userIdToAdd],
         });
       }
       return true;
@@ -204,11 +215,15 @@ export const ProjectRequests = () => {
 
   const handleAccept = async (request: ProjectRequest) => {
     try {
+      // Определяем ID пользователя для добавления
+      const userIdToAdd =
+        request.type === 'received' ? request.senderId : request.recipientId;
+
       // Добавляем пользователя в проект
       const success = await addUserToProject(
         request.projectId,
         request.role,
-        request.senderId,
+        userIdToAdd,
       );
 
       if (!success) {
@@ -218,7 +233,7 @@ export const ProjectRequests = () => {
       // Добавляем пользователя в чат
       const chatUpdateSuccess = await addUserToProjectChat(
         request.projectId,
-        request.senderId,
+        userIdToAdd,
       );
 
       if (!chatUpdateSuccess) {
@@ -237,9 +252,7 @@ export const ProjectRequests = () => {
 
   const handleReject = async (requestId: string) => {
     try {
-      // Удаляем заявку
       await deleteDoc(doc(FIREBASE_DB, 'projectRequests', requestId));
-
       setRequests(requests.filter(req => req.id !== requestId));
       Alert.alert('Успешно', 'Заявка отклонена');
     } catch (error) {
@@ -250,9 +263,7 @@ export const ProjectRequests = () => {
 
   const handleCancel = async (requestId: string) => {
     try {
-      // Удаляем заявку
       await deleteDoc(doc(FIREBASE_DB, 'projectRequests', requestId));
-
       setRequests(requests.filter(req => req.id !== requestId));
       Alert.alert('Успешно', 'Заявка отменена');
     } catch (error) {
