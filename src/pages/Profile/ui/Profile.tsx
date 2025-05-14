@@ -28,6 +28,16 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
 
+//TODO: сделать роли как в создании проекта
+/**
+ * Profile component that manages and displays user profile information.
+ *
+ * This component handles fetching and updating user data from Firestore,
+ * displaying user profile images and information, and allowing the user
+ * to edit their profile and upload new avatar or background images.
+ * It also provides a sign-out functionality, navigating the user back to the login screen.
+ */
+
 export const Profile = () => {
   const {navigate} = useAppNavigation();
 
@@ -40,9 +50,15 @@ export const Profile = () => {
   );
 
   useEffect(() => {
+    /**
+     * Fetches user data from Firestore and updates the user state in Redux store.
+     *
+     * If the user is authenticated, this function fetches the user data from Firestore
+     * and updates the user state in Redux store. It also sets the userDocRef state to
+     * the user document reference.
+     */
     const fetchData = async () => {
       const user = FIREBASE_AUTH.currentUser;
-      console.log(user);
       if (user) {
         const firestore = FIREBASE_DB;
         const usersRef = collection(firestore, 'users');
@@ -127,7 +143,7 @@ export const Profile = () => {
     if (!result.canceled) {
       const imageUrl = await uploadImageToFirebase1(result.assets[0].uri);
       if (imageUrl) {
-        const user = FIREBASE_AUTH.currentUser; // Получаем текущего пользователя
+        const user = FIREBASE_AUTH.currentUser;
         if (user) {
           dispatch(
             setUserData({
@@ -148,6 +164,12 @@ export const Profile = () => {
     }
   }, [dispatch, userName]);
 
+  /**
+   * Uploads an image from the given URI to Firebase Storage,
+   * then updates the user's avatar URL in Firestore.
+   * @param uri The URI of the image to upload
+   * @returns The URL of the uploaded image, or null on failure
+   */
   const uploadImageToFirebase = async (uri: string) => {
     try {
       const response = await fetch(uri);
@@ -177,6 +199,11 @@ export const Profile = () => {
     }
   };
 
+  /**
+   * Загружает изображение в Firebase Storage и обновляет URL в Firestore
+   * @param uri - URL изображения
+   * @returns URL загруженного изображения
+   */
   const uploadImageToFirebase1 = async (uri: string) => {
     try {
       const response = await fetch(uri);
@@ -205,6 +232,13 @@ export const Profile = () => {
       return null;
     }
   };
+
+  /**
+   * Signs out the current user from the Firebase authentication,
+   * navigates to the login screen, and clears the user's profile data
+   * and projects from the Redux store.
+   * Logs an error to the console if the sign-out process fails.
+   */
   const handleSignOut = async () => {
     try {
       await FIREBASE_AUTH.signOut();
@@ -296,7 +330,7 @@ export const Profile = () => {
             </TouchableOpacity>
           </View>
         )}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(_, index) => index.toString()}
       />
     </SafeAreaProvider>
   );

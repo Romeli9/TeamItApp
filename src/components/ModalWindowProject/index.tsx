@@ -50,8 +50,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const [roles, setRoles] = useState<string[]>();
 
   // New states for hard and soft skills
-  const [hardSkills, setHardSkills] = useState<Skill[]>([]);
-  const [softSkills, setSoftSkills] = useState<Skill[]>([]);
+  const [HardSkills, setHardSkills] = useState<Skill[]>([]);
+  const [SoftSkills, setSoftSkills] = useState<Skill[]>([]);
   const [hardSearchTerm, setHardSearchTerm] = useState('');
   const [softSearchTerm, setSoftSearchTerm] = useState('');
   const [hardSuggestions, setHardSuggestions] = useState<Skill[]>([]);
@@ -126,24 +126,24 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 
   // Handlers for adding/removing skills
   const handleAddHard = (skill: Skill) => {
-    if (!hardSkills.find(s => s.id === skill.id)) {
-      setHardSkills([...hardSkills, skill]);
+    if (!HardSkills.find(s => s.id === skill.id)) {
+      setHardSkills([...HardSkills, skill]);
       setHardSearchTerm('');
       setHardSuggestions([]);
     }
   };
   const handleRemoveHard = (id: string) => {
-    setHardSkills(hardSkills.filter(s => s.id !== id));
+    setHardSkills(HardSkills.filter(s => s.id !== id));
   };
   const handleAddSoft = (skill: Skill) => {
-    if (!softSkills.find(s => s.id === skill.id)) {
-      setSoftSkills([...softSkills, skill]);
+    if (!SoftSkills.find(s => s.id === skill.id)) {
+      setSoftSkills([...SoftSkills, skill]);
       setSoftSearchTerm('');
       setSoftSuggestions([]);
     }
   };
   const handleRemoveSoft = (id: string) => {
-    setSoftSkills(softSkills.filter(s => s.id !== id));
+    setSoftSkills(SoftSkills.filter(s => s.id !== id));
   };
 
   const uploadImageToFirebase = async (uri: string) => {
@@ -240,8 +240,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       creator: userName,
       creatorId: userId,
       members: members,
-      hardSkills: JSON.stringify(hardSkills),
-      softSkills: JSON.stringify(softSkills),
+      HardSkills: JSON.stringify(HardSkills),
+      SoftSkills: JSON.stringify(SoftSkills),
     };
 
     try {
@@ -250,8 +250,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       const newProject: ProjectType = {
         id: docRef.id,
         ...projectData,
-        hardSkills,
-        softSkills,
+        HardSkills,
+        SoftSkills,
       };
       const chatData = {
         group: true,
@@ -462,7 +462,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                   placeholderTextColor="#A8A8A8"
                 />
                 <View style={styles.selectedSkillsContainer}>
-                  {hardSkills.map(s => (
+                  {HardSkills.map(s => (
                     <TouchableOpacity
                       key={s.id}
                       onPress={() => handleRemoveHard(s.id)}
@@ -498,7 +498,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                   placeholderTextColor="#A8A8A8"
                 />
                 <View style={styles.selectedSkillsContainer}>
-                  {softSkills.map(s => (
+                  {SoftSkills.map(s => (
                     <TouchableOpacity
                       key={s.id}
                       onPress={() => handleRemoveSoft(s.id)}

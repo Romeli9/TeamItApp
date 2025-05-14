@@ -30,7 +30,7 @@ import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
 export const ProfileInfo = () => {
   const {navigate} = useAppNavigation();
   const dispatch = useDispatch();
-  const {telegramm, hardSkills, softSkills, experience, aboutMe} = useSelector(
+  const {telegramm, HardSkills, SoftSkills, experience, aboutMe} = useSelector(
     (state: RootState) => state.user,
   );
   useEffect(() => {
@@ -93,8 +93,8 @@ export const ProfileInfo = () => {
               required: doc.data().required,
               categories: doc.data().categories,
               members: doc.data().members,
-              hardSkills: doc.data().HardSkills,
-              softSkills: doc.data().SoftSkills,
+              HardSkills: doc.data().HardSkills,
+              SoftSkills: doc.data().SoftSkills,
             }));
             setProjects(projectsData);
             dispatch(setYourProjects(projectsData));
@@ -115,6 +115,12 @@ export const ProfileInfo = () => {
     </TouchableOpacity>
   );
 
+  /*************  ✨ Windsurf Command ⭐  *************/
+  /**
+   * Navigate to the project screen with the given project ID.
+   * @param {string} projectID - The ID of the project to navigate to.
+   */
+  /*******  ce797cb5-b9c3-440e-a309-1972ce226131  *******/
   const OpenProject = (projectID: string) => {
     navigate(Screens.PROJECT, {projectId: projectID});
   };
@@ -133,8 +139,8 @@ export const ProfileInfo = () => {
             {showMoreInfo && (
               <>
                 <Text style={styles.text}>Опыт: {experience}</Text>
-                <Text style={styles.text}>Hard Skills: {hardSkills}</Text>
-                <Text style={styles.text}>Soft Skills: {softSkills}</Text>
+                <Text style={styles.text}>Hard Skills: {HardSkills}</Text>
+                <Text style={styles.text}>Soft Skills: {SoftSkills}</Text>
                 <Text style={styles.text}>Телеграм: {telegramm}</Text>
               </>
             )}
@@ -145,7 +151,7 @@ export const ProfileInfo = () => {
           <FlatList
             data={projects}
             renderItem={renderProjectItem}
-            keyExtractor={(item: {id: any}) => item.id}
+            keyExtractor={(item: ProjectType) => item.id}
             numColumns={2}
           />
         </ScrollView>

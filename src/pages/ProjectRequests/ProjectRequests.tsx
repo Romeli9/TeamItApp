@@ -68,52 +68,79 @@ export const ProjectRequests = () => {
       const receivedRequests = await Promise.all(
         receivedSnapshot.docs.map(async doc => {
           const data = doc.data();
-          console.log(data);
 
           const user = await getUserById(userId);
-          let skillsArray = user.Skills || []; // Навыки пользователя, подавшего заявку
+          let userHardSkills = user.HardSkills || [];
+          let userSoftSkills = user.SoftSkills || [];
 
-          // Вычисление приоритета заявки
-          let matchingSkillsCount = 0;
+          if (typeof userHardSkills === 'string') {
+            userHardSkills = JSON.parse(userHardSkills);
+          }
+          if (typeof userSoftSkills === 'string') {
+            userSoftSkills = JSON.parse(userSoftSkills);
+          }
 
-          const skills =
-            typeof projectData?.skills === 'string' &&
-            JSON.parse(projectData.skills).map(
-              (item: {name: Skill}) => item.name,
+          if (Array.isArray(userHardSkills)) {
+            userHardSkills = userHardSkills.map(
+              (item: {name: string}) => item.name,
             );
-
-          console.log('skillsArray 1', skillsArray);
-
-          if (typeof skillsArray === 'string') {
-            skillsArray = JSON.parse(skillsArray);
+          }
+          if (Array.isArray(userSoftSkills)) {
+            userSoftSkills = userSoftSkills.map(
+              (item: {name: string}) => item.name,
+            );
           }
 
-          console.log('skillsArray 2', skillsArray);
+          const hardSkillsProject =
+            typeof projectData?.HardSkills === 'string'
+              ? JSON.parse(projectData.HardSkills).map(
+                  (item: {name: string}) => item.name,
+                )
+              : [];
 
-          if (Array.isArray(skillsArray) && skillsArray.length !== 0) {
-            skillsArray = skillsArray.map((item: {name: string}) => item.name);
-          }
-          console.log('skills', skills);
-          console.log('skillsArray', skillsArray);
+          const softSkillsProject =
+            typeof projectData?.SoftSkills === 'string'
+              ? JSON.parse(projectData.SoftSkills).map(
+                  (item: {name: string}) => item.name,
+                )
+              : [];
 
-          // Считаем совпадения навыков
-          skills.forEach((skill: string) => {
-            if (skillsArray.includes(skill)) {
-              matchingSkillsCount += 1;
+          let matchingHardSkillsCount = 0;
+          let matchingSoftSkillsCount = 0;
+
+          hardSkillsProject.forEach((skill: string) => {
+            if (userHardSkills.includes(skill)) {
+              matchingHardSkillsCount += 1;
             }
           });
 
-          const totalUserSkills = skillsArray.length;
-          const totalProjectSkills = skills.length;
+          softSkillsProject.forEach((skill: string) => {
+            if (userSoftSkills.includes(skill)) {
+              matchingSoftSkillsCount += 1;
+            }
+          });
 
-          console.log('matchingSkillsCount', matchingSkillsCount);
+          const totalUserHardSkills = userHardSkills.length;
+          const totalProjectHardSkills = hardSkillsProject.length;
+          const totalMatchingHardSkills = matchingHardSkillsCount;
 
-          const matchScore =
-            matchingSkillsCount /
-            Math.sqrt(totalUserSkills * totalProjectSkills);
+          const FirstCoef =
+            (totalMatchingHardSkills /
+              Math.sqrt(totalUserHardSkills * totalProjectHardSkills)) *
+            0.7;
+
+          const totalUserSoftSkills = userSoftSkills.length;
+          const totalProjectSoftSkills = softSkillsProject.length;
+          const totalMatchingSoftSkills = matchingSoftSkillsCount;
+
+          const SecondCoef =
+            (totalMatchingSoftSkills /
+              Math.sqrt(totalUserSoftSkills * totalProjectSoftSkills)) *
+            0.3;
+
+          const matchScore = FirstCoef + SecondCoef;
+
           const finalScore = matchScore;
-
-          console.log(finalScore);
 
           return {
             id: doc.id,

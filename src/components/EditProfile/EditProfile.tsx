@@ -33,17 +33,17 @@ export const EditProfile: React.FC<{
   const [selectedSoftSkills, setSelectedSoftSkills] = useState<Skill[]>([]);
 
   // Получаем данные из Redux store
-  const {aboutMe, experience, hardSkills, softSkills, telegramm} = useSelector(
+  const {aboutMe, experience, HardSkills, SoftSkills, telegramm} = useSelector(
     (state: RootState) => state.user,
   );
   const dispatch = useDispatch();
 
   const skills = useMemo(() => {
-    if (hardSkills?.length && softSkills?.length) {
-      return [...hardSkills, ...softSkills];
+    if (HardSkills?.length && SoftSkills?.length) {
+      return [...HardSkills, ...SoftSkills];
     }
     return [];
-  }, [hardSkills, softSkills]);
+  }, [HardSkills, SoftSkills]);
 
   useEffect(() => {
     setAboutMeInput(aboutMe || '');
@@ -85,7 +85,7 @@ export const EditProfile: React.FC<{
       AboutMe: aboutMeInput,
       Experience: experienceInput,
       HardSkills: JSON.stringify(selectedHardSkills),
-      softSkills: JSON.stringify(selectedSoftSkills),
+      SoftSkills: JSON.stringify(selectedSoftSkills),
       Telegramm: telegrammInput,
     };
 

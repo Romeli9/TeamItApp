@@ -21,14 +21,16 @@ type SearchModalProps = {
   onClose: () => void;
   onUserSelect: (username: UserFrom) => void;
   requiredRoles: string[];
-  projectSkills: Skill[];
+  projectHardSkills: Skill[];
+  projectSoftSkills: Skill[];
 };
 
 export type UserFrom = {
   priorityScore: number;
   username: string;
   id: string;
-  skills?: string[];
+  HardSkills: string[];
+  SoftSkills: string[];
   projectsParticipated?: string[];
 };
 
@@ -37,16 +39,14 @@ const SearchModal = ({
   onClose,
   onUserSelect,
   requiredRoles,
-  projectSkills, // Навыки проекта
+  projectHardSkills,
+  projectSoftSkills,
 }: SearchModalProps) => {
+  console.log(projectHardSkills, projectSoftSkills);
   const [searchText, setSearchText] = useState('');
   const [users, setUsers] = useState<UserFrom[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserFrom[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>(requiredRoles);
-
-  const skills = projectSkills.map(skill => skill.name);
-
-  console.log('зашел');
 
   useEffect(() => {
     if (visible) {
@@ -61,86 +61,129 @@ const SearchModal = ({
       const nameMatch = user.username
         ?.toLowerCase()
         .includes(searchText.toLowerCase());
-      console.log(nameMatch);
+
+      const allSkills = [
+        ...(user.HardSkills || []),
+        ...(user.SoftSkills || []),
+      ].map(s => s.toLowerCase());
+
       const rolesMatch =
         selectedRoles.length === 0 ||
         selectedRoles.some(role =>
-          user.skills?.some(skill =>
+          allSkills.some(skill =>
             skill.toLowerCase().includes(role.toLowerCase()),
           ),
         );
+
       return nameMatch && rolesMatch;
     });
-    console.log(filtered);
+
     setFilteredUsers(filtered);
   }, [searchText, users, selectedRoles]);
 
   const fetchUsers = async () => {
     try {
-      console.log('123');
       const firestore = FIREBASE_DB;
       const usersRef = collection(firestore, 'tempUsers');
       const snapshot = await getDocs(usersRef);
 
-      const allUsers = snapshot.docs
+      const allUsers: UserFrom[] = snapshot.docs
         .map(doc => {
           const data = doc.data();
-          console.log(data);
-          const skillsArray =
-            typeof data.Skills === 'string'
-              ? JSON.parse(data.Skills).map((s: Skill) => s.name)
-              : data.Skills || [];
+
+          let userHardSkills = data.HardSkills || [];
+          let userSoftSkills = data.SoftSkills || [];
+
+          if (typeof userHardSkills === 'string') {
+            userHardSkills = JSON.parse(userHardSkills);
+          }
+          if (typeof userSoftSkills === 'string') {
+            userSoftSkills = JSON.parse(userSoftSkills);
+          }
+
+          const normalizedHard = Array.isArray(userHardSkills)
+            ? userHardSkills.map(
+                (item: any) => item.name?.toLowerCase?.() || '',
+              )
+            : [];
+
+          const normalizedSoft = Array.isArray(userSoftSkills)
+            ? userSoftSkills.map(
+                (item: any) => item.name?.toLowerCase?.() || '',
+              )
+            : [];
 
           return {
-            username: data.username,
             id: doc.id,
-            skills: skillsArray,
+            username: data.username || '',
+            HardSkills: normalizedHard,
+            SoftSkills: normalizedSoft,
             projectsParticipated: data.projects || [],
-          } as UserFrom;
+            priorityScore: 0,
+          };
         })
         .filter(user => user.username);
 
-      // Вычисление приоритета пользователей
-      const prioritizedUsers = allUsers.map(user => {
-        let matchingSkillsCount = 0;
-        const userSkills = user.skills || [];
-        const totalUserSkills = userSkills.length;
-        const totalProjectSkills = skills.length;
+      const hardSkillNames = projectHardSkills.map(skill =>
+        skill.name.toLowerCase(),
+      );
+      const softSkillNames = projectSoftSkills.map(skill =>
+        skill.name.toLowerCase(),
+      );
 
-        // Считаем совпадения навыков
-        skills.forEach(skill => {
-          if (userSkills.includes(skill)) {
-            matchingSkillsCount += 1;
+      const prioritizedUsers = allUsers.map(user => {
+        let matchingHardSkillsCount = 0;
+        let matchingSoftSkillsCount = 0;
+
+        hardSkillNames.forEach(skill => {
+          if (user.HardSkills?.includes(skill)) {
+            matchingHardSkillsCount += 1;
           }
         });
 
-        // Вычисляем приоритет
-        const matchScore =
-          matchingSkillsCount / Math.sqrt(totalUserSkills * totalProjectSkills);
-        let participationScore = 0;
-        if (user.projectsParticipated && user.projectsParticipated.length > 0) {
-          participationScore = 1; // Если есть проекты, увеличиваем на 0.2
-        }
+        softSkillNames.forEach(skill => {
+          if (user.SoftSkills?.includes(skill)) {
+            matchingSoftSkillsCount += 1;
+          }
+        });
 
-        const finalScore = matchScore * 0.8 + participationScore * 0.2;
+        const totalUserHardSkills = user.HardSkills.length;
+        const totalProjectHardSkills = hardSkillNames.length;
+
+        const totalUserSoftSkills = user.SoftSkills.length;
+        const totalProjectSoftSkills = softSkillNames.length;
+
+        const firstCoef =
+          totalUserHardSkills && totalProjectHardSkills
+            ? (matchingHardSkillsCount /
+                Math.sqrt(totalUserHardSkills * totalProjectHardSkills)) *
+              0.7
+            : 0;
+
+        const secondCoef =
+          totalUserSoftSkills && totalProjectSoftSkills
+            ? (matchingSoftSkillsCount /
+                Math.sqrt(totalUserSoftSkills * totalProjectSoftSkills)) *
+              0.3
+            : 0;
+
+        const matchScore = firstCoef + secondCoef;
+
+        
 
         return {
           ...user,
-          priorityScore: finalScore,
+          priorityScore: matchScore,
         };
       });
 
-      console.log('prioritizedUsers', prioritizedUsers);
-
-      // Сортировка пользователей по приоритету
       const sortedUsers = prioritizedUsers.sort(
         (a, b) => b.priorityScore - a.priorityScore,
       );
-      console.log('sortedUsers', sortedUsers);
+
       setUsers(sortedUsers);
     } catch (error) {
       console.error('Error fetching users or processing data:', error);
-      // Здесь можно показать уведомление пользователю или выполнить другие действия
     }
   };
 
@@ -185,16 +228,17 @@ const SearchModal = ({
                   </View>
 
                   <Text style={styles.userSkills}>
-                    {user.skills?.join(', ')}
+                    {[
+                      ...(user.HardSkills || []),
+                      ...(user.SoftSkills || []),
+                    ].join(', ')}
                   </Text>
                 </TouchableOpacity>
               ))
             ) : (
               <Text style={styles.noResults}>
                 {selectedRoles.length > 0
-                  ? `Не найдено пользователей с навыками: ${selectedRoles.join(
-                      ', ',
-                    )}`
+                  ? `Не найдено пользователей с навыками: ${selectedRoles.join(', ')}`
                   : 'Пользователи не найдены'}
               </Text>
             )}
