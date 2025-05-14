@@ -43,8 +43,10 @@ export const Project = () => {
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
-
   console.log(projectData);
+  console.log(projectData?.HardSkills);
+  console.log(projectData?.SoftSkills);
+
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
@@ -296,17 +298,36 @@ export const Project = () => {
             </View>
           </View>
 
-          {projectData.skills && (
+          {projectData.HardSkills && (
             <View style={styles.skillsContainer}>
               <Text style={styles.sectionTitle}>Требуемые навыки:</Text>
               <View style={styles.skillsList}>
-                {typeof projectData.skills === 'string'
-                  ? JSON.parse(projectData.skills).map((skill: Skill) => (
+                {typeof projectData.HardSkills === 'string'
+                  ? JSON.parse(projectData.HardSkills).map((skill: Skill) => (
                       <View key={skill.id} style={styles.skillItem}>
                         <Text style={styles.skillText}>{skill.name}</Text>
                       </View>
                     ))
-                  : projectData.skills.map((skill: Skill) => (
+                  : projectData.HardSkills.map((skill: Skill) => (
+                      <View key={skill.id} style={styles.skillItem}>
+                        <Text style={styles.skillText}>{skill.name}</Text>
+                      </View>
+                    ))}
+              </View>
+            </View>
+          )}
+
+          {projectData.SoftSkills && (
+            <View style={styles.skillsContainer}>
+              <Text style={styles.sectionTitle}>Требуемые навыки:</Text>
+              <View style={styles.skillsList}>
+                {typeof projectData.SoftSkills === 'string'
+                  ? JSON.parse(projectData.SoftSkills).map((skill: Skill) => (
+                      <View key={skill.id} style={styles.skillItem}>
+                        <Text style={styles.skillText}>{skill.name}</Text>
+                      </View>
+                    ))
+                  : projectData.SoftSkills.map((skill: Skill) => (
                       <View key={skill.id} style={styles.skillItem}>
                         <Text style={styles.skillText}>{skill.name}</Text>
                       </View>
@@ -327,9 +348,13 @@ export const Project = () => {
             visible={isSearchModal}
             onClose={() => setSearchModal(false)}
             requiredRoles={projectData.required}
-            projectSkills={
-              typeof projectData.skills === 'string' &&
-              JSON.parse(projectData.skills)
+            projectHardSkills={
+              typeof projectData.HardSkills === 'string' &&
+              JSON.parse(projectData.HardSkills)
+            }
+            projectSoftSkills={
+              typeof projectData.SoftSkills === 'string' &&
+              JSON.parse(projectData.SoftSkills)
             }
           />
           {projectData.creatorId === userId && (
@@ -340,7 +365,7 @@ export const Project = () => {
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={goBack} style={styles.goback}>
-            <ArrowLeftIcon size={32} />
+            <ArrowLeftIcon size={24} />
           </TouchableOpacity>
         </ScrollView>
       </View>

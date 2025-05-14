@@ -12,8 +12,8 @@ export type ProjectType = {
   photo: string;
   required: string[];
   categories: string[];
-  hardSkills: Skill[];
-  softSkills: Skill[];
+  HardSkills: Skill[];
+  SoftSkills: Skill[];
   members: string[];
 };
 

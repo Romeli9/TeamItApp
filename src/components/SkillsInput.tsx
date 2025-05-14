@@ -40,7 +40,6 @@ export const SkillsInput: React.FC<SkillsInputProps> = ({
             setSkillsSuggestions(res.data.data);
           })
           .catch(async err => {
-            console.log(err);
             if (err.response?.status === 401) {
               await getToken();
             }
