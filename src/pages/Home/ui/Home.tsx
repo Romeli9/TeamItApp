@@ -157,12 +157,13 @@ export const Home = () => {
           </View>
         </View>
 
-        <View style={{position: 'absolute', top: insets.top + 76, left: 16}}>
+        <View style={{position: 'absolute', top: insets.top + 76, left: 0}}>
           <Text
             style={{
               fontFamily: 'Inter-SemiBold',
               fontSize: 18,
               color: '#808080',
+              left: 16,
             }}>
             Ваши проекты:
           </Text>

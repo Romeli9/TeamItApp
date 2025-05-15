@@ -144,7 +144,9 @@ export const EditProfile: React.FC<{
         setModalVisible(false);
         onModalClose();
       }}>
-      <KeyboardAvoidingView style={styles.keyboardAvoidingView}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{flex: 1}}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <TouchableOpacity
@@ -254,16 +256,15 @@ export const EditProfile: React.FC<{
                   </ScrollView>
                 )}
               </View>
+              <View style={styles.fixedBottom}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSave}
+                  disabled={loading}>
+                  <Text style={styles.saveButtonText}>Сохранить</Text>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
-
-            <View style={styles.fixedBottom}>
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSave}
-                disabled={loading}>
-                <Text style={styles.saveButtonText}>Сохранить</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
