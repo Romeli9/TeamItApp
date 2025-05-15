@@ -90,7 +90,8 @@ export const Home = () => {
               required: doc.data().required,
               categories: doc.data().categories,
               members: doc.data().members,
-              skills: doc.data().skills,
+              HardSkills: doc.data().HardSkills,
+              SoftSkills: doc.data().SoftSkills,
             }));
 
             dispatch(setYourProjects(projectsData));

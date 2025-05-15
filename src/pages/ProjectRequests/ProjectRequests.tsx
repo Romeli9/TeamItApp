@@ -47,9 +47,13 @@ export const ProjectRequests = () => {
 
   const {projectId} = route.params;
 
+  console.log('prId', projectId);
+
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
+
+  console.log('projectData', projectData);
 
   useEffect(() => {
     fetchRequests();
@@ -91,6 +95,9 @@ export const ProjectRequests = () => {
             );
           }
 
+          console.log('project hard skills:', projectData?.HardSkills);
+          console.log('project soft skills:', projectData?.SoftSkills);
+
           const hardSkillsProject =
             typeof projectData?.HardSkills === 'string'
               ? JSON.parse(projectData.HardSkills).map(
@@ -108,17 +115,26 @@ export const ProjectRequests = () => {
           let matchingHardSkillsCount = 0;
           let matchingSoftSkillsCount = 0;
 
+          console.log(hardSkillsProject);
+          console.log(softSkillsProject);
+          console.log(userHardSkills);
+          console.log(userSoftSkills);
+
           hardSkillsProject.forEach((skill: string) => {
             if (userHardSkills.includes(skill)) {
               matchingHardSkillsCount += 1;
             }
           });
 
+          console.log('matchingHardSkillsCount:', matchingHardSkillsCount);
+
           softSkillsProject.forEach((skill: string) => {
             if (userSoftSkills.includes(skill)) {
               matchingSoftSkillsCount += 1;
             }
           });
+
+          console.log('matchingSoftSkillsCount:', matchingSoftSkillsCount);
 
           const totalUserHardSkills = userHardSkills.length;
           const totalProjectHardSkills = hardSkillsProject.length;
@@ -129,18 +145,28 @@ export const ProjectRequests = () => {
               Math.sqrt(totalUserHardSkills * totalProjectHardSkills)) *
             0.7;
 
+          console.log('FirstCoef:', FirstCoef);
+
           const totalUserSoftSkills = userSoftSkills.length;
           const totalProjectSoftSkills = softSkillsProject.length;
           const totalMatchingSoftSkills = matchingSoftSkillsCount;
+
+          console.log('totalMatchingSoftSkills:', totalMatchingSoftSkills);
 
           const SecondCoef =
             (totalMatchingSoftSkills /
               Math.sqrt(totalUserSoftSkills * totalProjectSoftSkills)) *
             0.3;
 
+          console.log('SecondCoef:', SecondCoef);
+
           const matchScore = FirstCoef + SecondCoef;
 
+          console.log('Match Score:', matchScore);
+
           const finalScore = matchScore;
+
+          console.log('Final Score:', finalScore);
 
           return {
             id: doc.id,
