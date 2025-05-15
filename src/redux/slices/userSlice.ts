@@ -8,10 +8,10 @@ export interface userState {
   telegramm: string;
   HardSkills: string;
   SoftSkills: string;
-  Role: string;
   experience: string;
   aboutMe: string;
   background: string;
+  roles: string[];
 }
 
 const initialState: userState = {
@@ -22,7 +22,7 @@ const initialState: userState = {
   telegramm: '',
   HardSkills: '',
   SoftSkills: '',
-  Role: '',
+  roles: [],
   experience: '',
   aboutMe: '',
   background: '',
@@ -45,7 +45,7 @@ export const userSlice = createSlice({
       state.HardSkills = action.payload.HardSkills;
       state.SoftSkills = action.payload.SoftSkills;
       state.telegramm = action.payload.Telegramm;
-      state.Role = action.payload.Role;
+      state.roles = action.payload.roles;
     },
     clearProfileData(state) {
       state.userId = '';
