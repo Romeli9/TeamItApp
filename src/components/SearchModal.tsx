@@ -43,7 +43,6 @@ const SearchModal = ({
   projectHardSkills,
   projectSoftSkills,
 }: SearchModalProps) => {
-  console.log(projectHardSkills, projectSoftSkills);
   const [searchText, setSearchText] = useState('');
   const [users, setUsers] = useState<UserFrom[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserFrom[]>([]);
@@ -63,8 +62,6 @@ const SearchModal = ({
         ?.toLowerCase()
         .includes(searchText.toLowerCase());
 
-      console.log('selectedRoles', selectedRoles);
-      console.log('user.roles', user.roles);
       const rolesMatch =
         selectedRoles.length === 0 ||
         selectedRoles.some(role =>
@@ -72,8 +69,6 @@ const SearchModal = ({
             userRole => userRole.toLowerCase() === role.toLowerCase(),
           ),
         );
-
-      console.log(rolesMatch);
 
       return nameMatch && rolesMatch;
     });

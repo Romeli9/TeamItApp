@@ -43,9 +43,6 @@ export const Project = () => {
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
-  console.log(projectData);
-  console.log('hard', projectData?.HardSkills);
-  console.log('soft', projectData?.SoftSkills);
 
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
