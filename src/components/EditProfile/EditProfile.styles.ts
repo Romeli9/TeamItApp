@@ -28,6 +28,7 @@ export const EditProfileStyles = StyleSheet.create({
   fixedBottom: {
     position: 'absolute',
     bottom: 20,
+    // marginTop: 60,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -193,6 +194,7 @@ export const EditProfileStyles = StyleSheet.create({
     alignItems: 'flex-start',
     alignSelf: 'flex-start',
     marginLeft: 12,
+    marginBottom: 20,
   },
   fdrow: {
     flexDirection: 'row',
