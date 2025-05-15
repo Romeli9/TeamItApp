@@ -115,12 +115,10 @@ export const ProfileInfo = () => {
     </TouchableOpacity>
   );
 
-  /*************  ✨ Windsurf Command ⭐  *************/
   /**
    * Navigate to the project screen with the given project ID.
    * @param {string} projectID - The ID of the project to navigate to.
    */
-  /*******  ce797cb5-b9c3-440e-a309-1972ce226131  *******/
   const OpenProject = (projectID: string) => {
     navigate(Screens.PROJECT, {projectId: projectID});
   };
@@ -139,8 +137,18 @@ export const ProfileInfo = () => {
             {showMoreInfo && (
               <>
                 <Text style={styles.text}>Опыт: {experience}</Text>
-                <Text style={styles.text}>Hard Skills: {HardSkills}</Text>
-                <Text style={styles.text}>Soft Skills: {SoftSkills}</Text>
+                <Text style={styles.text}>
+                  Hard Skills:{' '}
+                  {JSON.parse(HardSkills)
+                    .map((item: {name: string}) => item.name)
+                    .join(', ')}
+                </Text>
+                <Text style={styles.text}>
+                  Soft Skills:{' '}
+                  {JSON.parse(SoftSkills)
+                    .map((item: {name: string}) => item.name)
+                    .join(', ')}
+                </Text>
                 <Text style={styles.text}>Телеграм: {telegramm}</Text>
               </>
             )}

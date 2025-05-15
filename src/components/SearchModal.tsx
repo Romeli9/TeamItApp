@@ -32,6 +32,7 @@ export type UserFrom = {
   HardSkills: string[];
   SoftSkills: string[];
   projectsParticipated?: string[];
+  roles?: string[];
 };
 
 const SearchModal = ({
@@ -51,7 +52,7 @@ const SearchModal = ({
   useEffect(() => {
     if (visible) {
       fetchUsers();
-      setSelectedRoles([]);
+      setSelectedRoles(requiredRoles);
       setSearchText('');
     }
   }, [visible]);
@@ -62,18 +63,17 @@ const SearchModal = ({
         ?.toLowerCase()
         .includes(searchText.toLowerCase());
 
-      const allSkills = [
-        ...(user.HardSkills || []),
-        ...(user.SoftSkills || []),
-      ].map(s => s.toLowerCase());
-
+      console.log('selectedRoles', selectedRoles);
+      console.log('user.roles', user.roles);
       const rolesMatch =
         selectedRoles.length === 0 ||
         selectedRoles.some(role =>
-          allSkills.some(skill =>
-            skill.toLowerCase().includes(role.toLowerCase()),
+          user.roles?.some(
+            userRole => userRole.toLowerCase() === role.toLowerCase(),
           ),
         );
+
+      console.log(rolesMatch);
 
       return nameMatch && rolesMatch;
     });
@@ -119,6 +119,7 @@ const SearchModal = ({
             HardSkills: normalizedHard,
             SoftSkills: normalizedSoft,
             projectsParticipated: data.projects || [],
+            roles: data.roles || [],
             priorityScore: 0,
           };
         })
@@ -169,8 +170,6 @@ const SearchModal = ({
 
         const matchScore = firstCoef + secondCoef;
 
-        
-
         return {
           ...user,
           priorityScore: matchScore,
@@ -187,6 +186,12 @@ const SearchModal = ({
     }
   };
 
+  const toggleRole = (role: string) => {
+    setSelectedRoles(prev =>
+      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role],
+    );
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -201,6 +206,26 @@ const SearchModal = ({
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled">
             <Text style={styles.title}>Поиск участников</Text>
+
+            <View style={styles.rolesContainer}>
+              {requiredRoles.map((role, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.roleButton,
+                    selectedRoles.includes(role) && styles.selectedRoleButton,
+                  ]}
+                  onPress={() => toggleRole(role)}>
+                  <Text
+                    style={[
+                      styles.roleText,
+                      selectedRoles.includes(role) && styles.selectedRoleText,
+                    ]}>
+                    {role}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <TextInput
               style={styles.searchInput}
@@ -233,6 +258,7 @@ const SearchModal = ({
                       ...(user.SoftSkills || []),
                     ].join(', ')}
                   </Text>
+                  <Text style={styles.userSkills}>{user.roles}</Text>
                 </TouchableOpacity>
               ))
             ) : (

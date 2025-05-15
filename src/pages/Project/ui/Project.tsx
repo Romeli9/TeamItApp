@@ -44,8 +44,8 @@ export const Project = () => {
     selectProjectById(projectId),
   );
   console.log(projectData);
-  console.log(projectData?.HardSkills);
-  console.log(projectData?.SoftSkills);
+  console.log('hard', projectData?.HardSkills);
+  console.log('soft', projectData?.SoftSkills);
 
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);

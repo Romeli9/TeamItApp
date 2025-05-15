@@ -11,8 +11,14 @@ import {
   View,
 } from 'react-native';
 
+import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Skill, SkillsInput} from 'components';
-import {DocumentReference, updateDoc} from 'firebase/firestore';
+import {
+  DocumentReference,
+  collection,
+  getDocs,
+  updateDoc,
+} from 'firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
 import {setProfileData} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
@@ -32,10 +38,14 @@ export const EditProfile: React.FC<{
   const [selectedHardSkills, setSelectedHardSkills] = useState<Skill[]>([]);
   const [selectedSoftSkills, setSelectedSoftSkills] = useState<Skill[]>([]);
 
+  const [rolesSelected, setRolesSelected] = useState<string[]>([]);
+  const [rolesOpen, setRolesOpen] = useState(false);
+
+  const [rolesData, setRolesData] = useState<string[]>([]);
+
   // Получаем данные из Redux store
-  const {aboutMe, experience, HardSkills, SoftSkills, telegramm} = useSelector(
-    (state: RootState) => state.user,
-  );
+  const {aboutMe, experience, HardSkills, SoftSkills, telegramm, roles} =
+    useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
   const skills = useMemo(() => {
@@ -46,6 +56,10 @@ export const EditProfile: React.FC<{
   }, [HardSkills, SoftSkills]);
 
   useEffect(() => {
+    console.log('монтирован');
+    fetchData();
+    console.log(roles);
+    setRolesSelected(roles || []);
     setAboutMeInput(aboutMe || '');
     setExperienceInput(experience || '');
     setTelegrammInput(telegramm || '');
@@ -55,21 +69,26 @@ export const EditProfile: React.FC<{
     if (!skills || skills.length === 0) return;
 
     try {
-      const parsedSkills =
-        typeof skills === 'string' ? JSON.parse(skills) : skills;
-
-      setSelectedHardSkills(
-        parsedSkills.filter((s: Skill) => s.type.includes('ST1')),
-      );
-      setSelectedSoftSkills(
-        parsedSkills.filter((s: Skill) => s.type.includes('ST2')),
-      );
+      setSelectedHardSkills(JSON.parse(HardSkills));
+      setSelectedSoftSkills(JSON.parse(SoftSkills));
     } catch (e) {
       console.error('Ошибка при парсинге навыков:', e);
       setSelectedHardSkills([]);
       setSelectedSoftSkills([]);
     }
   }, [skills]);
+
+  const fetchData = async () => {
+    let tempRoles: string[] = [];
+
+    const querySnapshotRoles = await getDocs(collection(FIREBASE_DB, 'role'));
+    querySnapshotRoles.forEach(doc => {
+      if (doc.data().name && doc.data().name.length > 0)
+        tempRoles.push(doc.data().name);
+    });
+
+    setRolesData(tempRoles);
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -86,6 +105,7 @@ export const EditProfile: React.FC<{
       Experience: experienceInput,
       HardSkills: JSON.stringify(selectedHardSkills),
       SoftSkills: JSON.stringify(selectedSoftSkills),
+      roles: rolesSelected,
       Telegramm: telegrammInput,
     };
 
@@ -103,6 +123,18 @@ export const EditProfile: React.FC<{
     }
   };
 
+  const handleRoleSelect = (value: string) => {
+    if (rolesSelected.includes(value)) {
+      setRolesSelected(rolesSelected.filter(item => item !== value));
+    } else {
+      setRolesSelected([...rolesSelected, value]);
+    }
+  };
+
+  const toggleRoles = () => {
+    setRolesOpen(!rolesOpen);
+  };
+
   return (
     <Modal
       visible={isModalVisible}
@@ -112,9 +144,7 @@ export const EditProfile: React.FC<{
         setModalVisible(false);
         onModalClose();
       }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidingView}>
+      <KeyboardAvoidingView style={styles.keyboardAvoidingView}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <TouchableOpacity
@@ -174,6 +204,56 @@ export const EditProfile: React.FC<{
                 placeholderTextColor="#A8A8A8"
                 keyboardType="url"
               />
+
+              <View style={styles.project__container_with_plus}>
+                <Text style={styles.project__text_2}>Роли:</Text>
+                <View style={styles.fdrow}>
+                  <TouchableOpacity
+                    style={styles.project__button_plus}
+                    onPress={toggleRoles}>
+                    <Text style={styles.plus1}>+</Text>
+                  </TouchableOpacity>
+                  {rolesSelected.map(item => (
+                    <View key={item} style={styles.selectedItem}>
+                      <Text style={styles.selectedItemText}>{item}</Text>
+                      <TouchableOpacity
+                        onPress={() => handleRoleSelect(item)}
+                        style={styles.removeSelectedItem}>
+                        <View style={styles.removeSelectedItemTextContainer}>
+                          <Text style={styles.cross1}>+</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+                {rolesOpen && (
+                  <ScrollView style={styles.dropdownContainer}>
+                    <View style={styles.dropdownWrapper}>
+                      {rolesData &&
+                        rolesData.length > 0 &&
+                        rolesData.map((item, ix) => (
+                          <TouchableOpacity
+                            key={ix}
+                            style={[
+                              styles.dropdownItem,
+                              rolesSelected.includes(item) &&
+                                styles.dropdownItemSelected,
+                            ]}
+                            onPress={() => handleRoleSelect(item)}>
+                            <View style={styles.dropdownItemContainer}>
+                              <View style={styles.dropdownItem_icon}>
+                                <Text style={styles.plus2}>+</Text>
+                              </View>
+                              <Text style={styles.dropdownItemText}>
+                                {item}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                    </View>
+                  </ScrollView>
+                )}
+              </View>
             </ScrollView>
 
             <View style={styles.fixedBottom}>
