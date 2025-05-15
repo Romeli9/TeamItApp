@@ -51,19 +51,19 @@ export const ProjectRequestsList = () => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setFilteredProjects(
-        projectsWithApplication.filter(item =>
-          item.name.toLowerCase().includes(projectNameInput.toLowerCase()),
-        ),
-      );
-    }, 400);
-
-    if (projectNameInput === '') {
-      setFilteredProjects(projectsWithApplication);
-    }
+      if (projectNameInput === '') {
+        setFilteredProjects(projectsWithApplication);
+      } else {
+        setFilteredProjects(
+          projectsWithApplication.filter(item =>
+            item.name.toLowerCase().includes(projectNameInput.toLowerCase()),
+          ),
+        );
+      }
+    }, 300);
 
     return () => clearTimeout(timeout);
-  }, [projectNameInput]);
+  }, [projectNameInput, projectsWithApplication]);
 
   useEffect(() => {
     fetchListProjects();
