@@ -56,9 +56,8 @@ export const EditProfile: React.FC<{
   }, [HardSkills, SoftSkills]);
 
   useEffect(() => {
-    console.log('монтирован');
     fetchData();
-    console.log(roles);
+
     setRolesSelected(roles || []);
     setAboutMeInput(aboutMe || '');
     setExperienceInput(experience || '');
