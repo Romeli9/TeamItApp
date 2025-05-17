@@ -6,6 +6,7 @@ export const ProjectStyles = StyleSheet.create({
   container: {
     backgroundColor: '#EAEAEA',
     alignItems: 'center',
+    paddingBottom: 60,
   },
 
   goback: {
@@ -51,10 +52,11 @@ export const ProjectStyles = StyleSheet.create({
   },
 
   about_project_desc: {
+    padding: 16,
     fontFamily: 'Inter-Medium',
     fontSize: 12,
     color: 'rgba(51, 51, 51, 1)',
-    textAlign: 'center',
+    textAlign: 'justify',
     marginTop: 5,
     marginBottom: 16,
   },

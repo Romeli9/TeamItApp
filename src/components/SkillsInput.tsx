@@ -103,11 +103,14 @@ export const SkillsInput: React.FC<SkillsInputProps> = ({
 
 const styles = StyleSheet.create({
   input: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    marginBottom: 15,
+    fontSize: 16,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
+    borderColor: '#E0E0E0',
   },
   dropdown: {
     borderWidth: 1,
