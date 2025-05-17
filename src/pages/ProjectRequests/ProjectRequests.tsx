@@ -142,6 +142,8 @@ export const ProjectRequests = () => {
 
           const finalScore = matchScore;
 
+          console.log(userHardSkills);
+
           return {
             id: doc.id,
             senderId: data.senderId,
@@ -156,6 +158,8 @@ export const ProjectRequests = () => {
             createdAt: data.createdAt,
             type: 'received' as 'received',
             priorityScore: finalScore,
+            HardSkills: userHardSkills,
+            SoftSkills: userSoftSkills,
           };
         }),
       );
@@ -295,7 +299,12 @@ export const ProjectRequests = () => {
       </Text>
       <Text style={styles.requestMessage}>Имя: {item.senderName}</Text>
       <Text style={styles.requestMessage}>Роль: {item.role}</Text>
-      <Text style={styles.requestMessage}>{item.message}</Text>
+      <Text style={styles.requestMessage}>
+        HardSkills: {item.HardSkills.map(item => item + ', ')}
+      </Text>
+      <Text style={styles.requestMessage}>
+        SoftSkills: {item.SoftSkills.map(item => item + ', ')}
+      </Text>
 
       <Text style={styles.requestPriority}>
         Коэффициент приоритета: {item.priorityScore.toFixed(2)}

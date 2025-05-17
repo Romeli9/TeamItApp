@@ -12,6 +12,8 @@ export type ProjectRequest = {
   createdAt: Date;
   type?: 'sent' | 'received';
   priorityScore: number;
+  HardSkills: string[];
+  SoftSkills: string[];
 };
 
 export type ProjectRequestStatus =

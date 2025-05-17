@@ -297,7 +297,7 @@ export const Project = () => {
 
           {projectData.HardSkills && (
             <View style={styles.skillsContainer}>
-              <Text style={styles.sectionTitle}>Требуемые навыки:</Text>
+              <Text style={styles.sectionTitle}>Hard Skills:</Text>
               <View style={styles.skillsList}>
                 {typeof projectData.HardSkills === 'string'
                   ? JSON.parse(projectData.HardSkills).map((skill: Skill) => (
@@ -316,7 +316,7 @@ export const Project = () => {
 
           {projectData.SoftSkills && (
             <View style={styles.skillsContainer}>
-              <Text style={styles.sectionTitle}>Требуемые навыки:</Text>
+              <Text style={styles.sectionTitle}>Soft skills:</Text>
               <View style={styles.skillsList}>
                 {typeof projectData.SoftSkills === 'string'
                   ? JSON.parse(projectData.SoftSkills).map((skill: Skill) => (
