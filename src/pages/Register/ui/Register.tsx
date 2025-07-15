@@ -38,7 +38,7 @@ export const RegisterPage = () => {
       const user = response.user;
 
       //TODO: вернуть users
-      const userDocRef = doc(collection(firestore, 'tempUsers'), user.uid);
+      const userDocRef = doc(collection(firestore, 'users'), user.uid);
 
       await setDoc(userDocRef, {
         username: username,
