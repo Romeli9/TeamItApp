@@ -14,18 +14,25 @@ import {
 import {collection, getDocs} from 'firebase/firestore';
 
 import {FIREBASE_DB} from '../app/FireBaseConfig';
+import {Skill} from './SkillsInput';
 
 type SearchModalProps = {
   visible: boolean;
   onClose: () => void;
   onUserSelect: (username: UserFrom) => void;
   requiredRoles: string[];
+  projectHardSkills: Skill[];
+  projectSoftSkills: Skill[];
 };
 
 export type UserFrom = {
+  priorityScore: number;
   username: string;
   id: string;
-  skills?: string[];
+  HardSkills: string[];
+  SoftSkills: string[];
+  projectsParticipated?: string[];
+  roles?: string[];
 };
 
 const SearchModal = ({
@@ -33,40 +40,18 @@ const SearchModal = ({
   onClose,
   onUserSelect,
   requiredRoles,
+  projectHardSkills,
+  projectSoftSkills,
 }: SearchModalProps) => {
   const [searchText, setSearchText] = useState('');
   const [users, setUsers] = useState<UserFrom[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserFrom[]>([]);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-
-  const fetchUsers = async () => {
-    const firestore = FIREBASE_DB;
-    const usersRef = collection(firestore, 'users');
-    const snapshot = await getDocs(usersRef);
-
-    const allUsers = snapshot.docs
-      .map(doc => {
-        const data = doc.data();
-        const skillsArray =
-          typeof data.Skills === 'string'
-            ? data.Skills.split(',').map(s => s.trim())
-            : data.Skills || [];
-
-        return {
-          username: data.username,
-          id: doc.id,
-          skills: skillsArray,
-        } as UserFrom;
-      })
-      .filter(user => user.username);
-
-    setUsers(allUsers);
-  };
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(requiredRoles);
 
   useEffect(() => {
     if (visible) {
       fetchUsers();
-      setSelectedRoles([]);
+      setSelectedRoles(requiredRoles);
       setSearchText('');
     }
   }, [visible]);
@@ -76,18 +61,125 @@ const SearchModal = ({
       const nameMatch = user.username
         ?.toLowerCase()
         .includes(searchText.toLowerCase());
+
       const rolesMatch =
         selectedRoles.length === 0 ||
         selectedRoles.some(role =>
-          user.skills?.some(skill =>
-            skill.toLowerCase().includes(role.toLowerCase()),
+          user.roles?.some(
+            userRole => userRole.toLowerCase() === role.toLowerCase(),
           ),
         );
+
       return nameMatch && rolesMatch;
     });
 
     setFilteredUsers(filtered);
   }, [searchText, users, selectedRoles]);
+
+  const fetchUsers = async () => {
+    try {
+      const firestore = FIREBASE_DB;
+      const usersRef = collection(firestore, 'users');
+      const snapshot = await getDocs(usersRef);
+
+      const allUsers: UserFrom[] = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+
+          let userHardSkills = data.HardSkills || [];
+          let userSoftSkills = data.SoftSkills || [];
+
+          if (typeof userHardSkills === 'string') {
+            userHardSkills = JSON.parse(userHardSkills);
+          }
+          if (typeof userSoftSkills === 'string') {
+            userSoftSkills = JSON.parse(userSoftSkills);
+          }
+
+          const normalizedHard = Array.isArray(userHardSkills)
+            ? userHardSkills.map(
+                (item: any) => item.name?.toLowerCase?.() || '',
+              )
+            : [];
+
+          const normalizedSoft = Array.isArray(userSoftSkills)
+            ? userSoftSkills.map(
+                (item: any) => item.name?.toLowerCase?.() || '',
+              )
+            : [];
+
+          return {
+            id: doc.id,
+            username: data.username || '',
+            HardSkills: normalizedHard,
+            SoftSkills: normalizedSoft,
+            projectsParticipated: data.projects || [],
+            roles: data.roles || [],
+            priorityScore: 0,
+          };
+        })
+        .filter(user => user.username);
+
+      const hardSkillNames = projectHardSkills.map(skill =>
+        skill.name.toLowerCase(),
+      );
+      const softSkillNames = projectSoftSkills.map(skill =>
+        skill.name.toLowerCase(),
+      );
+
+      const prioritizedUsers = allUsers.map(user => {
+        let matchingHardSkillsCount = 0;
+        let matchingSoftSkillsCount = 0;
+
+        hardSkillNames.forEach(skill => {
+          if (user.HardSkills?.includes(skill)) {
+            matchingHardSkillsCount += 1;
+          }
+        });
+
+        softSkillNames.forEach(skill => {
+          if (user.SoftSkills?.includes(skill)) {
+            matchingSoftSkillsCount += 1;
+          }
+        });
+
+        const totalUserHardSkills = user.HardSkills.length;
+        const totalProjectHardSkills = hardSkillNames.length;
+
+        const totalUserSoftSkills = user.SoftSkills.length;
+        const totalProjectSoftSkills = softSkillNames.length;
+
+        const firstCoef =
+          totalUserHardSkills && totalProjectHardSkills
+            ? (matchingHardSkillsCount /
+                Math.sqrt(totalUserHardSkills * totalProjectHardSkills)) *
+              0.7
+            : 0;
+
+        const secondCoef =
+          totalUserSoftSkills && totalProjectSoftSkills
+            ? (matchingSoftSkillsCount /
+                Math.sqrt(totalUserSoftSkills * totalProjectSoftSkills)) *
+              0.3
+            : 0;
+
+        const matchScore = firstCoef + secondCoef;
+
+        return {
+          ...user,
+          priorityScore: matchScore,
+        };
+      });
+
+      const sortedUsers = prioritizedUsers.sort(
+        (a, b) => b.priorityScore - a.priorityScore,
+      );
+
+      setUsers(sortedUsers);
+    } catch (error) {
+      console.error('Error fetching users or processing data:', error);
+    }
+  };
 
   const toggleRole = (role: string) => {
     setSelectedRoles(prev =>
@@ -137,30 +229,37 @@ const SearchModal = ({
               onChangeText={setSearchText}
             />
 
-            {selectedRoles.length > 0 && (
-              <Text style={styles.selectedRoleInfo}>
-                Подходящие на роли: {selectedRoles.join(', ')}
-              </Text>
-            )}
-
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user, index) => (
                 <TouchableOpacity
                   key={index}
                   onPress={() => onUserSelect(user)}
                   style={styles.userItemContainer}>
-                  <Text style={styles.userItem}>{user.username}</Text>
+                  <View style={styles.headerContent}>
+                    <Text style={styles.userItem}>{user.username}</Text>
+                    <Text
+                      style={
+                        user.priorityScore > 0.6
+                          ? styles.userScoreHigh
+                          : styles.userScore
+                      }>
+                      {user.priorityScore.toFixed(2)}
+                    </Text>
+                  </View>
+
                   <Text style={styles.userSkills}>
-                    {user.skills?.join(', ')}
+                    {[
+                      ...(user.HardSkills || []),
+                      ...(user.SoftSkills || []),
+                    ].join(', ')}
                   </Text>
+                  <Text style={styles.userSkills}>{user.roles}</Text>
                 </TouchableOpacity>
               ))
             ) : (
               <Text style={styles.noResults}>
                 {selectedRoles.length > 0
-                  ? `Не найдено пользователей с навыками: ${selectedRoles.join(
-                      ', ',
-                    )}`
+                  ? `Не найдено пользователей с навыками: ${selectedRoles.join(', ')}`
                   : 'Пользователи не найдены'}
               </Text>
             )}
@@ -235,6 +334,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
+  userScoreHigh: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'green',
+  },
+  userScore: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'red',
+  },
   userSkills: {
     fontSize: 12,
     color: '#666',
@@ -256,6 +365,11 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  headerContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
 

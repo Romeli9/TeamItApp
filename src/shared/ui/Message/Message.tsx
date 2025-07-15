@@ -1,4 +1,3 @@
-import {Spinner} from '@ui-kitten/components';
 import React, {memo} from 'react';
 import {
   ActivityIndicator,
@@ -36,14 +35,17 @@ export const Message = memo(
   }: MessageProps) => {
     const date = new Date(timestamp);
     const formData = date.getHours() + ':' + date.getMinutes();
+
     const renderIcon = () => {
       if (status === 'sending') {
         return (
-          <Spinner
+          <ActivityIndicator
             style={{
               width: IconStyles.small.width,
               height: IconStyles.small.height,
             }}
+            size="small"
+            color={Colors.Blue200}
           />
         );
       }

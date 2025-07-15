@@ -90,6 +90,8 @@ export const Home = () => {
               required: doc.data().required,
               categories: doc.data().categories,
               members: doc.data().members,
+              HardSkills: doc.data().HardSkills,
+              SoftSkills: doc.data().SoftSkills,
             }));
 
             dispatch(setYourProjects(projectsData));
@@ -106,6 +108,7 @@ export const Home = () => {
               required: doc.data().required,
               categories: doc.data().categories,
               members: doc.data().members,
+              skills: doc.data().skills,
             }));
 
             dispatch(setOtherProjects(projectsData));
@@ -154,12 +157,13 @@ export const Home = () => {
           </View>
         </View>
 
-        <View style={{position: 'absolute', top: insets.top + 76, left: 16}}>
+        <View style={{position: 'absolute', top: insets.top + 76, left: 0}}>
           <Text
             style={{
               fontFamily: 'Inter-SemiBold',
               fontSize: 18,
               color: '#808080',
+              left: 16,
             }}>
             Ваши проекты:
           </Text>
@@ -195,9 +199,8 @@ export const Home = () => {
             style={styles.searchButton}
             onPress={() => navigate(Screens.SEARCH)}>
             <SearchIcon
-              fill={IconStyles.medium.changeColor(Colors.White100).color}
-              width={IconStyles.large.width}
-              height={IconStyles.large.height}
+              color={IconStyles.medium.changeColor(Colors.White100).color}
+              size={24}
             />
           </TouchableOpacity>
 

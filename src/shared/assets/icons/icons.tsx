@@ -1,8 +1,9 @@
-import {Icon} from '@ui-kitten/components';
 import React from 'react';
 
-export const BellIcon = (props: any) => <Icon {...props} name="bell-outline" />;
+import {Feather, Ionicons} from '@expo/vector-icons';
 
-export const SearchIcon = (props: any) => (
-  <Icon {...props} name="search-outline" />
-);
+export const BellIcon = (props: any) => <Feather {...props} name="bell" />;
+
+export const SearchIcon = (props: any) => <Feather {...props} name="search" />;
+
+export const PhotoIcon = (props: any) => <Feather {...props} name="image" />;

@@ -25,10 +25,6 @@ export const HomePagestyles = StyleSheet.create({
   userProjectsContainer: {
     flexDirection: 'row',
     marginTop: 13,
-    paddingLeft: 10,
-    paddingRight: 25,
-    //height: 155,
-    marginLeft: -9,
   },
   projectItem: {
     marginLeft: 13,
