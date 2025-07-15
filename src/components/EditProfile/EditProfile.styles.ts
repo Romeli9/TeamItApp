@@ -123,7 +123,7 @@ export const EditProfileStyles = StyleSheet.create({
     fontSize: 16,
   },
   saveButton: {
-    backgroundColor: '#9260D1',
+    backgroundColor: '#BE9DE8',
     borderRadius: 10,
     paddingVertical: 14,
     paddingHorizontal: 30,

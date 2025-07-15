@@ -1,7 +1,9 @@
 import React from 'react';
 
 import {
+  AntDesign,
   Feather,
+  FontAwesome,
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
@@ -82,6 +84,22 @@ export const ArrowLeftIcon = (props: any) => (
   <Feather name="arrow-left" {...props} />
 );
 export const ArrowRightIcon = (props: any) => (
-  <Feather  name="arrow-right" {...props} />
+  <Feather name="arrow-right" {...props} />
 );
 export const PlusIcon = (props: any) => <Feather name="plus" {...props} />;
+
+export const EditProfileIcon = (props: any) => (
+  <FontAwesome name="edit" size={36} color="black" />
+);
+
+export const ExitIcon = (props: any) => (
+  <MaterialIcons name="exit-to-app" size={36} color="black" />
+);
+
+export const UpCaretIcon = (props: any) => (
+  <AntDesign name="caretup" size={24} color="black" />
+);
+
+export const DownCaretIcon = (props: any) => (
+  <AntDesign name="caretdown" size={24} color="black" />
+);

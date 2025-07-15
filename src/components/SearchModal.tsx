@@ -79,7 +79,7 @@ const SearchModal = ({
   const fetchUsers = async () => {
     try {
       const firestore = FIREBASE_DB;
-      const usersRef = collection(firestore, 'tempUsers');
+      const usersRef = collection(firestore, 'users');
       const snapshot = await getDocs(usersRef);
 
       const allUsers: UserFrom[] = snapshot.docs
