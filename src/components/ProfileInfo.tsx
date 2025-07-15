@@ -23,49 +23,27 @@ import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
 import 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
+import {DownCaretIcon, UpCaretIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
 
 export const ProfileInfo = () => {
   const {navigate} = useAppNavigation();
+
   const dispatch = useDispatch();
-  const {telegramm, skills, experience, aboutMe} = useSelector(
+
+  const [projects, setProjects] = useState<ProjectType[]>([]);
+
+  const {telegramm, HardSkills, SoftSkills, experience, aboutMe} = useSelector(
     (state: RootState) => state.user,
   );
+
+  useSelector((state: RootState) => state.projects);
+
   useEffect(() => {
     fetchUserProjects();
   }, []);
-  useSelector((state: RootState) => state.projects);
-
-  const [showMoreInfo, setShowMoreInfo] = useState(false);
-  const [projects, setProjects] = useState<ProjectType[]>([]);
-  const animatedHeight = useState(new Animated.Value(0))[0];
-  const [buttonImage, setButtonImage] = useState(
-    require('shared/assets/profile/down.png'),
-  );
-  const [subscribed, setSubscribed] = useState(false);
-
-  const toggleMoreInfo = () => {
-    setShowMoreInfo(prevState => !prevState);
-    Animated.timing(animatedHeight, {
-      toValue: showMoreInfo ? 0 : 1,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-
-    // Изменяем изображение кнопки
-    setButtonImage(
-      showMoreInfo
-        ? require('shared/assets/profile/down.png')
-        : require('shared/assets/profile/up.png'),
-    );
-  };
-
-  const additionalInfoHeight = animatedHeight.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 200], // Увеличиваем максимальную высоту
-  });
 
   const fetchUserProjects = async () => {
     try {
@@ -76,10 +54,11 @@ export const ProfileInfo = () => {
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
           const userData = docSnap.data();
+          console.log(docSnap.id);
 
           const projectsRef = collection(FIREBASE_DB, 'projects');
           const querySnapshot = await getDocs(
-            query(projectsRef, where('creator', '==', userData.username)),
+            query(projectsRef, where('creatorId', '==', docSnap.id)),
           );
 
           if (querySnapshot.docs.length > 0) {
@@ -93,6 +72,8 @@ export const ProfileInfo = () => {
               required: doc.data().required,
               categories: doc.data().categories,
               members: doc.data().members,
+              HardSkills: doc.data().HardSkills,
+              SoftSkills: doc.data().SoftSkills,
             }));
             setProjects(projectsData);
             dispatch(setYourProjects(projectsData));
@@ -105,63 +86,66 @@ export const ProfileInfo = () => {
   };
 
   const renderProjectItem = ({item}: {item: ProjectType}) => (
-    <TouchableOpacity
-      style={styles.projectItem}
-      onPress={() => OpenProject(item.id)}>
+    <TouchableOpacity onPress={() => OpenProject(item.id)}>
       <Image source={{uri: item.photo}} style={styles.projectImage} />
       <Text style={styles.projectName}>{item.name}</Text>
     </TouchableOpacity>
   );
 
+  /**
+   * Navigate to the project screen with the given project ID.
+   * @param {string} projectID - The ID of the project to navigate to.
+   */
   const OpenProject = (projectID: string) => {
     navigate(Screens.PROJECT, {projectId: projectID});
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.additionalInfoContainer}>
-        <ScrollView contentContainerStyle={styles.projectList}>
-          <TouchableOpacity style={styles.text} onPress={toggleMoreInfo}>
-            <Image source={buttonImage} style={{width: 12, height: 12}} />
-            <Text style={{fontSize: 15}}>Обо мне: {aboutMe}</Text>
-          </TouchableOpacity>
-
-          <Animated.View
-            style={{...styles.additionalInfo, maxHeight: additionalInfoHeight}}>
-            {showMoreInfo && (
-              <>
-                <Text style={styles.text}>Опыт: {experience}</Text>
-                <Text style={styles.text}>Навыки: {skills}</Text>
-                <Text style={styles.text}>Телеграм: {telegramm}</Text>
-              </>
-            )}
-          </Animated.View>
-
-          <Text style={styles.text_project}>Проекты:</Text>
-
-          <FlatList
-            data={projects}
-            renderItem={renderProjectItem}
-            keyExtractor={(item: {id: any}) => item.id}
-            numColumns={2}
-          />
-        </ScrollView>
+      <View style={styles.profileInfo}>
+        <Text style={styles.text}>Обо мне: {aboutMe}</Text>
+        <Text style={styles.text}>Опыт: {experience}</Text>
+        <Text style={styles.text}>
+          Hard Skills:{' '}
+          {JSON.parse(HardSkills)
+            .map((item: {name: string}) => item.name)
+            .join(', ')}
+        </Text>
+        <Text style={styles.text}>
+          Soft Skills:{' '}
+          {JSON.parse(SoftSkills)
+            .map((item: {name: string}) => item.name)
+            .join(', ')}
+        </Text>
+        <Text style={styles.text}>Телеграм: {telegramm}</Text>
       </View>
+
+      <Text style={styles.text_project}>Проекты:</Text>
+
+      <FlatList
+        data={projects}
+        renderItem={renderProjectItem}
+        keyExtractor={(item: ProjectType) => item.id}
+        numColumns={2}
+        columnWrapperStyle={{justifyContent: 'space-between'}}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
+    width: '100%',
   },
-  down_button: {
-    position: 'absolute',
-    left: 25,
-    top: 57,
+  profileInfo: {
+    display: 'flex',
+    width: '100%',
+    gap: 16,
   },
-  projectItem: {
-    marginLeft: 10,
+  text: {
+    fontSize: 15,
+    color: '#333',
+    fontFamily: 'Inter-Regular',
   },
   projectImage: {
     width: 175,
@@ -172,36 +156,14 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 10,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
-  text: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    fontSize: 15,
-    marginBottom: 15,
-    color: '#333',
-    fontFamily: 'Inter-Regular',
-    width: 350,
-  },
-  additionalInfoContainer: {
-    paddingTop: 350,
-    alignItems: 'center',
-    width: 400,
-  },
-  additionalInfo: {
-    width: '100%',
-  },
+
   text_project: {
+    paddingTop: 20,
+    paddingLeft: 16,
     marginBottom: 15,
     fontSize: 20,
     fontWeight: '500',
-  },
-  profileProjectContainer: {
-    width: '100%',
-    paddingHorizontal: 50,
-  },
-  projectList: {
-    paddingBottom: 150,
-    width: '100%',
   },
 });

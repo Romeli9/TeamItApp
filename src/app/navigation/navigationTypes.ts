@@ -6,6 +6,10 @@ export type ProjectRouteParams = {
   projectId: string;
 };
 
+export type RequestRouteParams = {
+  projectId: string;
+};
+
 export type MessengerRouteParams = {
   chatId: string;
   chatName: string;
@@ -26,7 +30,8 @@ export type RootStackParamsList = {
   [Stacks.MAIN]: NavigatorScreenParams<MainTabsStackParamsList>;
   [Screens.MESSENGER]: MessengerRouteParams;
   [Screens.PROJECT]: ProjectRouteParams;
-  [Screens.PROJECT_REQUESTS]: undefined;
+  [Screens.PROJECT_REQUESTS]: RequestRouteParams;
+  [Screens.PROJECT_LIST_REQUESTS]: undefined;
 };
 
 export type MainTabsStackParamsList = {

@@ -14,6 +14,7 @@ import {
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {ProjectRouteParams} from 'app/navigation/navigationTypes';
+import {Skill} from 'components';
 import SearchModal, {UserFrom} from 'components/SearchModal';
 import {addDoc, collection} from 'firebase/firestore';
 import {
@@ -42,6 +43,7 @@ export const Project = () => {
   const projectData: ProjectType | undefined = useSelector(
     selectProjectById(projectId),
   );
+
   const [openSendIndex, setOpenSendIndex] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
@@ -64,7 +66,6 @@ export const Project = () => {
 
   const openApplicationModal = (index: number) => {
     setOpenSendIndex(index);
-
     setModalVisible(true);
   };
 
@@ -106,9 +107,9 @@ export const Project = () => {
       const requestData = {
         projectId,
         projectName: projectData.name,
-        senderId: userId,
+        senderId: projectData.creatorId,
         senderName: userData.userName,
-        recipientId: projectData.creatorId,
+        recipientId: userId,
         recipientName: projectData.creator,
         role,
         message,
@@ -221,18 +222,10 @@ export const Project = () => {
                                 Подать заявку?
                               </Text>
                               <TouchableOpacity onPress={showConfirmation}>
-                                <CheckIcon
-                                  width={20}
-                                  height={23}
-                                  fill={Colors.White100}
-                                />
+                                <CheckIcon size={20} color={Colors.White100} />
                               </TouchableOpacity>
                               <TouchableOpacity onPress={closeApplicationModal}>
-                                <CloseIcon
-                                  width={20}
-                                  height={23}
-                                  fill={Colors.White100}
-                                />
+                                <CloseIcon size={20} color={Colors.White100} />
                               </TouchableOpacity>
                             </View>
                           )}
@@ -254,18 +247,10 @@ export const Project = () => {
                           Вы хотите подать заявку на "{selectedItem}"?
                         </Text>
                         <TouchableOpacity onPress={toggleRequired}>
-                          <CheckIcon
-                            width={20}
-                            height={23}
-                            fill={Colors.White100}
-                          />
+                          <CheckIcon size={20} color={Colors.White100} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={toggleRequired}>
-                          <CloseIcon
-                            width={20}
-                            height={23}
-                            fill={Colors.White100}
-                          />
+                          <CloseIcon size={20} color={Colors.White100} />
                         </TouchableOpacity>
                       </View>
                     ) : (
@@ -281,7 +266,7 @@ export const Project = () => {
                               onPress={() => handleApplicationSend(item.value)}>
                               <View style={styles.dropdownItemContainer}>
                                 <View style={styles.dropdownItem_icon}>
-                                  <PlusIcon />
+                                  <PlusIcon size={12} />
                                 </View>
                                 <Text style={styles.dropdownItemText}>
                                   {item.value}
@@ -310,6 +295,44 @@ export const Project = () => {
             </View>
           </View>
 
+          {projectData.HardSkills && (
+            <View style={styles.skillsContainer}>
+              <Text style={styles.sectionTitle}>Hard Skills:</Text>
+              <View style={styles.skillsList}>
+                {typeof projectData.HardSkills === 'string'
+                  ? JSON.parse(projectData.HardSkills).map((skill: Skill) => (
+                      <View key={skill.id} style={styles.skillItem}>
+                        <Text style={styles.skillText}>{skill.name}</Text>
+                      </View>
+                    ))
+                  : projectData.HardSkills.map((skill: Skill) => (
+                      <View key={skill.id} style={styles.skillItem}>
+                        <Text style={styles.skillText}>{skill.name}</Text>
+                      </View>
+                    ))}
+              </View>
+            </View>
+          )}
+
+          {projectData.SoftSkills && (
+            <View style={styles.skillsContainer}>
+              <Text style={styles.sectionTitle}>Soft skills:</Text>
+              <View style={styles.skillsList}>
+                {typeof projectData.SoftSkills === 'string'
+                  ? JSON.parse(projectData.SoftSkills).map((skill: Skill) => (
+                      <View key={skill.id} style={styles.skillItem}>
+                        <Text style={styles.skillText}>{skill.name}</Text>
+                      </View>
+                    ))
+                  : projectData.SoftSkills.map((skill: Skill) => (
+                      <View key={skill.id} style={styles.skillItem}>
+                        <Text style={styles.skillText}>{skill.name}</Text>
+                      </View>
+                    ))}
+              </View>
+            </View>
+          )}
+
           <View style={styles.author_container}>
             <Text style={styles.author_name}>Автор идеи:</Text>
             <View style={styles.author_wrapper}>
@@ -322,6 +345,14 @@ export const Project = () => {
             visible={isSearchModal}
             onClose={() => setSearchModal(false)}
             requiredRoles={projectData.required}
+            projectHardSkills={
+              typeof projectData.HardSkills === 'string' &&
+              JSON.parse(projectData.HardSkills)
+            }
+            projectSoftSkills={
+              typeof projectData.SoftSkills === 'string' &&
+              JSON.parse(projectData.SoftSkills)
+            }
           />
           {projectData.creatorId === userId && (
             <TouchableOpacity
@@ -331,7 +362,7 @@ export const Project = () => {
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={goBack} style={styles.goback}>
-            <ArrowLeftIcon />
+            <ArrowLeftIcon size={24} />
           </TouchableOpacity>
         </ScrollView>
       </View>

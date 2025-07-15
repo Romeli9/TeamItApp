@@ -1,5 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
+import {Skill} from 'components';
 import {RootState} from 'redux/store';
 
 export type ProjectType = {
@@ -11,6 +12,8 @@ export type ProjectType = {
   photo: string;
   required: string[];
   categories: string[];
+  HardSkills: Skill[];
+  SoftSkills: Skill[];
   members: string[];
 };
 
@@ -34,10 +37,15 @@ export const projectsSlice = createSlice({
     setOtherProjects(state, action: PayloadAction<ProjectType[]>) {
       state.otherProjects = action.payload;
     },
+    clearProjects(state) {
+      state.yourProjects = [];
+      state.otherProjects = [];
+    },
   },
 });
 
-export const {setYourProjects, setOtherProjects} = projectsSlice.actions;
+export const {setYourProjects, setOtherProjects, clearProjects} =
+  projectsSlice.actions;
 
 export const selectProjectById = (projectId: string) => (state: RootState) => {
   return (

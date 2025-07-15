@@ -6,6 +6,7 @@ export const ProjectStyles = StyleSheet.create({
   container: {
     backgroundColor: '#EAEAEA',
     alignItems: 'center',
+    paddingBottom: 60,
   },
 
   goback: {
@@ -24,7 +25,7 @@ export const ProjectStyles = StyleSheet.create({
     width: '100%',
     height: 236,
     borderRadius: 40,
-    marginBottom: 5,
+    marginBottom: 15,
     overflow: 'hidden',
   },
 
@@ -51,10 +52,11 @@ export const ProjectStyles = StyleSheet.create({
   },
 
   about_project_desc: {
+    padding: 16,
     fontFamily: 'Inter-Medium',
     fontSize: 12,
     color: 'rgba(51, 51, 51, 1)',
-    textAlign: 'center',
+    textAlign: 'justify',
     marginTop: 5,
     marginBottom: 16,
   },
@@ -139,9 +141,9 @@ export const ProjectStyles = StyleSheet.create({
     width: '94%',
     height: 'auto',
     backgroundColor: '#FFFFFF',
-    borderRadius: 30,
+    borderRadius: 25,
     paddingTop: 14,
-    paddingBottom: 17,
+    paddingBottom: 14,
   },
 
   categories_container_2: {
@@ -337,5 +339,35 @@ export const ProjectStyles = StyleSheet.create({
     top: -175,
     left: -65,
     //width: '100%',
+  },
+
+  skillsContainer: {
+    width: '94%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 30,
+    padding: 15,
+    marginTop: 14,
+  },
+  sectionTitle: {
+    fontFamily: 'Inter-ExtraBold',
+    fontSize: 15,
+    color: 'rgba(0, 0, 0, 0.9)',
+    marginBottom: 10,
+  },
+  skillsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  skillItem: {
+    backgroundColor: '#E8D9FF',
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  skillText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 12,
+    color: '#6A3BB5',
   },
 });

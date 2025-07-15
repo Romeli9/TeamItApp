@@ -8,7 +8,7 @@ export const MessengerStyles = StyleSheet.create({
     backgroundColor: Colors.White100,
   },
   messagesContainer: {
-    paddingTop: 70,
+    paddingTop: 90,
     flex: 1,
     position: 'relative',
   },

@@ -1,6 +1,12 @@
 import {RouteProp, useRoute} from '@react-navigation/native';
 import React, {useEffect, useMemo, useState} from 'react';
-import {FlatList, KeyboardAvoidingView, Platform, View} from 'react-native';
+import {
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  View,
+} from 'react-native';
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
@@ -168,7 +174,7 @@ export const Messenger = () => {
   };
 
   const handleAttachFile = () => {
-    console.log('А не нужно сюда тыкать');
+    Alert.alert('А не нужно сюда тыкать');
   };
 
   return (

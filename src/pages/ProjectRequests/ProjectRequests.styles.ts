@@ -4,7 +4,7 @@ import {Colors} from 'shared/libs/helpers/colors';
 
 export const ProjectRequestsStyles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#fff',
   },
   loadingContainer: {
@@ -14,7 +14,7 @@ export const ProjectRequestsStyles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    paddingTop: 80,
+    paddingTop: 110,
     paddingBottom: 32,
   },
   emptyContainer: {
@@ -25,7 +25,6 @@ export const ProjectRequestsStyles = StyleSheet.create({
   requestRole: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 4,
   },
   requestItem: {
     backgroundColor: '#f5f5f5',
@@ -40,8 +39,15 @@ export const ProjectRequestsStyles = StyleSheet.create({
   },
   requestMessage: {
     fontSize: 14,
-    marginBottom: 12,
     color: '#555',
+    marginBottom: 4,
+  },
+  // Новый стиль для отображения коэффициента приоритета
+  requestPriority: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4CAF50', // Зеленый цвет для приоритета
+    marginBottom: 12,
   },
   buttonsContainer: {
     flexDirection: 'row',
@@ -72,11 +78,54 @@ export const ProjectRequestsStyles = StyleSheet.create({
   projectLink: {
     color: '#2196F3',
     textDecorationLine: 'underline',
+    marginTop: 12,
+  },
+  // Новый стиль для перехода на профиль
+  profileLink: {
+    color: '#2196F3',
+    textDecorationLine: 'underline',
+    marginTop: 12,
+    fontSize: 14,
   },
   emptyText: {
     textAlign: 'center',
     marginTop: 20,
     fontSize: 16,
     color: '#777',
+  },
+  input: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    marginBottom: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  projectsList: {
+    paddingBottom: 20,
+  },
+  noProjectsText: {
+    textAlign: 'center',
+    color: '#999',
+    fontStyle: 'italic',
+    marginBottom: 20,
+  },
+  projectItem: {
+    flex: 1,
+    margin: 10,
+    maxWidth: '50%',
+  },
+  projectImage: {
+    width: '100%',
+    height: 250,
+    borderRadius: 20,
+  },
+  projectName: {
+    marginTop: 5,
+    marginBottom: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });

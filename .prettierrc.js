@@ -6,7 +6,7 @@ module.exports = {
   trailingComma: 'all',
   plugins: ['@trivago/prettier-plugin-sort-imports'],
   importOrder: [
-    '^(?!react$|react-native$|@react-navigation|react-i18next|@ui-kitten|@eva-design)(@?\\w)',
+    '^(?!react$|react-native$|@react-navigation|react-i18next|@eva-design)(@?\\w)',
     '^[./]',
     '^.+\\.styles(\\.ts)?$',
     '^types/(.*)$',

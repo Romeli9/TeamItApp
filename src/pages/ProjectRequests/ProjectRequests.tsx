@@ -1,3 +1,4 @@
+import {RouteProp, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -11,7 +12,9 @@ import {
 } from 'react-native';
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
-import {Screens} from 'app/navigation/navigationEnums';
+import {Screens, Stacks} from 'app/navigation/navigationEnums';
+import {ProjectRouteParams} from 'app/navigation/navigationTypes';
+import {Skill} from 'components';
 import {ProjectRequest} from 'entities';
 import {
   collection,
@@ -25,48 +28,143 @@ import {
   where,
 } from 'firebase/firestore';
 import {useSelector} from 'react-redux';
+import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
+import {getUserById} from 'services/getUserById';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProjectRequestsStyles as styles} from './ProjectRequests.styles';
 
 export const ProjectRequests = () => {
+  const {navigate} = useAppNavigation();
+
+  const route = useRoute<RouteProp<{params: ProjectRouteParams}>>();
+
   const {userId} = useSelector((state: RootState) => state.user);
-  const navigation = useAppNavigation();
   const [requests, setRequests] = useState<ProjectRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const {projectId} = route.params;
+
+  const projectData: ProjectType | undefined = useSelector(
+    selectProjectById(projectId),
+  );
+
+  useEffect(() => {
+    fetchRequests();
+  }, [projectId]);
 
   const fetchRequests = async () => {
     try {
       const q = query(
         collection(FIREBASE_DB, 'projectRequests'),
         where('recipientId', '==', userId),
+        where('projectId', '==', projectId),
       );
 
-      const sentQ = query(
-        collection(FIREBASE_DB, 'projectRequests'),
-        where('senderId', '==', userId),
+      const receivedSnapshot = await getDocs(q);
+
+      const receivedRequests = await Promise.all(
+        receivedSnapshot.docs.map(async doc => {
+          const data = doc.data();
+
+          const user = await getUserById(userId);
+          let userHardSkills = user.HardSkills || [];
+          let userSoftSkills = user.SoftSkills || [];
+
+          if (typeof userHardSkills === 'string') {
+            userHardSkills = JSON.parse(userHardSkills);
+          }
+          if (typeof userSoftSkills === 'string') {
+            userSoftSkills = JSON.parse(userSoftSkills);
+          }
+
+          if (Array.isArray(userHardSkills)) {
+            userHardSkills = userHardSkills.map(
+              (item: {name: string}) => item.name,
+            );
+          }
+          if (Array.isArray(userSoftSkills)) {
+            userSoftSkills = userSoftSkills.map(
+              (item: {name: string}) => item.name,
+            );
+          }
+
+          const hardSkillsProject =
+            typeof projectData?.HardSkills === 'string'
+              ? JSON.parse(projectData.HardSkills).map(
+                  (item: {name: string}) => item.name,
+                )
+              : [];
+
+          const softSkillsProject =
+            typeof projectData?.SoftSkills === 'string'
+              ? JSON.parse(projectData.SoftSkills).map(
+                  (item: {name: string}) => item.name,
+                )
+              : [];
+
+          let matchingHardSkillsCount = 0;
+          let matchingSoftSkillsCount = 0;
+
+          hardSkillsProject.forEach((skill: string) => {
+            if (userHardSkills.includes(skill)) {
+              matchingHardSkillsCount += 1;
+            }
+          });
+
+          softSkillsProject.forEach((skill: string) => {
+            if (userSoftSkills.includes(skill)) {
+              matchingSoftSkillsCount += 1;
+            }
+          });
+
+          const totalUserHardSkills = userHardSkills.length;
+          const totalProjectHardSkills = hardSkillsProject.length;
+          const totalMatchingHardSkills = matchingHardSkillsCount;
+
+          const FirstCoef =
+            (totalMatchingHardSkills /
+              Math.sqrt(totalUserHardSkills * totalProjectHardSkills)) *
+            0.7;
+
+          const totalUserSoftSkills = userSoftSkills.length;
+          const totalProjectSoftSkills = softSkillsProject.length;
+          const totalMatchingSoftSkills = matchingSoftSkillsCount;
+
+          const SecondCoef =
+            (totalMatchingSoftSkills /
+              Math.sqrt(totalUserSoftSkills * totalProjectSoftSkills)) *
+            0.3;
+
+          const matchScore = FirstCoef + SecondCoef;
+
+          const finalScore = matchScore;
+
+          console.log(userHardSkills);
+
+          return {
+            id: doc.id,
+            senderId: data.senderId,
+            projectId: data.projectId,
+            projectName: data.projectName,
+            senderName: data.senderName,
+            recipientId: data.recipientId,
+            recipientName: data.recipientName,
+            role: data.role,
+            message: data.message,
+            status: data.status,
+            createdAt: data.createdAt,
+            type: 'received' as 'received',
+            priorityScore: finalScore,
+            HardSkills: userHardSkills,
+            SoftSkills: userSoftSkills,
+          };
+        }),
       );
 
-      const [receivedSnapshot, sentSnapshot] = await Promise.all([
-        getDocs(q),
-        getDocs(sentQ),
-      ]);
-
-      const receivedRequests = receivedSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        type: 'received',
-      })) as ProjectRequest[];
-
-      const sentRequests = sentSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        type: 'sent',
-      })) as ProjectRequest[];
-
-      setRequests([...receivedRequests, ...sentRequests]);
+      setRequests(receivedRequests);
     } catch (error) {
       console.error('Error fetching requests:', error);
       Alert.alert('Ошибка', 'Не удалось загрузить заявки');
@@ -75,10 +173,6 @@ export const ProjectRequests = () => {
       setRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    fetchRequests();
-  }, [userId]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -203,9 +297,20 @@ export const ProjectRequests = () => {
       <Text style={styles.requestTitle}>
         {item.type === 'received' ? 'Входящая заявка' : 'Исходящая заявка'}
       </Text>
-      <Text style={styles.requestRole}>Роль: {item.role}</Text>
-      <Text style={styles.requestMessage}>{item.message}</Text>
+      <Text style={styles.requestMessage}>Имя: {item.senderName}</Text>
+      <Text style={styles.requestMessage}>Роль: {item.role}</Text>
+      <Text style={styles.requestMessage}>
+        HardSkills: {item.HardSkills.map(item => item + ', ')}
+      </Text>
+      <Text style={styles.requestMessage}>
+        SoftSkills: {item.SoftSkills.map(item => item + ', ')}
+      </Text>
 
+      <Text style={styles.requestPriority}>
+        Коэффициент приоритета: {item.priorityScore.toFixed(2)}
+      </Text>
+
+      {/* Кнопки для принятия/отклонения заявки */}
       {item.type === 'received' ? (
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
@@ -227,14 +332,22 @@ export const ProjectRequests = () => {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate(Screens.PROJECT, {projectId: item.projectId})
-        }>
-        <Text style={styles.projectLink}>Перейти к проекту</Text>
+      {/* Кнопка для перехода на профиль пользователя */}
+      <TouchableOpacity onPress={() => handleUserClick(item.senderId)}>
+        <Text style={styles.profileLink}>Перейти в профиль</Text>
       </TouchableOpacity>
     </View>
   );
+
+  const handleUserClick = (userId: string) => {
+    navigate(Stacks.MAIN, {
+      screen: Stacks.PROFILE_TAB,
+      params: {
+        screen: Screens.VIEW_PROFILE,
+        params: {userId: userId},
+      },
+    });
+  };
 
   return (
     <View style={styles.container}>

@@ -129,12 +129,26 @@ export const ProfileView = () => {
               <Text style={styles.text}>Опыт: {userData.Experience}</Text>
             )}
 
-            {userData.Skills && (
-              <Text style={styles.text}>Навыки: {userData.Skills}</Text>
-            )}
-
             {userData.Telegramm && (
               <Text style={styles.text}>Телеграм: {userData.Telegramm}</Text>
+            )}
+
+            {userData.HardSkills && (
+              <Text style={styles.text}>
+                HardSkills:{' '}
+                {JSON.parse(userData.HardSkills)
+                  .map((item: {name: string}) => item.name)
+                  .join(', ')}
+              </Text>
+            )}
+
+            {userData.SoftSkills && (
+              <Text style={styles.text}>
+                SoftSkills:{' '}
+                {JSON.parse(userData.SoftSkills)
+                  .map((item: {name: string}) => item.name)
+                  .join(', ')}
+              </Text>
             )}
           </View>
 
@@ -171,7 +185,7 @@ export const ProfileView = () => {
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.goback}>
-          <ArrowLeftIcon />
+          <ArrowLeftIcon size={24} />
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaProvider>
