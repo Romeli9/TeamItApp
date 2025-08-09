@@ -24,10 +24,12 @@ export const HomePagestyles = StyleSheet.create({
 
   userProjectsContainer: {
     flexDirection: 'row',
+    gap: 13,
     marginTop: 13,
+    marginLeft: 13,
   },
   projectItem: {
-    marginLeft: 13,
+    // marginLeft: 13,
   },
   projectImage: {
     width: 82,
