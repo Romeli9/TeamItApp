@@ -18,11 +18,13 @@ export type ProjectType = {
 };
 
 export interface projectsState {
+  allOtherProjects: ProjectType[];
   yourProjects: ProjectType[];
   otherProjects: ProjectType[];
 }
 
 const initialState: projectsState = {
+  allOtherProjects: [],
   yourProjects: [],
   otherProjects: [],
 };
@@ -37,15 +39,23 @@ export const projectsSlice = createSlice({
     setOtherProjects(state, action: PayloadAction<ProjectType[]>) {
       state.otherProjects = action.payload;
     },
+    setAllOtherProjects(state, action: PayloadAction<ProjectType[]>) {
+      state.allOtherProjects = action.payload;
+    },
     clearProjects(state) {
       state.yourProjects = [];
       state.otherProjects = [];
+      state.allOtherProjects = [];
     },
   },
 });
 
-export const {setYourProjects, setOtherProjects, clearProjects} =
-  projectsSlice.actions;
+export const {
+  setYourProjects,
+  setAllOtherProjects,
+  setOtherProjects,
+  clearProjects,
+} = projectsSlice.actions;
 
 export const selectProjectById = (projectId: string) => (state: RootState) => {
   return (

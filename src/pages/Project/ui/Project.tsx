@@ -36,6 +36,8 @@ export const Project = () => {
   const route = useRoute<RouteProp<{params: ProjectRouteParams}>>();
   const {navigate, goBack} = useAppNavigation();
 
+  const navigation = useAppNavigation();
+
   const {userId} = useSelector((state: RootState) => state.user);
   const userData = useSelector((state: RootState) => state.user);
 
@@ -55,7 +57,9 @@ export const Project = () => {
   const buttonRef = useRef<any>(null);
 
   const handleUserClick = (user: UserFrom) => {
-    navigate(Stacks.MAIN, {
+    setSearchModal(false);
+
+    navigation.navigate(Stacks.MAIN, {
       screen: Stacks.PROFILE_TAB,
       params: {
         screen: Screens.VIEW_PROFILE,

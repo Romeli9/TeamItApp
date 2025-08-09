@@ -69,8 +69,6 @@ export const ProjectRequests = () => {
         receivedSnapshot.docs.map(async doc => {
           const data = doc.data();
 
-          console.log(data);
-
           const user = await getUserById(data.senderId);
           let userHardSkills = user.HardSkills || [];
           let userSoftSkills = user.SoftSkills || [];
