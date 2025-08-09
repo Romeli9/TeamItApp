@@ -53,9 +53,6 @@ export const ProfileInfo = () => {
         const userDoc = doc(usersRef, user.uid);
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
-          const userData = docSnap.data();
-          console.log(docSnap.id);
-
           const projectsRef = collection(FIREBASE_DB, 'projects');
           const querySnapshot = await getDocs(
             query(projectsRef, where('creatorId', '==', docSnap.id)),

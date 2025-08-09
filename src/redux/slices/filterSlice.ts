@@ -1,6 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from 'redux/store';
+
 import {ProjectType} from './projectsSlice';
 
 export interface projectsState {
@@ -28,9 +29,14 @@ export const filterSlice = createSlice({
     setStateProjects(state, action) {
       state.projects = action.payload;
     },
+    clearFilters(state) {
+      state.categoryes = [];
+      state.requireds = [];
+    },
   },
 });
 
-export const {setCategory, setRequired, setStateProjects} = filterSlice.actions;
+export const {setCategory, setRequired, setStateProjects, clearFilters} =
+  filterSlice.actions;
 
 export default filterSlice.reducer;

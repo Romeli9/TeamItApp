@@ -29,6 +29,8 @@ export const Search: React.FC = () => {
     (state: RootState) => state.filter,
   );
 
+  const {allOtherProjects} = useSelector((state: RootState) => state.projects);
+
   const {userName} = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
@@ -94,7 +96,7 @@ export const Search: React.FC = () => {
       );
       dispatch(setOtherProjects(filtered));
     } else {
-      dispatch(setOtherProjects(projects));
+      dispatch(setOtherProjects(allOtherProjects));
     }
   }, [categoryes, requireds]);
 
