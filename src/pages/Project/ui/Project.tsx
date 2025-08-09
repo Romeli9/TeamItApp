@@ -107,9 +107,9 @@ export const Project = () => {
       const requestData = {
         projectId,
         projectName: projectData.name,
-        senderId: projectData.creatorId,
+        senderId: userId,
         senderName: userData.userName,
-        recipientId: userId,
+        recipientId: projectData.creatorId,
         recipientName: projectData.creator,
         role,
         message,
@@ -144,29 +144,10 @@ export const Project = () => {
 
           <View style={styles.about_project_container}>
             <Text style={styles.about_project_name}>{projectData.name}</Text>
-            {/* <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text> */}
 
             <Text style={styles.about_project_desc}>
               {projectData.description}
             </Text>
-            {/* <Text style={styles.about_project_desc}>
-              Разработка сервиса, в котором любой человек сможет заполнить
-              анкету о своих интересах, роде деятельности и навыках, а алгоритм
-              подберет для него потенциальных собеседников со схожими
-              интересами.Разработка сервиса, в котором любой человек сможет
-              заполнить анкету о своих интересах, роде деятельности и навыках, а
-              алгоритм подберет для него потенциальных собеседников со схожими
-              интересами.Разработка сервиса, в котором любой человек сможет
-              заполнить анкету о своих интересах, роде деятельности и навыках, а
-              алгоритм подберет для него потенциальных собеседников со схожими
-              интересами.Разработка сервиса, в котором любой человек сможет
-              заполнить анкету о своих интересах, роде деятельности и навыках, а
-              алгоритм подберет для него потенциальных собеседников со схожими
-              интересами.Разработка сервиса, в котором любой человек сможет
-              заполнить анкету о своих интересах, роде деятельности и навыках, а
-              алгоритм подберет для него потенциальных собеседников со схожими
-              интересами.
-            </Text> */}
           </View>
 
           <View style={styles.required_container}>

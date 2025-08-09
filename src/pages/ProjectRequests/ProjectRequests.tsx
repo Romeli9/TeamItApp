@@ -69,7 +69,9 @@ export const ProjectRequests = () => {
         receivedSnapshot.docs.map(async doc => {
           const data = doc.data();
 
-          const user = await getUserById(userId);
+          console.log(data);
+
+          const user = await getUserById(data.senderId);
           let userHardSkills = user.HardSkills || [];
           let userSoftSkills = user.SoftSkills || [];
 
@@ -140,9 +142,7 @@ export const ProjectRequests = () => {
 
           const matchScore = FirstCoef + SecondCoef;
 
-          const finalScore = matchScore;
-
-          console.log(userHardSkills);
+          const finalScore = matchScore || 0;
 
           return {
             id: doc.id,
@@ -300,10 +300,10 @@ export const ProjectRequests = () => {
       <Text style={styles.requestMessage}>Имя: {item.senderName}</Text>
       <Text style={styles.requestMessage}>Роль: {item.role}</Text>
       <Text style={styles.requestMessage}>
-        HardSkills: {item.HardSkills.map(item => item + ', ')}
+        HardSkills: {item.HardSkills.map((item: string) => item + ', ')}
       </Text>
       <Text style={styles.requestMessage}>
-        SoftSkills: {item.SoftSkills.map(item => item + ', ')}
+        SoftSkills: {item.SoftSkills.map((item: string) => item + ', ')}
       </Text>
 
       <Text style={styles.requestPriority}>
