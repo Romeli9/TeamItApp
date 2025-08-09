@@ -36,6 +36,8 @@ export const Project = () => {
   const route = useRoute<RouteProp<{params: ProjectRouteParams}>>();
   const {navigate, goBack} = useAppNavigation();
 
+  const navigation = useAppNavigation();
+
   const {userId} = useSelector((state: RootState) => state.user);
   const userData = useSelector((state: RootState) => state.user);
 
@@ -55,7 +57,9 @@ export const Project = () => {
   const buttonRef = useRef<any>(null);
 
   const handleUserClick = (user: UserFrom) => {
-    navigate(Stacks.MAIN, {
+    setSearchModal(false);
+
+    navigation.navigate(Stacks.MAIN, {
       screen: Stacks.PROFILE_TAB,
       params: {
         screen: Screens.VIEW_PROFILE,
@@ -107,9 +111,9 @@ export const Project = () => {
       const requestData = {
         projectId,
         projectName: projectData.name,
-        senderId: projectData.creatorId,
+        senderId: userId,
         senderName: userData.userName,
-        recipientId: userId,
+        recipientId: projectData.creatorId,
         recipientName: projectData.creator,
         role,
         message,
@@ -144,29 +148,10 @@ export const Project = () => {
 
           <View style={styles.about_project_container}>
             <Text style={styles.about_project_name}>{projectData.name}</Text>
-            {/* <Text style={styles.about_project_name} >РАЗРАБОТКА ЧАТ-БОТА ДЛЯ ЗНАКОМСТВ</Text> */}
 
             <Text style={styles.about_project_desc}>
               {projectData.description}
             </Text>
-            {/* <Text style={styles.about_project_desc}>
-              Разработка сервиса, в котором любой человек сможет заполнить
-              анкету о своих интересах, роде деятельности и навыках, а алгоритм
-              подберет для него потенциальных собеседников со схожими
-              интересами.Разработка сервиса, в котором любой человек сможет
-              заполнить анкету о своих интересах, роде деятельности и навыках, а
-              алгоритм подберет для него потенциальных собеседников со схожими
-              интересами.Разработка сервиса, в котором любой человек сможет
-              заполнить анкету о своих интересах, роде деятельности и навыках, а
-              алгоритм подберет для него потенциальных собеседников со схожими
-              интересами.Разработка сервиса, в котором любой человек сможет
-              заполнить анкету о своих интересах, роде деятельности и навыках, а
-              алгоритм подберет для него потенциальных собеседников со схожими
-              интересами.Разработка сервиса, в котором любой человек сможет
-              заполнить анкету о своих интересах, роде деятельности и навыках, а
-              алгоритм подберет для него потенциальных собеседников со схожими
-              интересами.
-            </Text> */}
           </View>
 
           <View style={styles.required_container}>
