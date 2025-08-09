@@ -1,4 +1,7 @@
 export interface ProjectRequest {
+  priorityScore: any;
+  HardSkills: any;
+  SoftSkills: any;
   id: string;
   projectId: string;
   projectName: string;
