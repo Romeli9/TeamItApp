@@ -28,7 +28,12 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {setOtherProjects, setYourProjects} from 'redux/slices/projectsSlice';
+import {clearFilters} from 'redux/slices/filterSlice';
+import {
+  setAllOtherProjects,
+  setOtherProjects,
+  setYourProjects,
+} from 'redux/slices/projectsSlice';
 import 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
 import {SearchIcon} from 'shared/icons';
@@ -52,6 +57,10 @@ export const Home = () => {
 
   const {yourProjects, otherProjects} = useSelector(
     (state: RootState) => state.projects,
+  );
+
+  const {categoryes, requireds} = useSelector(
+    (state: RootState) => state.filter,
   );
 
   useEffect(() => {
@@ -109,9 +118,11 @@ export const Home = () => {
               categories: doc.data().categories,
               members: doc.data().members,
               skills: doc.data().skills,
+              HardSkills: doc.data().HardSkills || [],
+              SoftSkills: doc.data().SoftSkills || [],
             }));
-
             dispatch(setOtherProjects(projectsData));
+            dispatch(setAllOtherProjects(projectsData));
           }
           setDataLoaded(true);
         }
@@ -205,48 +216,83 @@ export const Home = () => {
           </TouchableOpacity>
 
           <View style={{width: screenWidth}}>
-            <Image
-              source={require('shared/assets/icons/Group1.png')}
-              style={styles.effect}
-            />
-
-            <Carousel
-              loop={true}
-              mode="parallax"
-              modeConfig={{
-                parallaxScrollingScale: 0.8,
-                parallaxScrollingOffset: 70,
-              }}
-              width={screenWidth * 0.6}
-              height={320}
-              snapEnabled={true}
-              // pagingEnabled={false}
-              data={otherProjects}
-              style={{width: screenWidth}}
-              onSnapToItem={index => setCarouselIndex(index)}
-              renderItem={({item}) => (
-                <View style={styles.carouselItem}>
-                  <TouchableOpacity
-                    activeOpacity={0.9}
-                    onPress={() => OpenProject(item.id)}>
-                    <ImageBackground
-                      source={{uri: item.photo}}
-                      style={styles.image}
-                      borderRadius={20}>
-                      <LinearGradient
-                        colors={[
-                          'rgba(242,240,255, 0)',
-                          'rgba(158,115,198, 0.38)',
-                          'rgba(82,0,146, 0.4)',
-                        ]}
-                        style={styles.gradient}
-                      />
-                    </ImageBackground>
-                  </TouchableOpacity>
-                  <Text style={styles.projectTitle}>{item.name}</Text>
-                </View>
-              )}
-            />
+            {otherProjects.length === 0 ? (
+              <View
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 320,
+                }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: '#FFFFFF',
+                    marginBottom: 12,
+                    fontFamily: 'Inter-Medium',
+                  }}>
+                  {/* Если были выбраны фильтры и проекты не найдены, то такой текст иначе пишем проектов нет */}
+                  {!categoryes.length || !requireds.length
+                    ? 'Нет проектов с такими фильтрами'
+                    : 'Проектов нет'}
+                </Text>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#4F4F4F',
+                    paddingHorizontal: 20,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                  }}
+                  onPress={() => {
+                    fetchUserProjects();
+                    dispatch(clearFilters());
+                  }}>
+                  <Text style={{color: '#fff', fontSize: 14}}>Обновить</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                <Image
+                  source={require('shared/assets/icons/Group1.png')}
+                  style={styles.effect}
+                />
+                <Carousel
+                  loop
+                  mode="parallax"
+                  modeConfig={{
+                    parallaxScrollingScale: 0.8,
+                    parallaxScrollingOffset: 70,
+                  }}
+                  width={screenWidth * 0.6}
+                  height={320}
+                  snapEnabled
+                  data={otherProjects}
+                  style={{width: screenWidth}}
+                  onSnapToItem={index => setCarouselIndex(index)}
+                  renderItem={({item}) => (
+                    <View style={styles.carouselItem}>
+                      <TouchableOpacity
+                        activeOpacity={0.9}
+                        onPress={() => OpenProject(item.id)}>
+                        <ImageBackground
+                          source={{uri: item.photo}}
+                          style={styles.image}
+                          borderRadius={20}>
+                          <LinearGradient
+                            colors={[
+                              'rgba(242,240,255, 0)',
+                              'rgba(158,115,198, 0.38)',
+                              'rgba(82,0,146, 0.4)',
+                            ]}
+                            style={styles.gradient}
+                          />
+                        </ImageBackground>
+                      </TouchableOpacity>
+                      <Text style={styles.projectTitle}>{item.name}</Text>
+                    </View>
+                  )}
+                />
+              </>
+            )}
           </View>
         </View>
 
