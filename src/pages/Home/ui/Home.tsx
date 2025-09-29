@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import {Dimensions} from 'react-native';
 
+import {getFileUrl} from 'api';
 import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import ProjectModal from 'components/ModalWindowProject';
@@ -53,6 +54,8 @@ export const Home = () => {
 
   const [error, setError] = useState('');
 
+  const [avatarUrl, setAvatarUrl] = useState('');
+
   const dispatch = useDispatch();
 
   const {userName, avatar} = useSelector((state: RootState) => state.user);
@@ -69,32 +72,36 @@ export const Home = () => {
     fetchUserProjects();
   }, []);
 
+  useEffect(() => {
+    async function loadUrls() {
+      if (avatar) {
+        const url = await getFileUrl(avatar); // avatar = id
+        setAvatarUrl(url);
+      }
+    }
+    loadUrls();
+  }, [avatar]);
+
   const insets = useSafeAreaInsets();
 
   const fetchUserProjects = async () => {
     try {
-      console.log('fetchUserProjects');
       const user = FIREBASE_AUTH.currentUser;
       if (user) {
         const usersRef = collection(FIREBASE_DB, 'users');
         const userDoc = doc(usersRef, user.uid);
-        console.log('userDoc', userDoc);
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
-          console.log('docSnap', docSnap);
           const userData = docSnap.data();
 
           const projectsRef = collection(FIREBASE_DB, 'projects');
           const querySnapshot = await getDocs(
             query(projectsRef, where('creator', '==', userData.username)),
           );
-          console.log('querySnapshot', querySnapshot);
 
           const querySnapshot2 = await getDocs(
             query(projectsRef, where('creator', '!=', userData.username)),
           );
-
-          console.log('querySnapshot2', querySnapshot2);
 
           if (querySnapshot.docs.length > 0) {
             const projectsData = querySnapshot.docs.map(doc => ({
@@ -135,11 +142,9 @@ export const Home = () => {
         }
       }
     } catch (error: any) {
-      console.log('error', error);
       setError(error);
       console.error('Error fetching projects: ', error);
     } finally {
-      console.log('finally');
       setDataLoaded(true);
     }
   };
@@ -176,7 +181,7 @@ export const Home = () => {
           paddingLeft: 16,
         }}>
         <View style={styles.topContainer}>
-          <Image source={{uri: avatar}} style={styles.userImage} />
+          <Image source={{uri: avatarUrl}} style={styles.userImage} />
           <View style={styles.TextContainer}>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.TextContainer__text1}>Добро пожаловать!</Text>

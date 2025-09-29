@@ -108,6 +108,7 @@ export const HomePagestyles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     marginTop: 7,
+    paddingLeft: 8,
   },
 
   TextContainer__text1: {

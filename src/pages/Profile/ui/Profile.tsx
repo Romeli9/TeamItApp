@@ -43,6 +43,23 @@ export const Profile = () => {
     (state: RootState) => state.user,
   );
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadUrls() {
+      if (avatar) {
+        const url = await getFileUrl(avatar); // avatar = id
+        setAvatarUrl(url);
+      }
+      if (background) {
+        const url = await getFileUrl(background);
+        setBackgroundUrl(url);
+      }
+    }
+    loadUrls();
+  }, [avatar, background]);
+
   const fetchUserData = useCallback(async () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
@@ -82,7 +99,6 @@ export const Profile = () => {
   const handleImageUpload = useCallback(
     async (uri: string, field: 'avatar' | 'background') => {
       try {
-        console.log('field', field);
         // Запрос разрешений
         const {status} =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -96,8 +112,6 @@ export const Profile = () => {
           allowsEditing: true,
           aspect: [4, 3],
         });
-
-        console.log('result', result);
 
         if (result.canceled) return null;
 
@@ -114,21 +128,19 @@ export const Profile = () => {
           type,
         } as any);
 
-        console.log('formData', formData);
-
         const fileId = await uploadFile(formData);
-        console.log(fileId);
 
         if (!fileId) throw new Error('Upload failed');
 
         // Сохраняем ссылку в Firestore (можно оставить Firebase DB)
         const user = FIREBASE_AUTH.currentUser;
+
         if (!user) return null;
 
         const userRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
+
         await setDoc(userRef, {[field]: fileId}, {merge: true});
 
-        // Обновляем Redux state (сохраняем id)
         dispatch(
           setUserData({
             userId: user.uid,
@@ -153,7 +165,6 @@ export const Profile = () => {
 
   const pickImage = useCallback(
     (field: 'avatar' | 'background') => {
-      console.log('field in pickImage', field);
       handleImageUpload('', field);
     },
     [handleImageUpload],
@@ -184,16 +195,16 @@ export const Profile = () => {
               <TouchableOpacity
                 style={styles.background}
                 onPress={() => pickImage('background')}>
-                {background && <Image source={{uri: background}} />}
+                {backgroundUrl && <Image source={{uri: backgroundUrl}} />}
               </TouchableOpacity>
 
               <View style={styles.profileHeader}>
                 <View style={styles.avatar}>
                   <TouchableOpacity onPress={() => pickImage('avatar')}>
-                    {avatar ? (
+                    {avatarUrl ? (
                       <Image
                         style={styles.avatarImage}
-                        source={{uri: avatar}}
+                        source={{uri: avatarUrl}}
                       />
                     ) : (
                       <PlusIcon size={30} />

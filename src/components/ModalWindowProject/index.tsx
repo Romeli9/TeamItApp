@@ -23,6 +23,8 @@ import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
+import {categoriesMock} from 'shared/assets/consts/Categories';
+import {requiredMock} from 'shared/assets/consts/Required';
 import {PhotoIcon} from 'shared/assets/icons/icons';
 
 import {FIREBASE_DB, FIREBASE_STORAGE} from '../../app/FireBaseConfig';
@@ -46,8 +48,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const [projectDescRaw, setProjectDescRaw] = useState('');
   const [projectName, setProjectName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<string[]>();
-  const [roles, setRoles] = useState<string[]>();
 
   // New states for hard and soft skills
   const [HardSkills, setHardSkills] = useState<Skill[]>([]);
@@ -63,32 +63,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const {userName, userId} = useSelector((state: RootState) => state.user);
   const {yourProjects} = useSelector((state: RootState) => state.projects);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      let tempCateg: string[] = [];
-      let tempRoles: string[] = [];
-
-      const querySnapshotCategories = await getDocs(
-        collection(FIREBASE_DB, 'categories'),
-      );
-      querySnapshotCategories.forEach(doc => {
-        if (doc.data().name && doc.data().name.length > 0)
-          tempCateg.push(doc.data().name);
-      });
-
-      const querySnapshotRoles = await getDocs(collection(FIREBASE_DB, 'role'));
-      querySnapshotRoles.forEach(doc => {
-        if (doc.data().name && doc.data().name.length > 0)
-          tempRoles.push(doc.data().name);
-      });
-
-      setCategories(tempCateg);
-      setRoles(tempRoles);
-    };
-
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -374,27 +348,23 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 {requiredOpen && (
                   <ScrollView style={styles.dropdownContainer}>
                     <View style={styles.dropdownWrapper}>
-                      {roles &&
-                        roles.length > 0 &&
-                        roles.map((item, ix) => (
-                          <TouchableOpacity
-                            key={ix}
-                            style={[
-                              styles.dropdownItem,
-                              requiredSelected.includes(item) &&
-                                styles.dropdownItemSelected,
-                            ]}
-                            onPress={() => handleRequiredSelect(item)}>
-                            <View style={styles.dropdownItemContainer}>
-                              <View style={styles.dropdownItem_icon}>
-                                <Text style={styles.plus2}>+</Text>
-                              </View>
-                              <Text style={styles.dropdownItemText}>
-                                {item}
-                              </Text>
+                      {requiredMock.map((item, ix) => (
+                        <TouchableOpacity
+                          key={ix}
+                          style={[
+                            styles.dropdownItem,
+                            requiredSelected.includes(item) &&
+                              styles.dropdownItemSelected,
+                          ]}
+                          onPress={() => handleRequiredSelect(item)}>
+                          <View style={styles.dropdownItemContainer}>
+                            <View style={styles.dropdownItem_icon}>
+                              <Text style={styles.plus2}>+</Text>
                             </View>
-                          </TouchableOpacity>
-                        ))}
+                            <Text style={styles.dropdownItemText}>{item}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
                     </View>
                   </ScrollView>
                 )}
@@ -426,27 +396,23 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 {categoriesOpen && (
                   <ScrollView style={styles.dropdownContainer}>
                     <View style={styles.dropdownWrapper}>
-                      {categories &&
-                        categories.length > 0 &&
-                        categories.map((item, ix) => (
-                          <TouchableOpacity
-                            key={ix}
-                            style={[
-                              styles.dropdownItem,
-                              categoriesSelected.includes(item) &&
-                                styles.dropdownItemSelected,
-                            ]}
-                            onPress={() => handleCategorySelect(item)}>
-                            <View style={styles.dropdownItemContainer}>
-                              <View style={styles.dropdownItem_icon}>
-                                <Text style={styles.plus2}>+</Text>
-                              </View>
-                              <Text style={styles.dropdownItemText}>
-                                {item}
-                              </Text>
+                      {categoriesMock.map((item, ix) => (
+                        <TouchableOpacity
+                          key={ix}
+                          style={[
+                            styles.dropdownItem,
+                            categoriesSelected.includes(item) &&
+                              styles.dropdownItemSelected,
+                          ]}
+                          onPress={() => handleCategorySelect(item)}>
+                          <View style={styles.dropdownItemContainer}>
+                            <View style={styles.dropdownItem_icon}>
+                              <Text style={styles.plus2}>+</Text>
                             </View>
-                          </TouchableOpacity>
-                        ))}
+                            <Text style={styles.dropdownItemText}>{item}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
                     </View>
                   </ScrollView>
                 )}
