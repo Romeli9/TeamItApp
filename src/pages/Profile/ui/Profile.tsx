@@ -81,33 +81,74 @@ export const Profile = () => {
   const handleImageUpload = useCallback(
     async (uri: string, field: 'avatar' | 'background') => {
       try {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        const storageRef = ref(
-          FIREBASE_STORAGE,
-          `images/${userName}_${Date.now()}`,
-        );
-        await uploadBytes(storageRef, blob);
-        const downloadURL = await getDownloadURL(storageRef);
+        console.log('field', field);
+        // Запрос разрешений
+        const {status} =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          return Alert.alert('Ошибка', 'Нужно разрешение на доступ к галерее');
+        }
 
+        // Выбор изображения
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [4, 3],
+        });
+
+        console.log('result', result);
+
+        if (result.canceled) return null;
+
+        const imageUri = result.assets[0].uri;
+        const fileName = imageUri.split('/').pop();
+        const match = /\.(\w+)$/.exec(fileName || '');
+        const type = match ? `image/${match[1]}` : 'image';
+
+        // Формируем FormData для отправки на сервер
+        const formData = new FormData();
+        formData.append('file', {
+          uri: imageUri,
+          name: fileName,
+          type,
+        } as any);
+
+        console.log('formData', formData);
+
+        // Отправка на сервер
+        const response = await fetch(
+          `http://${process.env.EXPO_PUBLIC_SERVER}/upload`,
+          {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        console.log('response', response);
+
+        const data = await response.json();
+
+        console.log('data', data);
+        if (!data.url) throw new Error('Upload failed');
+
+        // Сохраняем ссылку в Firestore (можно оставить Firebase DB)
         const user = FIREBASE_AUTH.currentUser;
         if (!user) return null;
 
-        await setDoc(
-          doc(collection(FIREBASE_DB, 'users'), user.uid),
-          {
-            [field]: downloadURL,
-          },
-          {merge: true},
-        );
+        const userRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
+        await setDoc(userRef, {[field]: data.url}, {merge: true});
 
+        // Обновляем Redux state
         dispatch(
           setUserData({
             userId: user.uid,
             username: userName,
             email: user.email,
-            avatar: field === 'avatar' ? downloadURL : avatar,
-            background: field === 'background' ? downloadURL : background,
+            avatar: field === 'avatar' ? data.url : avatar,
+            background: field === 'background' ? data.url : background,
           }),
         );
 
@@ -115,31 +156,24 @@ export const Profile = () => {
           'Успешно',
           `${field === 'avatar' ? 'Аватар' : 'Фон'} обновлён.`,
         );
-        return downloadURL;
+
+        return data.url;
       } catch (err) {
         console.error('Image upload error:', err);
+        Alert.alert('Ошибка', 'Не удалось загрузить файл');
         return null;
       }
     },
     [avatar, background, dispatch, userName],
   );
 
-  const pickImage = async (field: 'avatar' | 'background') => {
-    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      return Alert.alert('Ошибка', 'Нужно разрешение на доступ к галерее');
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-    });
-
-    if (!result.canceled) {
-      await handleImageUpload(result.assets[0].uri, field);
-    }
-  };
+  const pickImage = useCallback(
+    (field: 'avatar' | 'background') => {
+      console.log('field in pickImage', field);
+      handleImageUpload('', field);
+    },
+    [handleImageUpload],
+  );
 
   const handleSignOut = async () => {
     try {

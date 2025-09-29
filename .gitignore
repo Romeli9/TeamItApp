@@ -80,3 +80,5 @@ android/
 ios/
 
 src/app/FireBaseConfig.ts
+
+.env
