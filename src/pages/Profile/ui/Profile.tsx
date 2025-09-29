@@ -97,7 +97,7 @@ export const Profile = () => {
   }, [fetchUserData]);
 
   const handleImageUpload = useCallback(
-    async (uri: string, field: 'avatar' | 'background') => {
+    async (field: 'avatar' | 'background') => {
       try {
         // Запрос разрешений
         const {status} =
@@ -165,7 +165,7 @@ export const Profile = () => {
 
   const pickImage = useCallback(
     (field: 'avatar' | 'background') => {
-      handleImageUpload('', field);
+      handleImageUpload(field);
     },
     [handleImageUpload],
   );

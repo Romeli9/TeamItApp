@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import {getFileUrl} from 'api';
 import {Screens} from 'app/navigation/navigationEnums';
 import {
   collection,
@@ -72,8 +73,18 @@ export const ProfileInfo = () => {
               HardSkills: doc.data().HardSkills,
               SoftSkills: doc.data().SoftSkills,
             }));
-            setProjects(projectsData);
-            dispatch(setYourProjects(projectsData));
+
+            const projectsWithPhotoUrl = await Promise.all(
+              projectsData.map(async project => {
+                if (project.photo) {
+                  const url = await getFileUrl(project.photo);
+                  return {...project, photo: url};
+                }
+                return project;
+              }),
+            );
+            setProjects(projectsWithPhotoUrl);
+            dispatch(setYourProjects(projectsWithPhotoUrl));
           }
         }
       }

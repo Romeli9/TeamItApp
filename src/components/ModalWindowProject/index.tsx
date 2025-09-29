@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 
-import {getSkills, getToken} from 'api';
+import {getSkills, getToken, uploadFile} from 'api';
 import {Skill} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {LinearGradient} from 'expo-linear-gradient';
@@ -120,16 +120,25 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     setSoftSkills(SoftSkills.filter(s => s.id !== id));
   };
 
-  const uploadImageToFirebase = async (uri: string) => {
+  const uploadImageToFirebase = async () => {
     try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const storageRef = ref(
-        FIREBASE_STORAGE,
-        `images/${userName}_${Date.now()}`,
-      );
-      await uploadBytes(storageRef, blob);
-      return await getDownloadURL(storageRef);
+      if (!pickerResponse || pickerResponse.canceled) return null;
+      const imageUri = pickerResponse.assets[0].uri;
+      const fileName = imageUri.split('/').pop();
+      const match = /\.(\w+)$/.exec(fileName || '');
+      const type = match ? `image/${match[1]}` : 'image';
+
+      // Формируем FormData для отправки на сервер
+      const formData = new FormData();
+      formData.append('file', {
+        uri: imageUri,
+        name: fileName,
+        type,
+      } as any);
+
+      const fileId = await uploadFile(formData);
+
+      return fileId;
     } catch (error) {
       console.error('Error uploading image: ', error);
       return null;
@@ -201,8 +210,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 
     let imageUrl = '';
     if (pickerResponse && !pickerResponse.canceled) {
-      const url = await uploadImageToFirebase(pickerResponse.assets[0].uri);
-      if (url) imageUrl = url;
+      imageUrl = (await uploadImageToFirebase()) ?? '';
     }
 
     const projectData = {

@@ -118,7 +118,17 @@ export const Home = () => {
               SoftSkills: doc.data().SoftSkills,
             }));
 
-            dispatch(setYourProjects(projectsData));
+            const projectsWithPhotoUrl = await Promise.all(
+              projectsData.map(async project => {
+                if (project.photo) {
+                  const url = await getFileUrl(project.photo);
+                  return {...project, photo: url};
+                }
+                return project;
+              }),
+            );
+
+            dispatch(setYourProjects(projectsWithPhotoUrl));
           }
 
           if (querySnapshot2.docs.length > 0) {
@@ -136,8 +146,19 @@ export const Home = () => {
               HardSkills: doc.data().HardSkills || [],
               SoftSkills: doc.data().SoftSkills || [],
             }));
-            dispatch(setOtherProjects(projectsData));
-            dispatch(setAllOtherProjects(projectsData));
+
+            const projectsWithPhotoUrl = await Promise.all(
+              projectsData.map(async project => {
+                if (project.photo) {
+                  const url = await getFileUrl(project.photo);
+                  return {...project, photo: url};
+                }
+                return project;
+              }),
+            );
+
+            dispatch(setOtherProjects(projectsWithPhotoUrl));
+            dispatch(setAllOtherProjects(projectsWithPhotoUrl));
           }
         }
       }
