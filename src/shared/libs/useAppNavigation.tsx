@@ -2,7 +2,7 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 
 import {auth} from 'app/FireBaseConfig';
-import {AllRoutes, Screens, Stacks} from 'app/navigation/navigationEnums';
+import {AllRoutes, Screens} from 'app/navigation/navigationEnums';
 import {RootStackParamsList} from 'app/navigation/navigationTypes';
 
 type AuthNavigationProp = NavigationProp<RootStackParamsList> & {
@@ -42,8 +42,6 @@ export const useAppNavigation = (): AuthNavigationProp => {
       return;
     }
 
-    console.log('1');
-
     const publicScreens: AllRoutes[] = [Screens.LOGIN, Screens.REGISTER];
 
     // Разрешаем навигацию на публичные экраны без проверки
@@ -51,8 +49,6 @@ export const useAppNavigation = (): AuthNavigationProp => {
       (navigation.navigate as any)(screenName, params, options);
       return;
     }
-
-    console.log('2');
 
     // Для защищенных экранов проверяем авторизацию
     if (!isAuthenticated) {
@@ -62,8 +58,6 @@ export const useAppNavigation = (): AuthNavigationProp => {
       });
       return;
     }
-
-    console.log('3');
 
     // Если пользователь авторизован - разрешаем навигацию
     (navigation.navigate as any)(screenName, params, options);

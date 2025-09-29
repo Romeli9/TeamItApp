@@ -51,6 +51,8 @@ export const Home = () => {
 
   const [carouselIndex, setCarouselIndex] = useState(0);
 
+  const [error, setError] = useState('');
+
   const dispatch = useDispatch();
 
   const {userName, avatar} = useSelector((state: RootState) => state.user);
@@ -71,22 +73,28 @@ export const Home = () => {
 
   const fetchUserProjects = async () => {
     try {
+      console.log('fetchUserProjects');
       const user = FIREBASE_AUTH.currentUser;
       if (user) {
         const usersRef = collection(FIREBASE_DB, 'users');
         const userDoc = doc(usersRef, user.uid);
+        console.log('userDoc', userDoc);
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
+          console.log('docSnap', docSnap);
           const userData = docSnap.data();
 
           const projectsRef = collection(FIREBASE_DB, 'projects');
           const querySnapshot = await getDocs(
             query(projectsRef, where('creator', '==', userData.username)),
           );
+          console.log('querySnapshot', querySnapshot);
 
           const querySnapshot2 = await getDocs(
             query(projectsRef, where('creator', '!=', userData.username)),
           );
+
+          console.log('querySnapshot2', querySnapshot2);
 
           if (querySnapshot.docs.length > 0) {
             const projectsData = querySnapshot.docs.map(doc => ({
@@ -124,11 +132,15 @@ export const Home = () => {
             dispatch(setOtherProjects(projectsData));
             dispatch(setAllOtherProjects(projectsData));
           }
-          setDataLoaded(true);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.log('error', error);
+      setError(error);
       console.error('Error fetching projects: ', error);
+    } finally {
+      console.log('finally');
+      setDataLoaded(true);
     }
   };
 
@@ -137,6 +149,14 @@ export const Home = () => {
   };
 
   const screenWidth = Dimensions.get('window').width;
+
+  if (error) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Произошла ошибка, попробуйте перезагрузить приложение</Text>
+      </View>
+    );
+  }
 
   if (!dataLoaded) {
     return (

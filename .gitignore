@@ -78,3 +78,5 @@ yarn-error.log
 .expo/
 android/
 ios/
+
+src/app/FireBaseConfig.ts

@@ -1,9 +1,9 @@
-// Refactored Profile.tsx component
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
   FlatList,
   Image,
+  RefreshControl,
   Text,
   TouchableOpacity,
   View,
@@ -33,14 +33,17 @@ import {ProfileStyles as styles} from './Profile.styles';
 export const Profile = () => {
   const {navigate} = useAppNavigation();
   const dispatch = useDispatch();
+
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
   const {userName, aboutMe, avatar, background} = useSelector(
     (state: RootState) => state.user,
   );
 
-  useEffect(() => {
-    const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
+    try {
       const user = FIREBASE_AUTH.currentUser;
       if (!user) return;
       const userRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
@@ -59,11 +62,21 @@ export const Profile = () => {
       );
       dispatch(setProfileData(data));
       setUserDocRef(userRef);
-    };
+    } catch (err) {
+      console.error('Ошибка загрузки данных:', err);
+    }
+  }, [dispatch]);
 
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchUserData);
     return unsubscribe;
-  }, [dispatch]);
+  }, [fetchUserData]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchUserData();
+    setRefreshing(false);
+  }, [fetchUserData]);
 
   const handleImageUpload = useCallback(
     async (uri: string, field: 'avatar' | 'background') => {
@@ -144,6 +157,9 @@ export const Profile = () => {
       <FlatList
         data={[{}]}
         keyExtractor={(_, index) => index.toString()}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         renderItem={() => (
           <View style={styles.container}>
             <View style={styles.background_image}>
