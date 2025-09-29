@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 
+import {getFileUrl, uploadFile} from 'api';
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import {EditProfile, ProfileInfo} from 'components';
@@ -115,40 +116,26 @@ export const Profile = () => {
 
         console.log('formData', formData);
 
-        // Отправка на сервер
-        const response = await fetch(
-          `http://${process.env.EXPO_PUBLIC_SERVER}/upload`,
-          {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          },
-        );
+        const fileId = await uploadFile(formData);
+        console.log(fileId);
 
-        console.log('response', response);
-
-        const data = await response.json();
-
-        console.log('data', data);
-        if (!data.url) throw new Error('Upload failed');
+        if (!fileId) throw new Error('Upload failed');
 
         // Сохраняем ссылку в Firestore (можно оставить Firebase DB)
         const user = FIREBASE_AUTH.currentUser;
         if (!user) return null;
 
         const userRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
-        await setDoc(userRef, {[field]: data.url}, {merge: true});
+        await setDoc(userRef, {[field]: fileId}, {merge: true});
 
-        // Обновляем Redux state
+        // Обновляем Redux state (сохраняем id)
         dispatch(
           setUserData({
             userId: user.uid,
             username: userName,
             email: user.email,
-            avatar: field === 'avatar' ? data.url : avatar,
-            background: field === 'background' ? data.url : background,
+            avatar: field === 'avatar' ? fileId : avatar,
+            background: field === 'background' ? fileId : background,
           }),
         );
 
@@ -156,12 +143,9 @@ export const Profile = () => {
           'Успешно',
           `${field === 'avatar' ? 'Аватар' : 'Фон'} обновлён.`,
         );
-
-        return data.url;
       } catch (err) {
         console.error('Image upload error:', err);
         Alert.alert('Ошибка', 'Не удалось загрузить файл');
-        return null;
       }
     },
     [avatar, background, dispatch, userName],
