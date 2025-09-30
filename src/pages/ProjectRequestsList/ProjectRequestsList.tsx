@@ -16,7 +16,7 @@ import {
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
-import {ProjectRequest} from 'entities/projectRequest';
+import {ProjectRequest} from 'entities/ProjectRequest';
 import {
   collection,
   deleteDoc,
@@ -107,7 +107,9 @@ export const ProjectRequestsList = () => {
         navigation.navigate(Screens.PROJECT_REQUESTS, {projectId: item.id})
       }>
       <Image source={{uri: item.photo}} style={styles.projectImage} />
-      <Text style={styles.projectName}>{item.name}</Text>
+      <Text style={styles.projectName} numberOfLines={1} ellipsizeMode="tail">
+        {item.name}
+      </Text>
     </TouchableOpacity>
   );
 

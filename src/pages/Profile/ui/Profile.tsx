@@ -1,24 +1,38 @@
-// Refactored Profile.tsx component
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
   FlatList,
   Image,
+  RefreshControl,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+import {getFileUrl, uploadFile} from 'api';
 import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import {EditProfile, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';
-import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {clearProjects} from 'redux/slices/projectsSlice';
+import {
+  ProjectType,
+  clearProjects,
+  setYourProjects,
+} from 'redux/slices/projectsSlice';
 import {
   clearProfileData,
   setProfileData,
@@ -33,14 +47,36 @@ import {ProfileStyles as styles} from './Profile.styles';
 export const Profile = () => {
   const {navigate} = useAppNavigation();
   const dispatch = useDispatch();
+
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
   const {userName, aboutMe, avatar, background} = useSelector(
     (state: RootState) => state.user,
   );
 
+  const [projects, setProjects] = useState<ProjectType[]>([]);
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+
   useEffect(() => {
-    const fetchUserData = async () => {
+    async function loadUrls() {
+      if (avatar) {
+        const url = await getFileUrl(avatar); // avatar = id
+        setAvatarUrl(url);
+      }
+      if (background) {
+        const url = await getFileUrl(background);
+        setBackgroundUrl(url);
+      }
+    }
+    loadUrls();
+  }, [avatar, background]);
+
+  const fetchUserData = async () => {
+    try {
       const user = FIREBASE_AUTH.currentUser;
       if (!user) return;
       const userRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
@@ -59,42 +95,125 @@ export const Profile = () => {
       );
       dispatch(setProfileData(data));
       setUserDocRef(userRef);
-    };
+    } catch (err) {
+      console.error('Ошибка загрузки данных:', err);
+    }
+  };
 
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchUserData);
     return unsubscribe;
-  }, [dispatch]);
+  }, [fetchUserData]);
+
+  useEffect(() => {
+    fetchUserProjects();
+  }, []);
+
+  const fetchUserProjects = async () => {
+    try {
+      const user = FIREBASE_AUTH.currentUser;
+      if (user) {
+        const usersRef = collection(FIREBASE_DB, 'users');
+        const userDoc = doc(usersRef, user.uid);
+        const docSnap = await getDoc(userDoc);
+        if (docSnap.exists()) {
+          const projectsRef = collection(FIREBASE_DB, 'projects');
+          const querySnapshot = await getDocs(
+            query(projectsRef, where('creatorId', '==', docSnap.id)),
+          );
+
+          if (querySnapshot.docs.length > 0) {
+            const projectsData = querySnapshot.docs.map(doc => ({
+              id: doc.id,
+              creator: doc.data().creator,
+              creatorId: doc.data().creatorId,
+              description: doc.data().description,
+              name: doc.data().name,
+              photo: doc.data().photo,
+              required: doc.data().required,
+              categories: doc.data().categories,
+              members: doc.data().members,
+              HardSkills: doc.data().HardSkills,
+              SoftSkills: doc.data().SoftSkills,
+            }));
+
+            const projectsWithPhotoUrl = await Promise.all(
+              projectsData.map(async project => {
+                if (project.photo) {
+                  const url = await getFileUrl(project.photo);
+                  return {...project, photo: url};
+                }
+                return project;
+              }),
+            );
+            setProjects(projectsWithPhotoUrl);
+            dispatch(setYourProjects(projectsWithPhotoUrl));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching projects: ', error);
+    }
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchUserData();
+    setRefreshing(false);
+  }, [fetchUserData]);
 
   const handleImageUpload = useCallback(
-    async (uri: string, field: 'avatar' | 'background') => {
+    async (field: 'avatar' | 'background') => {
       try {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        const storageRef = ref(
-          FIREBASE_STORAGE,
-          `images/${userName}_${Date.now()}`,
-        );
-        await uploadBytes(storageRef, blob);
-        const downloadURL = await getDownloadURL(storageRef);
+        // Запрос разрешений
+        const {status} =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          return Alert.alert('Ошибка', 'Нужно разрешение на доступ к галерее');
+        }
 
+        // Выбор изображения
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [4, 3],
+        });
+
+        if (result.canceled) return null;
+
+        const imageUri = result.assets[0].uri;
+        const fileName = imageUri.split('/').pop();
+        const match = /\.(\w+)$/.exec(fileName || '');
+        const type = match ? `image/${match[1]}` : 'image';
+
+        // Формируем FormData для отправки на сервер
+        const formData = new FormData();
+        formData.append('file', {
+          uri: imageUri,
+          name: fileName,
+          type,
+        } as any);
+
+        const fileId = await uploadFile(formData);
+
+        if (!fileId) throw new Error('Upload failed');
+
+        // Сохраняем ссылку в Firestore (можно оставить Firebase DB)
         const user = FIREBASE_AUTH.currentUser;
+
         if (!user) return null;
 
-        await setDoc(
-          doc(collection(FIREBASE_DB, 'users'), user.uid),
-          {
-            [field]: downloadURL,
-          },
-          {merge: true},
-        );
+        const userRef = doc(collection(FIREBASE_DB, 'users'), user.uid);
+
+        await setDoc(userRef, {[field]: fileId}, {merge: true});
 
         dispatch(
           setUserData({
             userId: user.uid,
             username: userName,
             email: user.email,
-            avatar: field === 'avatar' ? downloadURL : avatar,
-            background: field === 'background' ? downloadURL : background,
+            avatar: field === 'avatar' ? fileId : avatar,
+            background: field === 'background' ? fileId : background,
           }),
         );
 
@@ -102,31 +221,20 @@ export const Profile = () => {
           'Успешно',
           `${field === 'avatar' ? 'Аватар' : 'Фон'} обновлён.`,
         );
-        return downloadURL;
       } catch (err) {
         console.error('Image upload error:', err);
-        return null;
+        Alert.alert('Ошибка', 'Не удалось загрузить файл');
       }
     },
     [avatar, background, dispatch, userName],
   );
 
-  const pickImage = async (field: 'avatar' | 'background') => {
-    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      return Alert.alert('Ошибка', 'Нужно разрешение на доступ к галерее');
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-    });
-
-    if (!result.canceled) {
-      await handleImageUpload(result.assets[0].uri, field);
-    }
-  };
+  const pickImage = useCallback(
+    (field: 'avatar' | 'background') => {
+      handleImageUpload(field);
+    },
+    [handleImageUpload],
+  );
 
   const handleSignOut = async () => {
     try {
@@ -144,22 +252,25 @@ export const Profile = () => {
       <FlatList
         data={[{}]}
         keyExtractor={(_, index) => index.toString()}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         renderItem={() => (
           <View style={styles.container}>
             <View style={styles.background_image}>
               <TouchableOpacity
                 style={styles.background}
                 onPress={() => pickImage('background')}>
-                {background && <Image source={{uri: background}} />}
+                {backgroundUrl && <Image source={{uri: backgroundUrl}} />}
               </TouchableOpacity>
 
               <View style={styles.profileHeader}>
                 <View style={styles.avatar}>
                   <TouchableOpacity onPress={() => pickImage('avatar')}>
-                    {avatar ? (
+                    {avatarUrl ? (
                       <Image
                         style={styles.avatarImage}
-                        source={{uri: avatar}}
+                        source={{uri: avatarUrl}}
                       />
                     ) : (
                       <PlusIcon size={30} />
@@ -184,7 +295,7 @@ export const Profile = () => {
 
             <View style={styles.profileInfo}>
               {aboutMe ? (
-                <ProfileInfo />
+                <ProfileInfo projects={projects} />
               ) : (
                 <View>
                   <Text>Пожалуйста, заполните свой профиль</Text>

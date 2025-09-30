@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import {getFileUrl} from 'api';
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import {ProfileStackParamsList} from 'app/navigation/navigationTypes';
@@ -39,6 +40,12 @@ export const ProfileView = () => {
         if (userId) {
           // Загружаем данные пользователя
           const userData = await getUserById(userId);
+          const imageUrl = await getFileUrl(userData.avatar);
+          userData.avatar = imageUrl;
+          const imageBackgroundUrl = await getFileUrl(
+            userData.imageBackgroundUrl,
+          );
+          userData.background = imageBackgroundUrl;
           setUserData(userData);
 
           // Загружаем проекты пользователя
@@ -71,7 +78,9 @@ export const ProfileView = () => {
         navigation.navigate(Screens.PROJECT, {projectId: item.id})
       }>
       <Image source={{uri: item.photo}} style={styles.projectImage} />
-      <Text style={styles.projectName}>{item.name}</Text>
+      <Text style={styles.projectName} numberOfLines={1} ellipsizeMode="tail">
+        {item.name}
+      </Text>
     </TouchableOpacity>
   );
 

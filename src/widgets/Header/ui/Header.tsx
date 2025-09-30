@@ -39,8 +39,10 @@ export const Header = ({
       </View>
       {chatName && (
         <View style={styles.chatTitle}>
-          <Text style={TextStyles.p3.changeColor(Colors.Gray500)}>
-            {chatName}
+          <Text
+            style={TextStyles.p3.changeColor(Colors.Gray500)}
+            numberOfLines={1}>
+            {chatName.length > 20 ? `${chatName.slice(0, 17)}...` : chatName}
           </Text>
         </View>
       )}

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import {Dimensions} from 'react-native';
 
+import {getFileUrl} from 'api';
 import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import ProjectModal from 'components/ModalWindowProject';
@@ -51,6 +52,10 @@ export const Home = () => {
 
   const [carouselIndex, setCarouselIndex] = useState(0);
 
+  const [error, setError] = useState('');
+
+  const [avatarUrl, setAvatarUrl] = useState('');
+
   const dispatch = useDispatch();
 
   const {userName, avatar} = useSelector((state: RootState) => state.user);
@@ -66,6 +71,16 @@ export const Home = () => {
   useEffect(() => {
     fetchUserProjects();
   }, []);
+
+  useEffect(() => {
+    async function loadUrls() {
+      if (avatar) {
+        const url = await getFileUrl(avatar); // avatar = id
+        setAvatarUrl(url);
+      }
+    }
+    loadUrls();
+  }, [avatar]);
 
   const insets = useSafeAreaInsets();
 
@@ -103,7 +118,17 @@ export const Home = () => {
               SoftSkills: doc.data().SoftSkills,
             }));
 
-            dispatch(setYourProjects(projectsData));
+            const projectsWithPhotoUrl = await Promise.all(
+              projectsData.map(async project => {
+                if (project.photo) {
+                  const url = await getFileUrl(project.photo);
+                  return {...project, photo: url};
+                }
+                return project;
+              }),
+            );
+
+            dispatch(setYourProjects(projectsWithPhotoUrl));
           }
 
           if (querySnapshot2.docs.length > 0) {
@@ -121,14 +146,27 @@ export const Home = () => {
               HardSkills: doc.data().HardSkills || [],
               SoftSkills: doc.data().SoftSkills || [],
             }));
-            dispatch(setOtherProjects(projectsData));
-            dispatch(setAllOtherProjects(projectsData));
+
+            const projectsWithPhotoUrl = await Promise.all(
+              projectsData.map(async project => {
+                if (project.photo) {
+                  const url = await getFileUrl(project.photo);
+                  return {...project, photo: url};
+                }
+                return project;
+              }),
+            );
+
+            dispatch(setOtherProjects(projectsWithPhotoUrl));
+            dispatch(setAllOtherProjects(projectsWithPhotoUrl));
           }
-          setDataLoaded(true);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
+      setError(error);
       console.error('Error fetching projects: ', error);
+    } finally {
+      setDataLoaded(true);
     }
   };
 
@@ -137,6 +175,14 @@ export const Home = () => {
   };
 
   const screenWidth = Dimensions.get('window').width;
+
+  if (error) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text>Произошла ошибка, попробуйте перезагрузить приложение</Text>
+      </View>
+    );
+  }
 
   if (!dataLoaded) {
     return (
@@ -156,7 +202,7 @@ export const Home = () => {
           paddingLeft: 16,
         }}>
         <View style={styles.topContainer}>
-          <Image source={{uri: avatar}} style={styles.userImage} />
+          <Image source={{uri: avatarUrl}} style={styles.userImage} />
           <View style={styles.TextContainer}>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.TextContainer__text1}>Добро пожаловать!</Text>

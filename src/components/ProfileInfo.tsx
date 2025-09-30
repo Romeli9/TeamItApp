@@ -10,30 +10,20 @@ import {
   View,
 } from 'react-native';
 
+import {getFileUrl} from 'api';
 import {Screens} from 'app/navigation/navigationEnums';
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from 'firebase/firestore';
-import {useDispatch, useSelector} from 'react-redux';
-import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
+import {useSelector} from 'react-redux';
+import {ProjectType} from 'redux/slices/projectsSlice';
 import 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
-import {DownCaretIcon, UpCaretIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
-import {FIREBASE_AUTH, FIREBASE_DB} from '../app/FireBaseConfig';
+export interface ProfileInfoProps {
+  projects: ProjectType[];
+}
 
-export const ProfileInfo = () => {
+export const ProfileInfo = ({projects}: ProfileInfoProps) => {
   const {navigate} = useAppNavigation();
-
-  const dispatch = useDispatch();
-
-  const [projects, setProjects] = useState<ProjectType[]>([]);
 
   const {telegramm, HardSkills, SoftSkills, experience, aboutMe} = useSelector(
     (state: RootState) => state.user,
@@ -41,51 +31,12 @@ export const ProfileInfo = () => {
 
   useSelector((state: RootState) => state.projects);
 
-  useEffect(() => {
-    fetchUserProjects();
-  }, []);
-
-  const fetchUserProjects = async () => {
-    try {
-      const user = FIREBASE_AUTH.currentUser;
-      if (user) {
-        const usersRef = collection(FIREBASE_DB, 'users');
-        const userDoc = doc(usersRef, user.uid);
-        const docSnap = await getDoc(userDoc);
-        if (docSnap.exists()) {
-          const projectsRef = collection(FIREBASE_DB, 'projects');
-          const querySnapshot = await getDocs(
-            query(projectsRef, where('creatorId', '==', docSnap.id)),
-          );
-
-          if (querySnapshot.docs.length > 0) {
-            const projectsData = querySnapshot.docs.map(doc => ({
-              id: doc.id,
-              creator: doc.data().creator,
-              creatorId: doc.data().creatorId,
-              description: doc.data().description,
-              name: doc.data().name,
-              photo: doc.data().photo,
-              required: doc.data().required,
-              categories: doc.data().categories,
-              members: doc.data().members,
-              HardSkills: doc.data().HardSkills,
-              SoftSkills: doc.data().SoftSkills,
-            }));
-            setProjects(projectsData);
-            dispatch(setYourProjects(projectsData));
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching projects: ', error);
-    }
-  };
-
   const renderProjectItem = ({item}: {item: ProjectType}) => (
     <TouchableOpacity onPress={() => OpenProject(item.id)}>
       <Image source={{uri: item.photo}} style={styles.projectImage} />
-      <Text style={styles.projectName}>{item.name}</Text>
+      <Text style={styles.projectName} numberOfLines={1} ellipsizeMode="tail">
+        {item.name}
+      </Text>
     </TouchableOpacity>
   );
 
@@ -154,6 +105,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontWeight: 'bold',
     textAlign: 'center',
+    width: 175, 
   },
 
   text_project: {

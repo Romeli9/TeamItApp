@@ -5,6 +5,7 @@ import {Colors} from 'shared/libs/helpers/colors';
 export const ProfileStyles = StyleSheet.create({
   container: {
     flex: 1,
+    // top: 32,
   },
   background_image: {
     justifyContent: 'flex-end',
