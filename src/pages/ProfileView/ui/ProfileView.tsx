@@ -42,6 +42,10 @@ export const ProfileView = () => {
           const userData = await getUserById(userId);
           const imageUrl = await getFileUrl(userData.avatar);
           userData.avatar = imageUrl;
+          const imageBackgroundUrl = await getFileUrl(
+            userData.imageBackgroundUrl,
+          );
+          userData.background = imageBackgroundUrl;
           setUserData(userData);
 
           // Загружаем проекты пользователя
