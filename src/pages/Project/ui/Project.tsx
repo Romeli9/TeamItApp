@@ -24,7 +24,7 @@ import {
 import {useSelector} from 'react-redux';
 import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
-import {required} from 'shared/assets/consts/Required';
+import {requiredMock} from 'shared/assets/consts/Required';
 import {ArrowLeftIcon, CheckIcon, CloseIcon, PlusIcon} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
@@ -241,20 +241,20 @@ export const Project = () => {
                     ) : (
                       <ScrollView style={styles.dropdownContainer}>
                         <View style={styles.dropdownWrapper}>
-                          {required.map(item => (
+                          {requiredMock.map((item, ix) => (
                             <TouchableOpacity
-                              key={item.key}
+                              key={ix}
                               style={[
                                 styles.dropdownItem,
                                 styles.dropdownItemSelected,
                               ]}
-                              onPress={() => handleApplicationSend(item.value)}>
+                              onPress={() => handleApplicationSend(item)}>
                               <View style={styles.dropdownItemContainer}>
                                 <View style={styles.dropdownItem_icon}>
                                   <PlusIcon size={12} />
                                 </View>
                                 <Text style={styles.dropdownItemText}>
-                                  {item.value}
+                                  {item}
                                 </Text>
                               </View>
                             </TouchableOpacity>

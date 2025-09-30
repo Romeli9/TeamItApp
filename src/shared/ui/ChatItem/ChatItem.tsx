@@ -86,7 +86,14 @@ export const ChatItem = memo(
 
         <View style={styles.infoBlock}>
           <View style={styles.header}>
-            <Text style={styles.chatName}>{chatData.name}</Text>
+            <Text
+              style={styles.chatName}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {chatData.name.length > 20
+                ? `${chatData.name.slice(0, 17)}...`
+                : chatData.name}
+            </Text>
             <Text style={styles.timestamp}>{chatData.time}</Text>
           </View>
           <View style={styles.messageBlock}>

@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   RefreshControl,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -15,11 +16,23 @@ import {Screens} from 'app/navigation/navigationEnums';
 import {EditProfile, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {onAuthStateChanged} from 'firebase/auth';
-import {collection, doc, getDoc, setDoc} from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {clearProjects} from 'redux/slices/projectsSlice';
+import {
+  ProjectType,
+  clearProjects,
+  setYourProjects,
+} from 'redux/slices/projectsSlice';
 import {
   clearProfileData,
   setProfileData,
@@ -43,6 +56,8 @@ export const Profile = () => {
     (state: RootState) => state.user,
   );
 
+  const [projects, setProjects] = useState<ProjectType[]>([]);
+
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
 
@@ -60,7 +75,7 @@ export const Profile = () => {
     loadUrls();
   }, [avatar, background]);
 
-  const fetchUserData = useCallback(async () => {
+  const fetchUserData = async () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
       if (!user) return;
@@ -83,12 +98,63 @@ export const Profile = () => {
     } catch (err) {
       console.error('Ошибка загрузки данных:', err);
     }
-  }, [dispatch]);
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchUserData);
     return unsubscribe;
   }, [fetchUserData]);
+
+  useEffect(() => {
+    fetchUserProjects();
+  }, []);
+
+  const fetchUserProjects = async () => {
+    try {
+      const user = FIREBASE_AUTH.currentUser;
+      if (user) {
+        const usersRef = collection(FIREBASE_DB, 'users');
+        const userDoc = doc(usersRef, user.uid);
+        const docSnap = await getDoc(userDoc);
+        if (docSnap.exists()) {
+          const projectsRef = collection(FIREBASE_DB, 'projects');
+          const querySnapshot = await getDocs(
+            query(projectsRef, where('creatorId', '==', docSnap.id)),
+          );
+
+          if (querySnapshot.docs.length > 0) {
+            const projectsData = querySnapshot.docs.map(doc => ({
+              id: doc.id,
+              creator: doc.data().creator,
+              creatorId: doc.data().creatorId,
+              description: doc.data().description,
+              name: doc.data().name,
+              photo: doc.data().photo,
+              required: doc.data().required,
+              categories: doc.data().categories,
+              members: doc.data().members,
+              HardSkills: doc.data().HardSkills,
+              SoftSkills: doc.data().SoftSkills,
+            }));
+
+            const projectsWithPhotoUrl = await Promise.all(
+              projectsData.map(async project => {
+                if (project.photo) {
+                  const url = await getFileUrl(project.photo);
+                  return {...project, photo: url};
+                }
+                return project;
+              }),
+            );
+            setProjects(projectsWithPhotoUrl);
+            dispatch(setYourProjects(projectsWithPhotoUrl));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching projects: ', error);
+    }
+  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -229,7 +295,7 @@ export const Profile = () => {
 
             <View style={styles.profileInfo}>
               {aboutMe ? (
-                <ProfileInfo />
+                <ProfileInfo projects={projects} />
               ) : (
                 <View>
                   <Text>Пожалуйста, заполните свой профиль</Text>

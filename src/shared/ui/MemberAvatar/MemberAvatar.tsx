@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Image} from 'react-native';
 
+import {getFileUrl} from 'api';
 import {getUserById} from 'services/getUserById';
 
 import {MemberAvatarStyles as styles} from './MemberAvatar.styles';
@@ -15,7 +16,8 @@ export const MemberAvatar: React.FC<{userId: string; num: number}> = ({
     const fetchUserData = async () => {
       try {
         const userData = await getUserById(userId);
-        setUser(userData);
+        const imageUrl = await getFileUrl(userData.avatar);
+        setUser({...userData, avatar: imageUrl});
       } catch (error) {
         console.error('Ошибка при загрузке данных пользователя:', error);
       }
