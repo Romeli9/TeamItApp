@@ -15,8 +15,9 @@ import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {ProjectRouteParams} from 'app/navigation/navigationTypes';
 import {Skill} from 'components';
+import ReviewModal from 'components/ReviewModal';
 import SearchModal, {UserFrom} from 'components/SearchModal';
-import {addDoc, collection} from 'firebase/firestore';
+import {addDoc, collection, doc, updateDoc} from 'firebase/firestore';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -53,6 +54,10 @@ export const Project = () => {
   const [requiredOpen, setRequiredOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState('');
   const [isSearchModal, setSearchModal] = useState(false);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [currentReviewUserId, setCurrentReviewUserId] = useState<string | null>(
+    null,
+  );
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
 
@@ -136,6 +141,42 @@ export const Project = () => {
       </View>
     );
   }
+
+  const handleFinishProject = async () => {
+    try {
+      if (!projectData) return;
+
+      const participants = projectData.members.filter(
+        id => id !== '-' && id !== userId,
+      );
+
+      await updateDoc(doc(FIREBASE_DB, 'projects', projectId), {
+        status: 'completed1',
+      });
+
+      // Отправка уведомлений участникам
+      for (const participantId of participants) {
+        await addDoc(collection(FIREBASE_DB, 'notifications'), {
+          userId: participantId,
+          projectId,
+          type: 'review',
+          fromUserId: userId,
+          createdAt: Date.now(),
+          read: false,
+        });
+      }
+
+      if (participants.length > 0) {
+        setCurrentReviewUserId(participants[0]);
+        setReviewModalVisible(true);
+      } else {
+        Alert.alert('Готово', 'Проект завершён!');
+      }
+    } catch (err) {
+      console.error('Ошибка завершения проекта:', err);
+      Alert.alert('Ошибка', 'Не удалось завершить проект');
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -346,9 +387,49 @@ export const Project = () => {
               <Text style={styles.inviteProject}>Поиск участников</Text>
             </TouchableOpacity>
           )}
+
+          {projectData.creatorId === userId &&
+            projectData.status !== 'completed' && (
+              <TouchableOpacity
+                onPress={handleFinishProject}
+                style={[styles.invite, {backgroundColor: 'red'}]}>
+                <Text style={[styles.inviteProject, {color: '#fff'}]}>
+                  Завершить проект
+                </Text>
+              </TouchableOpacity>
+            )}
           <TouchableOpacity onPress={goBack} style={styles.goback}>
             <ArrowLeftIcon size={24} />
           </TouchableOpacity>
+
+          {reviewModalVisible && currentReviewUserId && (
+            <ReviewModal
+              visible={reviewModalVisible}
+              projectId={projectId}
+              fromUserId={userId}
+              toUserId={currentReviewUserId}
+              role="creator"
+              projectData={projectData}
+              onSubmitNext={() => {
+                const participants = projectData.members.filter(
+                  id => id !== '-' && id !== projectData.creatorId,
+                );
+                const currentIndex = participants.indexOf(currentReviewUserId);
+                const nextIndex = currentIndex + 1;
+
+                if (nextIndex < participants.length) {
+                  setCurrentReviewUserId(participants[nextIndex]);
+                } else {
+                  setReviewModalVisible(false);
+                  setCurrentReviewUserId(null);
+                }
+              }}
+              onClose={() => {
+                setReviewModalVisible(false);
+                setCurrentReviewUserId(null);
+              }}
+            />
+          )}
         </ScrollView>
       </View>
     </SafeAreaProvider>

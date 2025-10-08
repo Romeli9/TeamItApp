@@ -116,6 +116,7 @@ export const Home = () => {
               members: doc.data().members,
               HardSkills: doc.data().HardSkills,
               SoftSkills: doc.data().SoftSkills,
+              status: doc.data().status,
             }));
 
             const projectsWithPhotoUrl = await Promise.all(
@@ -145,6 +146,7 @@ export const Home = () => {
               skills: doc.data().skills,
               HardSkills: doc.data().HardSkills || [],
               SoftSkills: doc.data().SoftSkills || [],
+              status: doc.data().status ?? 'started',
             }));
 
             const projectsWithPhotoUrl = await Promise.all(

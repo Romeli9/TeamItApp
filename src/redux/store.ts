@@ -2,6 +2,7 @@ import {configureStore} from '@reduxjs/toolkit';
 
 import filter from './slices/filterSlice';
 import projects from './slices/projectsSlice';
+import reviewsReducer from './slices/reviewsSlice';
 import user from './slices/userSlice';
 
 export const store = configureStore({
@@ -9,6 +10,7 @@ export const store = configureStore({
     user,
     projects,
     filter,
+    reviews: reviewsReducer,
   },
 });
 

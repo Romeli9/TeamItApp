@@ -34,11 +34,17 @@ import {
   setYourProjects,
 } from 'redux/slices/projectsSlice';
 import {
+  fetchUserReviews,
+  selectReviews,
+  selectReviewsLoading,
+} from 'redux/slices/reviewsSlice';
+import {
   clearProfileData,
   setProfileData,
   setUserData,
 } from 'redux/slices/userSlice';
-import {RootState} from 'redux/store';
+import {AppDispatch, RootState} from 'redux/store';
+import {BellIcon} from 'shared/assets/icons/icons';
 import {EditProfileIcon, ExitIcon, PlusIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
@@ -46,13 +52,13 @@ import {ProfileStyles as styles} from './Profile.styles';
 
 export const Profile = () => {
   const {navigate} = useAppNavigation();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const {userName, aboutMe, avatar, background} = useSelector(
+  const {userName, aboutMe, avatar, background, userId} = useSelector(
     (state: RootState) => state.user,
   );
 
@@ -61,10 +67,17 @@ export const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
 
+  const reviews = useSelector(selectReviews);
+  const loading = useSelector(selectReviewsLoading);
+
+  useEffect(() => {
+    dispatch(fetchUserReviews(userId));
+  }, [userId]);
+
   useEffect(() => {
     async function loadUrls() {
       if (avatar) {
-        const url = await getFileUrl(avatar); // avatar = id
+        const url = await getFileUrl(avatar);
         setAvatarUrl(url);
       }
       if (background) {
@@ -135,6 +148,7 @@ export const Profile = () => {
               members: doc.data().members,
               HardSkills: doc.data().HardSkills,
               SoftSkills: doc.data().SoftSkills,
+              status: doc.data().status ?? 'started',
             }));
 
             const projectsWithPhotoUrl = await Promise.all(
@@ -283,7 +297,12 @@ export const Profile = () => {
             </View>
 
             {/* Блок с кнопками для редактирования и выхода из аккаунта */}
-            <View style={styles.actionButtonsProfile}>
+            <View style={styles.actionButtonsProfileLeft}>
+              <TouchableOpacity onPress={() => navigate(Screens.NOTIFICATION)}>
+                <BellIcon size={24} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.actionButtonsProfileRight}>
               <TouchableOpacity onPress={() => setEditProfileVisible(true)}>
                 <EditProfileIcon />
               </TouchableOpacity>

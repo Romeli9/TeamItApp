@@ -11,6 +11,7 @@ import {
   ProjectRequests,
   RegisterPage,
 } from 'pages';
+import {NotificationsPage} from 'pages/NotificationsPage.tsx';
 import {ProjectRequestsList} from 'pages/ProjectRequestsList/ProjectRequestsList.tsx';
 import {useAppNavigation} from 'shared/libs/useAppNavigation.tsx';
 import {Header} from 'widgets';
@@ -87,6 +88,11 @@ export const RootNavigator = () => {
         options={() => ({
           header: () => <Header showBackButton onBackPress={handleGoBack} />,
         })}
+      />
+      <RootStack.Screen
+        name={Screens.NOTIFICATION}
+        component={NotificationsPage}
+        options={{headerShown: false}}
       />
     </RootStack.Navigator>
   );
