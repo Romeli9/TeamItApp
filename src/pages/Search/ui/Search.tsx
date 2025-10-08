@@ -17,8 +17,8 @@ import {
 } from 'redux/slices/filterSlice';
 import {setOtherProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
-import {categories} from 'shared/assets/consts/Categories';
-import {required} from 'shared/assets/consts/Required';
+import {categoriesMock} from 'shared/assets/consts/Categories';
+import {requiredMock} from 'shared/assets/consts/Required';
 
 import {SearchStyles as styles} from './Search.styles';
 
@@ -108,7 +108,7 @@ export const Search: React.FC = () => {
         <View style={styles.boxesContainer}>
           <View style={styles.containerboxed1}>
             <Text style={styles.textStyle1}>Категории</Text>
-            {categories.map(category => (
+            {categoriesMock.map((category: any) => (
               <TouchableOpacity
                 key={category.key}
                 style={styles.checkboxContainer}
@@ -127,7 +127,7 @@ export const Search: React.FC = () => {
           </View>
           <View style={styles.containerboxed2}>
             <Text style={styles.textStyle1}>Роли</Text>
-            {required.map(requireded => (
+            {requiredMock.map((requireded: any) => (
               <TouchableOpacity
                 key={requireded.key}
                 style={styles.checkboxContainer}
