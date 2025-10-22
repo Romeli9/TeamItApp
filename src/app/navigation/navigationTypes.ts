@@ -32,6 +32,9 @@ export type RootStackParamsList = {
   [Screens.PROJECT]: ProjectRouteParams;
   [Screens.PROJECT_REQUESTS]: RequestRouteParams;
   [Screens.PROJECT_LIST_REQUESTS]: undefined;
+  //[Screens.PROFILE]: undefined;
+  [Screens.BELBIN_TEST]: undefined; 
+  [Screens.PROFILE]: { belbinResults?: number[] } | undefined;
 };
 
 export type MainTabsStackParamsList = {
