@@ -304,4 +304,19 @@ export const EditProfileStyles = StyleSheet.create({
     marginLeft: 4,
     transform: [{rotate: '45deg'}],
   },
+  belbinButton: {
+  backgroundColor: '#BE9DE8',
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  borderRadius: 10,
+  alignItems: 'center',
+  marginTop: 10,
+  marginBottom: 20,
+},
+belbinButtonText: {
+  color: '#FFFFFF',
+  fontSize: 16,
+  fontWeight: '600',
+},
+
 });

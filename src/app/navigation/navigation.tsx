@@ -1,6 +1,8 @@
 import {createNavigationContainerRef} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect} from 'react';
+import { Belbin } from '../../components/Belbin';
+import { ProfileScreen } from '../../components/ProfileScreen';
 
 import {auth} from 'app/FireBaseConfig.ts';
 import {onAuthStateChanged} from 'firebase/auth';
@@ -82,11 +84,25 @@ export const RootNavigator = () => {
         })}
       />
       <RootStack.Screen
+        name={Screens.BELBIN_TEST}
+        component={Belbin}
+        options={{ headerShown: false }} // или с заголовком — как хотите
+        />
+
+      <RootStack.Screen
+        name={Screens.PROFILE}
+        component={ProfileScreen}
+        options={{ headerShown: false }}
+        />
+
+
+      <RootStack.Screen
         name={Screens.PROJECT_REQUESTS}
         component={ProjectRequests}
         options={() => ({
           header: () => <Header showBackButton onBackPress={handleGoBack} />,
         })}
+        
       />
     </RootStack.Navigator>
   );

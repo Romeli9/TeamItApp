@@ -13,6 +13,9 @@ import {
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Skill, SkillsInput} from 'components';
+import {Screens} from 'app/navigation/navigationEnums';
+import { useAppNavigation } from 'shared/libs/useAppNavigation';
+//const { navigate } = useAppNavigation();
 import {
   DocumentReference,
   collection,
@@ -26,10 +29,12 @@ import {RootState} from 'redux/store';
 import {EditProfileStyles as styles} from './EditProfile.styles';
 
 export const EditProfile: React.FC<{
+  
   onModalClose: () => void;
   userDocRef: DocumentReference;
 }> = ({onModalClose, userDocRef}) => {
   // Состояния компонента
+  const { navigate } = useAppNavigation();
   const [isModalVisible, setModalVisible] = useState(true);
   const [aboutMeInput, setAboutMeInput] = useState('');
   const [experienceInput, setExperienceInput] = useState('');
@@ -37,7 +42,7 @@ export const EditProfile: React.FC<{
   const [loading, setLoading] = useState(false);
   const [selectedHardSkills, setSelectedHardSkills] = useState<Skill[]>([]);
   const [selectedSoftSkills, setSelectedSoftSkills] = useState<Skill[]>([]);
-
+  
   const [rolesSelected, setRolesSelected] = useState<string[]>([]);
   const [rolesOpen, setRolesOpen] = useState(false);
 
@@ -189,12 +194,22 @@ export const EditProfile: React.FC<{
                 type="ST1"
               />
 
-              <Text style={styles.sectionTitle}>Soft Skills</Text>
-              <SkillsInput
-                selectedSkills={selectedSoftSkills}
-                setSelectedSkills={setSelectedSoftSkills}
-                type="ST2"
-              />
+             <Text style={styles.sectionTitle}>Soft Skills</Text>
+<SkillsInput
+  selectedSkills={selectedSoftSkills}
+  setSelectedSkills={setSelectedSoftSkills}
+  type="ST2"
+/>
+
+<Text style={styles.sectionTitle}>Пройти тест Белбина</Text>
+<TouchableOpacity
+  style={styles.belbinButton}
+  onPress={() => {
+    setModalVisible(false); // ← Закрываем модальное окно
+    navigate(Screens.BELBIN_TEST); // ← Переходим на тест
+  }}>
+  <Text style={styles.belbinButtonText}>Начать тест</Text>
+</TouchableOpacity>
 
               <Text style={styles.sectionTitle}>Telegram</Text>
               <TextInput

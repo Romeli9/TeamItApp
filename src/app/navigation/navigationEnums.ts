@@ -6,7 +6,7 @@ export enum Stacks {
 
 export enum Screens {
   HOME = 'Home',
-  PROFILE = 'Profile',
+  PROFILE = 'PROFILE',
   LOGIN = 'Login',
   REGISTER = 'Register',
   CHATLIST = 'ChatList',
@@ -16,6 +16,7 @@ export enum Screens {
   PROJECT_REQUESTS = 'ProjectRequests',
   PROJECT_LIST_REQUESTS='ProjectListRequests',
   VIEW_PROFILE = 'ViewProfile',
+  BELBIN_TEST = 'BELBIN_TEST',
 }
 
 export type AllRoutes = Screens | Stacks;
