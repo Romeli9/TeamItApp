@@ -43,26 +43,25 @@ export const ProfileStyles = StyleSheet.create({
     fontSize: 20,
     color: '#000000',
   },
-  actionButtonsProfileRight: {
-    display: 'flex',
-    width: '100%',
+  containerButtons: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-    right: 0,
-    gap: 16,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
     padding: 16,
   },
+
   actionButtonsProfileLeft: {
-    display: 'flex',
-    width: '100%',
     flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    left: 0,
-    gap: 16,
-    padding: 16,
+    alignItems: 'center',
   },
+
+  actionButtonsProfileRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+
   profileInfo: {
     paddingTop: 32,
     paddingHorizontal: 16,

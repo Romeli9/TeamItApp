@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  Button,
   FlatList,
   SafeAreaView,
   StyleSheet,
@@ -22,6 +23,7 @@ import {
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useSelector} from 'react-redux';
 import {RootState} from 'redux/store';
+import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 // твоя функция получения пользователя
 
@@ -33,6 +35,7 @@ export const NotificationsPage = () => {
   const [projectData, setProjectData] = useState<any>(null);
   const [participants, setParticipants] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigation = useAppNavigation();
 
   useEffect(() => {
     if (!userId) return;
@@ -124,6 +127,7 @@ export const NotificationsPage = () => {
               }}
             />
           )}
+          <Button title="Назад" onPress={() => navigation.goBack()} />
         </View>
       </SafeAreaView>
     </SafeAreaProvider>

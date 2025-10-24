@@ -22,6 +22,7 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import {setProfileData} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
+import {requiredMock} from 'shared/assets/consts/Required';
 
 import {EditProfileStyles as styles} from './EditProfile.styles';
 
@@ -41,8 +42,6 @@ export const EditProfile: React.FC<{
   const [rolesSelected, setRolesSelected] = useState<string[]>([]);
   const [rolesOpen, setRolesOpen] = useState(false);
 
-  const [rolesData, setRolesData] = useState<string[]>([]);
-
   // Получаем данные из Redux store
   const {aboutMe, experience, HardSkills, SoftSkills, telegramm, roles} =
     useSelector((state: RootState) => state.user);
@@ -56,8 +55,6 @@ export const EditProfile: React.FC<{
   }, [HardSkills, SoftSkills]);
 
   useEffect(() => {
-    fetchData();
-
     setRolesSelected(roles || []);
     setAboutMeInput(aboutMe || '');
     setExperienceInput(experience || '');
@@ -76,18 +73,6 @@ export const EditProfile: React.FC<{
       setSelectedSoftSkills([]);
     }
   }, [skills]);
-
-  const fetchData = async () => {
-    let tempRoles: string[] = [];
-
-    const querySnapshotRoles = await getDocs(collection(FIREBASE_DB, 'role'));
-    querySnapshotRoles.forEach(doc => {
-      if (doc.data().name && doc.data().name.length > 0)
-        tempRoles.push(doc.data().name);
-    });
-
-    setRolesData(tempRoles);
-  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -230,27 +215,23 @@ export const EditProfile: React.FC<{
                 {rolesOpen && (
                   <ScrollView style={styles.dropdownContainer}>
                     <View style={styles.dropdownWrapper}>
-                      {rolesData &&
-                        rolesData.length > 0 &&
-                        rolesData.map((item, ix) => (
-                          <TouchableOpacity
-                            key={ix}
-                            style={[
-                              styles.dropdownItem,
-                              rolesSelected.includes(item) &&
-                                styles.dropdownItemSelected,
-                            ]}
-                            onPress={() => handleRoleSelect(item)}>
-                            <View style={styles.dropdownItemContainer}>
-                              <View style={styles.dropdownItem_icon}>
-                                <Text style={styles.plus2}>+</Text>
-                              </View>
-                              <Text style={styles.dropdownItemText}>
-                                {item}
-                              </Text>
+                      {requiredMock.map((item, ix) => (
+                        <TouchableOpacity
+                          key={ix}
+                          style={[
+                            styles.dropdownItem,
+                            rolesSelected.includes(item) &&
+                              styles.dropdownItemSelected,
+                          ]}
+                          onPress={() => handleRoleSelect(item)}>
+                          <View style={styles.dropdownItemContainer}>
+                            <View style={styles.dropdownItem_icon}>
+                              <Text style={styles.plus2}>+</Text>
                             </View>
-                          </TouchableOpacity>
-                        ))}
+                            <Text style={styles.dropdownItemText}>{item}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
                     </View>
                   </ScrollView>
                 )}

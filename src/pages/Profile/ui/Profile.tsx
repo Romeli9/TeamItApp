@@ -4,7 +4,6 @@ import {
   FlatList,
   Image,
   RefreshControl,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -25,7 +24,6 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore';
-import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -297,19 +295,21 @@ export const Profile = () => {
             </View>
 
             {/* Блок с кнопками для редактирования и выхода из аккаунта */}
-            <View style={styles.actionButtonsProfileLeft}>
-              <TouchableOpacity onPress={() => navigate(Screens.NOTIFICATION)}>
-                <BellIcon size={24} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.actionButtonsProfileRight}>
-              <TouchableOpacity onPress={() => setEditProfileVisible(true)}>
-                <EditProfileIcon />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={handleSignOut}>
-                <ExitIcon />
-              </TouchableOpacity>
+            <View style={styles.containerButtons}>
+              <View style={styles.actionButtonsProfileLeft}>
+                <TouchableOpacity
+                  onPress={() => navigate(Screens.NOTIFICATION)}>
+                  <BellIcon size={24} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.actionButtonsProfileRight}>
+                <TouchableOpacity onPress={() => setEditProfileVisible(true)}>
+                  <EditProfileIcon size={24} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSignOut}>
+                  <ExitIcon size={24} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.profileInfo}>
