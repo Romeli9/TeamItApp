@@ -146,16 +146,41 @@ export const Project = () => {
     try {
       if (!projectData) return;
 
-      const participants = projectData.members.filter(
-        id => id !== '-' && id !== userId,
-      );
+      // const participants = projectData.members.filter(
+      //   id => id !== '-' && id !== userId,
+      // );
+
+      const participants = projectData.members.filter(id => id !== '-');
 
       await updateDoc(doc(FIREBASE_DB, 'projects', projectId), {
         status: 'completed1',
       });
 
+      console.log(
+        '%csrc/pages/Project/ui/Project.tsx:159 projectId',
+        'color: #007acc;',
+        projectId,
+      );
+
+      console.log(
+        '%csrc/pages/Project/ui/Project.tsx:159 projectData.members',
+        'color: #007acc;',
+        projectData.members,
+      );
+
+      console.log(
+        '%csrc/pages/Project/ui/Project.tsx:159 participants',
+        'color: #007acc;',
+        participants,
+      );
+
       // Отправка уведомлений участникам
       for (const participantId of participants) {
+        console.log(
+          '%csrc/pages/Project/ui/Project.tsx:161 participantId',
+          'color: #007acc;',
+          participantId,
+        );
         await addDoc(collection(FIREBASE_DB, 'notifications'), {
           userId: participantId,
           projectId,

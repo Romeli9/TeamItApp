@@ -25,8 +25,6 @@ import {useSelector} from 'react-redux';
 import {RootState} from 'redux/store';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
-// твоя функция получения пользователя
-
 export const NotificationsPage = () => {
   const {userId} = useSelector((state: RootState) => state.user);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -37,19 +35,50 @@ export const NotificationsPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigation = useAppNavigation();
 
+  // 📌 Подгружаем уведомления
   useEffect(() => {
     if (!userId) return;
     const q = query(
       collection(FIREBASE_DB, 'notifications'),
       where('userId', '==', userId),
     );
-    const unsub = onSnapshot(q, snapshot => {
-      const list = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-      setNotifications(list);
+    const unsub = onSnapshot(q, async snapshot => {
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        projectId: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log('list', list);
+
+      // Для каждого уведомления — подгружаем имя проекта
+      const listWithProjectNames = await Promise.all(
+        list.map(async n => {
+          try {
+            console.log('n', n);
+
+            const projectRef = doc(FIREBASE_DB, 'projects', n.projectId);
+
+            const projectSnap = await getDoc(projectRef);
+
+            console.log('projectSnap', projectSnap.data());
+
+            const projectName = projectSnap.exists()
+              ? projectSnap.data().name
+              : 'Неизвестный проект';
+            return {...n, projectName};
+          } catch {
+            return {...n, projectName: 'Ошибка загрузки'};
+          }
+        }),
+      );
+
+      setNotifications(listWithProjectNames);
     });
     return () => unsub();
   }, [userId]);
 
+  // 📌 Открытие модалки с отзывом
   const handleOpenReview = async (notification: any) => {
     setSelectedNotification(notification);
 
@@ -65,13 +94,12 @@ export const NotificationsPage = () => {
     const data: any = {id: projectSnap.id, ...projectSnap.data()};
     setProjectData(data);
 
-    // Формируем список участников, которых нужно оценить (можно исключить себя)
+    // Формируем список участников (исключая себя и создателя)
     const users = data.members.filter(
       (id: string) => id !== userId && id !== data.creatorId,
     );
     setParticipants(users);
     setCurrentIndex(0);
-
     setModalVisible(true);
   };
 
@@ -92,6 +120,7 @@ export const NotificationsPage = () => {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           <Text style={styles.title}>Уведомления</Text>
+
           <FlatList
             data={notifications}
             keyExtractor={item => item.id}
@@ -99,12 +128,7 @@ export const NotificationsPage = () => {
               <TouchableOpacity
                 style={[styles.item, item.read && {backgroundColor: '#eee'}]}
                 onPress={() => !item.read && handleOpenReview(item)}>
-                <Text>
-                  Оставьте отзыв по проекту{' '}
-                  {projectData?.id === item.projectId
-                    ? projectData?.name
-                    : item.projectId}
-                </Text>
+                <Text>Оставьте отзыв по проекту {item.projectName}</Text>
               </TouchableOpacity>
             )}
           />
@@ -117,7 +141,7 @@ export const NotificationsPage = () => {
               toUserId={participants[currentIndex]}
               role="creator"
               projectData={projectData}
-              onSubmitNext={handleNextParticipant} // ← новый проп
+              onSubmitNext={handleNextParticipant}
               onClose={() => {
                 setModalVisible(false);
                 setParticipants([]);
@@ -127,6 +151,7 @@ export const NotificationsPage = () => {
               }}
             />
           )}
+
           <Button title="Назад" onPress={() => navigation.goBack()} />
         </View>
       </SafeAreaView>
