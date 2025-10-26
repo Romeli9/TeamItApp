@@ -102,7 +102,11 @@ export const Home = () => {
           );
 
           const querySnapshot2 = await getDocs(
-            query(projectsRef, where('creator', '!=', userData.username)),
+            query(
+              projectsRef,
+              where('creator', '!=', userData.username),
+              where('status', '!=', 'completed'),
+            ),
           );
 
           if (querySnapshot.docs.length > 0) {
