@@ -49,19 +49,13 @@ export const NotificationsPage = () => {
         ...doc.data(),
       }));
 
-      console.log('list', list);
-
       // Для каждого уведомления — подгружаем имя проекта
       const listWithProjectNames = await Promise.all(
         list.map(async n => {
           try {
-            console.log('n', n);
-
             const projectRef = doc(FIREBASE_DB, 'projects', n.projectId);
 
             const projectSnap = await getDoc(projectRef);
-
-            console.log('projectSnap', projectSnap.data());
 
             const projectName = projectSnap.exists()
               ? projectSnap.data().name

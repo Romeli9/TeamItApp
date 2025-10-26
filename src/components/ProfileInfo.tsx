@@ -10,6 +10,8 @@ import {
 
 import {Screens} from 'app/navigation/navigationEnums';
 import {useSelector} from 'react-redux';
+import {selectAchievements} from 'redux/slices/achievementsSlice';
+import {selectAuthorStats} from 'redux/slices/authorStatsSlice';
 import {ProjectType} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
@@ -33,6 +35,10 @@ export const ProfileInfo = ({projects}: ProfileInfoProps) => {
     avgContribution,
     lastComments,
   } = useSelector((state: RootState) => state.reviewStats);
+
+  // Внутри Profile компонента:
+  const authorStats = useSelector(selectAuthorStats);
+  const badges = useSelector(selectAchievements);
 
   const renderProjectItem = ({item}: {item: ProjectType}) => (
     <TouchableOpacity
@@ -73,16 +79,29 @@ export const ProfileInfo = ({projects}: ProfileInfoProps) => {
         ) : (
           <>
             <Text style={styles.ratingText}>Общий рейтинг: {avgTotal}/5</Text>
-            <Text>Проф. навыки: {avgHard}/5</Text>
-            <Text>Командная работа: {avgSoft}/5</Text>
-            <Text>Соблюдение сроков: {avgDeadlines}/5</Text>
-            <Text>Вклад в проект: {avgContribution}/5</Text>
+
+            <View style={styles.ratingRow}>
+              <Text style={styles.ratingLabel}>Проф. навыки</Text>
+              <Text>{avgHard}/5</Text>
+            </View>
+            <View style={styles.ratingRow}>
+              <Text style={styles.ratingLabel}>Командная работа</Text>
+              <Text>{avgSoft}/5</Text>
+            </View>
+            <View style={styles.ratingRow}>
+              <Text style={styles.ratingLabel}>Соблюдение сроков</Text>
+              <Text>{avgDeadlines}/5</Text>
+            </View>
+            <View style={styles.ratingRow}>
+              <Text style={styles.ratingLabel}>Вклад в проект</Text>
+              <Text>{avgContribution}/5</Text>
+            </View>
 
             {lastComments.length > 0 && (
-              <View style={{marginTop: 10}}>
+              <View style={{marginTop: 12}}>
                 <Text style={styles.subTitle}>Последние отзывы:</Text>
                 {lastComments.map((c, i) => (
-                  <Text key={i} style={{fontStyle: 'italic'}}>
+                  <Text key={i} style={styles.commentText}>
                     “{c}”
                   </Text>
                 ))}
@@ -91,6 +110,38 @@ export const ProfileInfo = ({projects}: ProfileInfoProps) => {
           </>
         )}
       </View>
+
+      {/* 🔹 Рейтинг автора */}
+      <View style={styles.authorStats}>
+        <Text style={styles.sectionTitle}>Рейтинг автора</Text>
+        <Text>Завершённые проекты: {authorStats.completionRate}%</Text>
+        <Text>Средняя оценка участников: {authorStats.avgTeamRating}/5</Text>
+
+        {authorStats.leadershipComments.length > 0 && (
+          <View style={{marginTop: 8}}>
+            <Text>Отзывы команды о лидерстве:</Text>
+            {authorStats.leadershipComments.map((c, i) => (
+              <Text key={i} style={styles.commentText}>
+                “{c}”
+              </Text>
+            ))}
+          </View>
+        )}
+      </View>
+
+      {/* 🔹 Бейджи и ачивки */}
+      {badges.length > 0 && (
+        <View style={styles.badgesBlock}>
+          <Text style={styles.sectionTitle}>Бейджи и ачивки</Text>
+          <View style={styles.badgesRow}>
+            {badges.map(badge => (
+              <View key={badge.id} style={styles.badge}>
+                <Text style={styles.badgeText}>{badge.name}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
 
       {/* 🔹 Проекты */}
       <Text style={styles.text_project}>Проекты:</Text>
@@ -104,21 +155,71 @@ export const ProfileInfo = ({projects}: ProfileInfoProps) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
-  container: {width: '100%'},
-  profileInfo: {gap: 8, marginBottom: 16},
-  text: {fontSize: 15, color: '#333'},
-  ratingBlock: {
-    padding: 10,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
+  container: {
+    width: '100%',
+    paddingHorizontal: 16,
+  },
+  profileInfo: {
+    gap: 8,
     marginBottom: 20,
   },
-  sectionTitle: {fontSize: 18, fontWeight: 'bold', marginBottom: 8},
-  ratingText: {fontSize: 16, fontWeight: '600'},
-  subTitle: {fontSize: 15, fontWeight: '600', marginTop: 5},
-  projectImage: {width: 175, height: 250, borderRadius: 20},
+  text: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 22,
+  },
+  ratingBlock: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 10,
+    color: '#222',
+  },
+  ratingText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 2,
+  },
+  ratingLabel: {
+    color: '#555',
+    fontSize: 15,
+  },
+  subTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 10,
+    color: '#333',
+  },
+  commentText: {
+    fontStyle: 'italic',
+    color: '#444',
+    marginTop: 4,
+    marginLeft: 8,
+  },
+  projectImage: {
+    width: 175,
+    height: 250,
+    borderRadius: 20,
+  },
   projectName: {
     marginTop: 5,
     marginBottom: 10,
@@ -128,9 +229,39 @@ const styles = StyleSheet.create({
   },
   text_project: {
     paddingTop: 10,
-    paddingLeft: 16,
     marginBottom: 10,
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#111',
+  },
+  authorStats: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  badgesBlock: {
+    padding: 16,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 16,
+    marginBottom: 24,
+  },
+  badgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  badge: {
+    backgroundColor: '#ffd700',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

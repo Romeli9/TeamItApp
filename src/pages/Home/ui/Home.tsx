@@ -87,48 +87,22 @@ export const Home = () => {
   const fetchUserProjects = async () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
-      console.log(
-        '%csrc/pages/Home/ui/Home.tsx:90 user',
-        'color: #007acc;',
-        user,
-      );
+
       if (user) {
         const usersRef = collection(FIREBASE_DB, 'users');
         const userDoc = doc(usersRef, user.uid);
         const docSnap = await getDoc(userDoc);
         if (docSnap.exists()) {
           const userData = docSnap.data();
-          console.log(
-            '%csrc/pages/Home/ui/Home.tsx:97 userData',
-            'color: #007acc;',
-            userData,
-          );
 
           const projectsRef = collection(FIREBASE_DB, 'projects');
 
-          console.log(
-            '%csrc/pages/Home/ui/Home.tsx:109 projectsRef',
-            'color: #007acc;',
-            projectsRef,
-          );
           const querySnapshot = await getDocs(
             query(projectsRef, where('creator', '==', userData.username)),
           );
 
-          console.log(
-            '%csrc/pages/Home/ui/Home.tsx:114 querySnapshot',
-            'color: #007acc;',
-            querySnapshot,
-          );
-
           const querySnapshot2 = await getDocs(
             query(projectsRef, where('creator', '!=', userData.username)),
-          );
-
-          console.log(
-            '%csrc/pages/Home/ui/Home.tsx:120 querySnapshot2',
-            'color: #007acc;',
-            querySnapshot2,
           );
 
           if (querySnapshot.docs.length > 0) {
@@ -147,12 +121,6 @@ export const Home = () => {
               status: doc.data().status,
             }));
 
-            console.log(
-              '%csrc/pages/Home/ui/Home.tsx:138 projectsData',
-              'color: #007acc;',
-              projectsData,
-            );
-
             const projectsWithPhotoUrl = await Promise.all(
               projectsData.map(async project => {
                 if (project.photo) {
@@ -161,12 +129,6 @@ export const Home = () => {
                 }
                 return project;
               }),
-            );
-
-            console.log(
-              '%csrc/pages/Home/ui/Home.tsx:142 projectsWithPhotoUrl',
-              'color: #007acc;',
-              projectsWithPhotoUrl,
             );
 
             dispatch(setYourProjects(projectsWithPhotoUrl));
@@ -199,30 +161,15 @@ export const Home = () => {
               }),
             );
 
-            console.log(
-              '%csrc/pages/Home/ui/Home.tsx:178 projectsWith',
-              'color: #007acc;',
-              projectsWithPhotoUrl,
-            );
-
             dispatch(setOtherProjects(projectsWithPhotoUrl));
             dispatch(setAllOtherProjects(projectsWithPhotoUrl));
           }
         }
       }
     } catch (error: any) {
-      console.log(
-        '%csrc/pages/Home/ui/Home.tsx:168 error',
-        'color: #007acc;',
-        error,
-      );
       setError(error);
       console.error('Error fetching projects: ', error);
     } finally {
-      console.log(
-        '%csrc/pages/Home/ui/Home.tsx:171 setDataLoaded true',
-        'color: #007acc;',
-      );
       setDataLoaded(true);
     }
   };

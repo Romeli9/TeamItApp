@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import {getFileUrl, uploadFile} from 'api';
-import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
+import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import {EditProfile, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
@@ -26,6 +26,8 @@ import {
 } from 'firebase/firestore';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
+import {calculateAchievements} from 'redux/slices/achievementsSlice';
+import {calculateAuthorStats} from 'redux/slices/authorStatsSlice';
 import {
   ProjectType,
   clearProjects,
@@ -67,6 +69,14 @@ export const Profile = () => {
 
   const reviews = useSelector(selectReviews);
   const loading = useSelector(selectReviewsLoading);
+
+  // После загрузки проектов и отзывов:
+  useEffect(() => {
+    if (projects.length && reviews.length) {
+      dispatch(calculateAuthorStats({projects, reviews, authorId: userId}));
+      dispatch(calculateAchievements({projects, reviews, userId}));
+    }
+  }, [projects, reviews, userId]);
 
   useEffect(() => {
     dispatch(fetchUserReviews(userId));

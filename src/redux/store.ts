@@ -1,5 +1,7 @@
 import {configureStore} from '@reduxjs/toolkit';
 
+import achievementsReducer from './slices/achievementsSlice';
+import authorStatsReducer from './slices/authorStatsSlice';
 import filter from './slices/filterSlice';
 import projects from './slices/projectsSlice';
 import reviewStatsReducer from './slices/reviewStatsSlice';
@@ -13,6 +15,8 @@ export const store = configureStore({
     filter,
     reviews: reviewsReducer,
     reviewStats: reviewStatsReducer,
+    authorStats: authorStatsReducer,
+    achievements: achievementsReducer,
   },
 });
 

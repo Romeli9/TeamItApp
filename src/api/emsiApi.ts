@@ -19,7 +19,7 @@ export const getToken = async () => {
       await AsyncStorage.setItem('token', res.data.access_token);
     })
     .catch(error => {
-      console.log(error);
+      console.error(error);
     });
 };
 
