@@ -23,6 +23,7 @@ export const calculateAchievements = createAsyncThunk<
   {projects: ProjectType[]; reviews: Review[]; userId: string}
 >('achievements/calculate', async ({projects, reviews, userId}) => {
   const userReviews = reviews.filter(r => r.toUserId === userId);
+
   const authoredProjects = projects.filter(p => p.creatorId === userId);
   const completedProjects = authoredProjects.filter(
     p => p.status === 'completed',
