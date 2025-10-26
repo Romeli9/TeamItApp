@@ -16,11 +16,15 @@ import {Screens} from 'app/navigation/navigationEnums';
 import ProjectModal from 'components/ModalWindowProject';
 import {LinearGradient} from 'expo-linear-gradient';
 import {
+  addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
   query,
+  startAfter,
   where,
 } from 'firebase/firestore';
 import Carousel from 'react-native-reanimated-carousel';
@@ -31,6 +35,7 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import {clearFilters} from 'redux/slices/filterSlice';
 import {
+  ProjectType,
   setAllOtherProjects,
   setOtherProjects,
   setYourProjects,
@@ -42,6 +47,9 @@ import {Colors, IconStyles} from 'shared/libs/helpers';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {HomePagestyles as styles} from './Home.styles';
+
+const PAGE_SIZE = 10; // количество проектов на "страницу"
+let lastVisible: any = null; // последняя подгруженная запись
 
 export const Home = () => {
   const {navigate} = useAppNavigation();
@@ -69,6 +77,52 @@ export const Home = () => {
   );
 
   useEffect(() => {
+    const createProjects = async () => {
+      const firestore = FIREBASE_DB;
+      const projectsCollection = collection(firestore, 'projects');
+
+      for (let i = 1; i <= 20; i++) {
+        const projectData = {
+          creator: 'qweABC',
+          creatorId: `Otl378VmD2e87sXGC4WYW3OV6P62ABC`, // добавляем ABC в конце
+          description: 'add',
+          name: `awe ${i}`,
+          photo: '017a5865610a3f591e6e51a46c86a2c2.jpg',
+          required: ['Backend разраб.', 'Дизайнер'],
+          categories: ['ПИВО', 'Desktop'],
+          members: ['Otl378VmD2e87sXGC4WYW3OV6P62', '-'],
+          HardSkills: [
+            {
+              id: 'KS1217P66NK6BW72M9FH',
+              infoUrl:
+                'https://lightcast.io/open-skills/skills/KS1217P66NK6BW72M9FH',
+              name: 'Customer Relationship Management',
+              type: {id: 'ST1', name: 'Specialized Skill'},
+            },
+          ],
+          SoftSkills: [
+            {
+              id: 'KS1203C6N9B52QGB4H67',
+              infoUrl:
+                'https://lightcast.io/open-skills/skills/KS1203C6N9B52QGB4H67',
+              name: 'Research',
+              type: {id: 'ST2', name: 'Common Skill'},
+            },
+          ],
+          status: 'completed1',
+        };
+
+        await addDoc(projectsCollection, projectData);
+        console.log(`Project ${i} created`);
+      }
+
+      console.log('All 20 projects created!');
+    };
+
+    // createProjects().catch(console.error);
+  }, []);
+
+  useEffect(() => {
     fetchUserProjects();
   }, []);
 
@@ -88,93 +142,157 @@ export const Home = () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
 
-      if (user) {
-        const usersRef = collection(FIREBASE_DB, 'users');
-        const userDoc = doc(usersRef, user.uid);
-        const docSnap = await getDoc(userDoc);
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
+      if (!user) return;
 
-          const projectsRef = collection(FIREBASE_DB, 'projects');
+      const usersRef = collection(FIREBASE_DB, 'users');
+      const userDoc = doc(usersRef, user.uid);
+      const docSnap = await getDoc(userDoc);
 
-          const querySnapshot = await getDocs(
-            query(projectsRef, where('creator', '==', userData.username)),
-          );
+      if (!docSnap.exists()) return;
+      const userData = docSnap.data();
 
-          const querySnapshot2 = await getDocs(
-            query(
-              projectsRef,
-              where('creator', '!=', userData.username),
-              where('status', '!=', 'completed'),
-            ),
-          );
+      const projectsRef = collection(FIREBASE_DB, 'projects');
 
-          if (querySnapshot.docs.length > 0) {
-            const projectsData = querySnapshot.docs.map(doc => ({
-              id: doc.id,
-              creator: doc.data().creator,
-              creatorId: doc.data().creatorId,
-              description: doc.data().description,
-              name: doc.data().name,
-              photo: doc.data().photo,
-              required: doc.data().required,
-              categories: doc.data().categories,
-              members: doc.data().members,
-              HardSkills: doc.data().HardSkills,
-              SoftSkills: doc.data().SoftSkills,
-              status: doc.data().status,
-            }));
+      // Проекты пользователя
+      const querySnapshot = await getDocs(
+        query(projectsRef, where('creator', '==', userData.username)),
+      );
 
-            const projectsWithPhotoUrl = await Promise.all(
-              projectsData.map(async project => {
-                if (project.photo) {
-                  const url = await getFileUrl(project.photo);
-                  return {...project, photo: url};
-                }
-                return project;
-              }),
-            );
+      if (!querySnapshot.empty) {
+        const yourProjectsData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          creator: doc.data().creator,
+          creatorId: doc.data().creatorId,
+          description: doc.data().description,
+          name: doc.data().name,
+          photo: doc.data().photo,
+          required: doc.data().required,
+          categories: doc.data().categories,
+          members: doc.data().members,
+          HardSkills: doc.data().HardSkills || [],
+          SoftSkills: doc.data().SoftSkills || [],
+          status: doc.data().status,
+        }));
 
-            dispatch(setYourProjects(projectsWithPhotoUrl));
-          }
+        const yourProjectsWithPhotoUrl = await Promise.all(
+          yourProjectsData.map(async project => {
+            if (project.photo) {
+              const url = await getFileUrl(project.photo);
+              return {...project, photo: url};
+            }
+            return project;
+          }),
+        );
 
-          if (querySnapshot2.docs.length > 0) {
-            const projectsData = querySnapshot2.docs.map(doc => ({
-              id: doc.id,
-              creator: doc.data().creator,
-              creatorId: doc.data().creatorId,
-              description: doc.data().description,
-              name: doc.data().name,
-              photo: doc.data().photo,
-              required: doc.data().required,
-              categories: doc.data().categories,
-              members: doc.data().members,
-              skills: doc.data().skills,
-              HardSkills: doc.data().HardSkills || [],
-              SoftSkills: doc.data().SoftSkills || [],
-              status: doc.data().status ?? 'started',
-            }));
+        dispatch(setYourProjects(yourProjectsWithPhotoUrl));
+      }
 
-            const projectsWithPhotoUrl = await Promise.all(
-              projectsData.map(async project => {
-                if (project.photo) {
-                  const url = await getFileUrl(project.photo);
-                  return {...project, photo: url};
-                }
-                return project;
-              }),
-            );
+      // Другие проекты — оставляем только один != фильтр
+      const querySnapshot2 = await getDocs(
+        query(
+          projectsRef,
+          where('creator', '!=', userData.username),
+          orderBy('creator'),
+        ),
+      );
 
-            dispatch(setOtherProjects(projectsWithPhotoUrl));
-            dispatch(setAllOtherProjects(projectsWithPhotoUrl));
-          }
-        }
+      if (!querySnapshot2.empty) {
+        const otherProjectsData = querySnapshot2.docs
+          .map(doc => ({
+            id: doc.id,
+            creator: doc.data().creator,
+            creatorId: doc.data().creatorId,
+            description: doc.data().description,
+            name: doc.data().name,
+            photo: doc.data().photo,
+            required: doc.data().required,
+            categories: doc.data().categories,
+            members: doc.data().members,
+            HardSkills: doc.data().HardSkills || [],
+            SoftSkills: doc.data().SoftSkills || [],
+            status: doc.data().status ?? 'started',
+          }))
+          // фильтр по status на клиенте
+          .filter(project => project.status !== 'completed');
+
+        const otherProjectsWithPhotoUrl = await Promise.all(
+          otherProjectsData.map(async project => {
+            if (project.photo) {
+              const url = await getFileUrl(project.photo);
+              return {...project, photo: url};
+            }
+            return project;
+          }),
+        );
+
+        dispatch(setOtherProjects(otherProjectsWithPhotoUrl));
+        dispatch(setAllOtherProjects(otherProjectsWithPhotoUrl));
       }
     } catch (error: any) {
       setError(error);
       console.error('Error fetching projects: ', error);
     } finally {
       setDataLoaded(true);
+    }
+  };
+
+  const fetchOtherProjectsPage = async () => {
+    const projectsRef = collection(FIREBASE_DB, 'projects');
+
+    let q = query(
+      projectsRef,
+      where('creator', '!=', userName),
+      orderBy('creator'),
+      limit(PAGE_SIZE),
+    );
+
+    if (lastVisible) {
+      q = query(
+        projectsRef,
+        where('creator', '!=', userName),
+        orderBy('creator'),
+        startAfter(lastVisible),
+        limit(PAGE_SIZE),
+      );
+    }
+
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      const projectsData: ProjectType[] = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          creator: doc.data().creator,
+          creatorId: doc.data().creatorId,
+          description: doc.data().description,
+          name: doc.data().name,
+          photo: doc.data().photo,
+          required: doc.data().required,
+          categories: doc.data().categories,
+          members: doc.data().members,
+          HardSkills: doc.data().HardSkills || [],
+          SoftSkills: doc.data().SoftSkills || [],
+          status: doc.data().status ?? 'started',
+        }))
+        .filter(project => project.status !== 'completed');
+
+      // Получаем URL для фото
+      const projectsWithPhotoUrl: ProjectType[] = await Promise.all(
+        projectsData.map(async project => {
+          if (project.photo) {
+            const url = await getFileUrl(project.photo);
+            return {...project, photo: url};
+          }
+          return project;
+        }),
+      );
+
+      dispatch(setOtherProjects([...otherProjects, ...projectsWithPhotoUrl]));
+      dispatch(
+        setAllOtherProjects([...otherProjects, ...projectsWithPhotoUrl]),
+      );
+
+      lastVisible = snapshot.docs[snapshot.docs.length - 1];
     }
   };
 
@@ -321,7 +439,13 @@ export const Home = () => {
                   snapEnabled
                   data={otherProjects}
                   style={{width: screenWidth}}
-                  onSnapToItem={index => setCarouselIndex(index)}
+                  onSnapToItem={index => {
+                    setCarouselIndex(index);
+                    if (index === otherProjects.length - 1) {
+                      // дошли до последнего
+                      fetchOtherProjectsPage(); // подгружаем следующую "страницу"
+                    }
+                  }}
                   renderItem={({item}) => (
                     <View style={styles.carouselItem}>
                       <TouchableOpacity
