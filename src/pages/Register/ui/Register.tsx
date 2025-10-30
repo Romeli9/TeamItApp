@@ -5,7 +5,9 @@ import {
   Button,
   Image,
   KeyboardAvoidingView,
+  Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -54,6 +56,7 @@ export const RegisterPage = () => {
         }),
       );
     } catch (error) {
+      Alert.alert('Sign Up failed');
     } finally {
       setLoading(false);
     }
@@ -108,14 +111,20 @@ export const RegisterPage = () => {
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
-          <Button color="#B783EC" title="Register" onPress={SignUp} />
+          <TouchableOpacity
+            style={styles.button}
+            activeOpacity={0.8}
+            onPress={SignUp}>
+            <Text style={styles.buttonText}>Register</Text>
+          </TouchableOpacity>
         )}
 
-        <Button
-          color="#B783EC"
-          title="Go to Login"
-          onPress={() => navigate(Screens.LOGIN)}
-        />
+        <TouchableOpacity
+          style={styles.button}
+          activeOpacity={0.8}
+          onPress={() => navigate(Screens.LOGIN)}>
+          <Text style={styles.buttonText}>Go to Login</Text>
+        </TouchableOpacity>
       </KeyboardAvoidingView>
       <View style={styles.image_teamIT_down}>
         <Image

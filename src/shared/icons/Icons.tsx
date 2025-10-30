@@ -83,12 +83,15 @@ export const AlertIcon = (props: any) => (
 export const ArrowLeftIcon = (props: any) => (
   <Feather name="arrow-left" {...props} />
 );
+export const UserAddIcon = (props: any) => (
+  <AntDesign name="user-add" {...props} />
+)
 export const ArrowRightIcon = (props: any) => (
   <Feather name="arrow-right" {...props} />
 );
 export const PlusIcon = (props: any) => <Feather name="plus" {...props} />;
 
-export const EditProfileIcon = (props: any) => (
+export const EditIcon = (props: any) => (
   <FontAwesome name="edit" size={36} color="black" />
 );
 

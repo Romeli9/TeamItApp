@@ -15,18 +15,38 @@ import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens, Stacks} from 'app/navigation/navigationEnums';
 import {ProjectRouteParams} from 'app/navigation/navigationTypes';
 import {Skill} from 'components';
+import ProjectModal from 'components/ModalWindowProject';
 import ReviewModal from 'components/ReviewModal';
 import SearchModal, {UserFrom} from 'components/SearchModal';
-import {addDoc, collection, doc, updateDoc} from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import {useSelector} from 'react-redux';
-import {ProjectType, selectProjectById} from 'redux/slices/projectsSlice';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  ProjectType,
+  removeProject,
+  selectProjectById,
+} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
 import {requiredMock} from 'shared/assets/consts/Required';
-import {ArrowLeftIcon, CheckIcon, CloseIcon, PlusIcon} from 'shared/icons';
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  CloseIcon,
+  DoubleCheckIcon,
+  EditIcon,
+  PlusIcon,
+  RemoveIcon,
+  UserAddIcon,
+} from 'shared/icons';
 import {Colors} from 'shared/libs/helpers';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 import {MemberAvatar} from 'shared/ui';
@@ -36,6 +56,8 @@ import {ProjectStyles as styles} from './Project.styles';
 export const Project = () => {
   const route = useRoute<RouteProp<{params: ProjectRouteParams}>>();
   const {navigate, goBack} = useAppNavigation();
+
+  const dispatch = useDispatch();
 
   const navigation = useAppNavigation();
 
@@ -58,8 +80,34 @@ export const Project = () => {
   const [currentReviewUserId, setCurrentReviewUserId] = useState<string | null>(
     null,
   );
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const buttonRef = useRef<any>(null);
+
+  const handleDeleteProject = async () => {
+    Alert.alert(
+      'Удаление проекта',
+      'Вы уверены, что хотите удалить этот проект?',
+      [
+        {text: 'Отмена', style: 'cancel'},
+        {
+          text: 'Удалить',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteDoc(doc(FIREBASE_DB, 'projects', projectId));
+              dispatch(removeProject(projectId));
+              Alert.alert('Готово', 'Проект удалён');
+              goBack();
+            } catch (err) {
+              console.error('Ошибка удаления проекта:', err);
+              Alert.alert('Ошибка', 'Не удалось удалить проект');
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const handleUserClick = (user: UserFrom) => {
     setSearchModal(false);
@@ -143,39 +191,52 @@ export const Project = () => {
   }
 
   const handleFinishProject = async () => {
-    try {
-      if (!projectData) return;
+    Alert.alert(
+      'Завершение проекта',
+      'Вы уверены, что хотите отметить проект как завершённый? После этого участникам будет отправлено приглашение оставить отзыв.',
+      [
+        {text: 'Отмена', style: 'cancel'},
+        {
+          text: 'Завершить',
+          style: 'default',
+          onPress: async () => {
+            try {
+              if (!projectData) return;
 
-      const participants = projectData.members.filter(
-        id => id !== '-' && id !== userId,
-      );
+              const participants = projectData.members.filter(
+                id => id !== '-' && id !== userId,
+              );
 
-      await updateDoc(doc(FIREBASE_DB, 'projects', projectId), {
-        status: 'completed',
-      });
+              await updateDoc(doc(FIREBASE_DB, 'projects', projectId), {
+                status: 'completed',
+              });
 
-      // Отправка уведомлений участникам
-      for (const participantId of participants) {
-        await addDoc(collection(FIREBASE_DB, 'notifications'), {
-          userId: participantId,
-          projectId,
-          type: 'review',
-          fromUserId: userId,
-          createdAt: Date.now(),
-          read: false,
-        });
-      }
+              // Отправляем уведомления участникам
+              for (const participantId of participants) {
+                await addDoc(collection(FIREBASE_DB, 'notifications'), {
+                  userId: participantId,
+                  projectId,
+                  type: 'review',
+                  fromUserId: userId,
+                  createdAt: Date.now(),
+                  read: false,
+                });
+              }
 
-      if (participants.length > 0) {
-        setCurrentReviewUserId(participants[0]);
-        setReviewModalVisible(true);
-      } else {
-        Alert.alert('Готово', 'Проект завершён!');
-      }
-    } catch (err) {
-      console.error('Ошибка завершения проекта:', err);
-      Alert.alert('Ошибка', 'Не удалось завершить проект');
-    }
+              if (participants.length > 0) {
+                setCurrentReviewUserId(participants[0]);
+                setReviewModalVisible(true);
+              } else {
+                Alert.alert('Готово', 'Проект успешно завершён!');
+              }
+            } catch (err) {
+              console.error('Ошибка завершения проекта:', err);
+              Alert.alert('Ошибка', 'Не удалось завершить проект');
+            }
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -380,24 +441,42 @@ export const Project = () => {
               JSON.parse(projectData.SoftSkills)
             }
           />
+
+          {/* === Контейнер действий === */}
           {projectData.creatorId === userId && (
-            <TouchableOpacity
-              onPress={() => setSearchModal(true)}
-              style={styles.invite}>
-              <Text style={styles.inviteProject}>Поиск участников</Text>
-            </TouchableOpacity>
+            <View style={styles.actionsContainer}>
+              {/* Добавить участника */}
+              <TouchableOpacity
+                onPress={() => setSearchModal(true)}
+                style={[styles.iconButton, {backgroundColor: '#BE9DE8'}]}>
+                <UserAddIcon size={24} color="#fff" />
+              </TouchableOpacity>
+
+              {/* Завершить проект */}
+              {projectData.status !== 'completed' && (
+                <TouchableOpacity
+                  onPress={handleFinishProject}
+                  style={[styles.iconButton, {backgroundColor: 'red'}]}>
+                  <DoubleCheckIcon size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
+
+              {/* Редактировать проект */}
+              <TouchableOpacity
+                onPress={() => setEditModalVisible(true)}
+                style={[styles.iconButton, {backgroundColor: '#4A90E2'}]}>
+                <EditIcon size={24} color="#fff" />
+              </TouchableOpacity>
+
+              {/* Удалить проект */}
+              <TouchableOpacity
+                onPress={handleDeleteProject}
+                style={[styles.iconButton, {backgroundColor: '#8B0000'}]}>
+                <RemoveIcon size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
           )}
 
-          {projectData.creatorId === userId &&
-            projectData.status !== 'completed' && (
-              <TouchableOpacity
-                onPress={handleFinishProject}
-                style={[styles.invite, {backgroundColor: 'red'}]}>
-                <Text style={[styles.inviteProject, {color: '#fff'}]}>
-                  Завершить проект
-                </Text>
-              </TouchableOpacity>
-            )}
           <TouchableOpacity onPress={goBack} style={styles.goback}>
             <ArrowLeftIcon size={24} />
           </TouchableOpacity>
@@ -430,6 +509,12 @@ export const Project = () => {
               }}
             />
           )}
+
+          <ProjectModal
+            isModalVisible={editModalVisible}
+            setModalVisible={setEditModalVisible}
+            projectToEdit={projectData}
+          />
         </ScrollView>
       </View>
     </SafeAreaProvider>

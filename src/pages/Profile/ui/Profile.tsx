@@ -45,7 +45,7 @@ import {
 } from 'redux/slices/userSlice';
 import {AppDispatch, RootState} from 'redux/store';
 import {BellIcon} from 'shared/assets/icons/icons';
-import {EditProfileIcon, ExitIcon, PlusIcon} from 'shared/icons';
+import {EditIcon, ExitIcon, PlusIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
@@ -314,7 +314,7 @@ export const Profile = () => {
               </View>
               <View style={styles.actionButtonsProfileRight}>
                 <TouchableOpacity onPress={() => setEditProfileVisible(true)}>
-                  <EditProfileIcon size={24} />
+                  <EditIcon size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleSignOut}>
                   <ExitIcon size={24} />

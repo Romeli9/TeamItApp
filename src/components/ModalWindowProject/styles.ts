@@ -140,7 +140,7 @@ export const styles = StyleSheet.create({
   },
   project__text_create: {
     fontFamily: 'Inter-SemiBold',
-    fontSize: 27,
+    fontSize: 16,
     color: '#FFFFFF',
   },
   selectedImage: {
