@@ -224,6 +224,12 @@ export const EditProfileStyles = StyleSheet.create({
     fontSize: 24,
     color: '#C7C7C7',
   },
+  dropdownOuter: {
+    position: 'relative',
+    alignSelf: 'flex-start',
+    zIndex: 999,
+  },
+
   dropdownContainer: {
     position: 'relative',
     maxHeight: 200,
@@ -233,12 +239,15 @@ export const EditProfileStyles = StyleSheet.create({
     zIndex: 999,
     marginTop: 15,
   },
+
   dropdownWrapper: {
+    flexGrow: 1,
     paddingTop: 13,
     paddingLeft: 6,
     paddingRight: 13,
     paddingBottom: 5,
   },
+
   dropdownItem: {
     marginBottom: 10,
     color: 'white',

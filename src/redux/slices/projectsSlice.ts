@@ -15,6 +15,7 @@ export type ProjectType = {
   HardSkills: Skill[];
   SoftSkills: Skill[];
   members: string[];
+  status?: string;
 };
 
 export interface projectsState {
@@ -42,6 +43,14 @@ export const projectsSlice = createSlice({
     setAllOtherProjects(state, action: PayloadAction<ProjectType[]>) {
       state.allOtherProjects = action.payload;
     },
+    removeProject(state, action: PayloadAction<string>) {
+      const projectId = action.payload;
+      state.yourProjects = state.yourProjects.filter(p => p.id !== projectId);
+      state.otherProjects = state.otherProjects.filter(p => p.id !== projectId);
+      state.allOtherProjects = state.allOtherProjects.filter(
+        p => p.id !== projectId,
+      );
+    },
     clearProjects(state) {
       state.yourProjects = [];
       state.otherProjects = [];
@@ -54,6 +63,7 @@ export const {
   setYourProjects,
   setAllOtherProjects,
   setOtherProjects,
+  removeProject,
   clearProjects,
 } = projectsSlice.actions;
 

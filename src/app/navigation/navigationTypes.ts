@@ -32,6 +32,7 @@ export type RootStackParamsList = {
   [Screens.PROJECT]: ProjectRouteParams;
   [Screens.PROJECT_REQUESTS]: RequestRouteParams;
   [Screens.PROJECT_LIST_REQUESTS]: undefined;
+  [Screens.NOTIFICATION]: undefined;
 };
 
 export type MainTabsStackParamsList = {

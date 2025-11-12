@@ -48,4 +48,16 @@ export const LoginPagestyles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0)',
   },
+  button: {
+    backgroundColor: '#A36CE0',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
 });

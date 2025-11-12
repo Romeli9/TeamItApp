@@ -4,14 +4,13 @@ import {
   FlatList,
   Image,
   RefreshControl,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
 import {getFileUrl, uploadFile} from 'api';
-import {FIREBASE_AUTH, FIREBASE_DB, FIREBASE_STORAGE} from 'app/FireBaseConfig';
+import {FIREBASE_AUTH, FIREBASE_DB} from 'app/FireBaseConfig';
 import {Screens} from 'app/navigation/navigationEnums';
 import {EditProfile, ProfileInfo} from 'components';
 import * as ImagePicker from 'expo-image-picker';
@@ -25,34 +24,41 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore';
-import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
+import {calculateAchievements} from 'redux/slices/achievementsSlice';
+import {calculateAuthorStats} from 'redux/slices/authorStatsSlice';
 import {
   ProjectType,
   clearProjects,
   setYourProjects,
 } from 'redux/slices/projectsSlice';
 import {
+  fetchUserReviews,
+  selectReviews,
+  selectReviewsLoading,
+} from 'redux/slices/reviewsSlice';
+import {
   clearProfileData,
   setProfileData,
   setUserData,
 } from 'redux/slices/userSlice';
-import {RootState} from 'redux/store';
-import {EditProfileIcon, ExitIcon, PlusIcon} from 'shared/icons';
+import {AppDispatch, RootState} from 'redux/store';
+import {BellIcon} from 'shared/assets/icons/icons';
+import {EditIcon, ExitIcon, PlusIcon, StarIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
 
 export const Profile = () => {
   const {navigate} = useAppNavigation();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
   const [userDocRef, setUserDocRef] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const {userName, aboutMe, avatar, background} = useSelector(
+  const {userName, aboutMe, avatar, background, userId} = useSelector(
     (state: RootState) => state.user,
   );
 
@@ -61,10 +67,25 @@ export const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
 
+  const reviews = useSelector(selectReviews);
+  const loading = useSelector(selectReviewsLoading);
+
+  // После загрузки проектов и отзывов:
+  useEffect(() => {
+    if (projects.length && reviews.length) {
+      dispatch(calculateAuthorStats({projects, reviews, authorId: userId}));
+      dispatch(calculateAchievements({projects, reviews, userId}));
+    }
+  }, [projects, reviews, userId]);
+
+  useEffect(() => {
+    dispatch(fetchUserReviews(userId));
+  }, [userId]);
+
   useEffect(() => {
     async function loadUrls() {
       if (avatar) {
-        const url = await getFileUrl(avatar); // avatar = id
+        const url = await getFileUrl(avatar);
         setAvatarUrl(url);
       }
       if (background) {
@@ -135,15 +156,22 @@ export const Profile = () => {
               members: doc.data().members,
               HardSkills: doc.data().HardSkills,
               SoftSkills: doc.data().SoftSkills,
+              status: doc.data().status ?? 'started',
             }));
+
+            const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
 
             const projectsWithPhotoUrl = await Promise.all(
               projectsData.map(async project => {
                 if (project.photo) {
-                  const url = await getFileUrl(project.photo);
-                  return {...project, photo: url};
+                  try {
+                    const url = await getFileUrl(project.photo);
+                    return {...project, photo: {uri: url}};
+                  } catch (err) {
+                    return {...project, photo: defaultPhoto};
+                  }
                 }
-                return project;
+                return {...project, photo: defaultPhoto};
               }),
             );
             setProjects(projectsWithPhotoUrl);
@@ -283,14 +311,25 @@ export const Profile = () => {
             </View>
 
             {/* Блок с кнопками для редактирования и выхода из аккаунта */}
-            <View style={styles.actionButtonsProfile}>
-              <TouchableOpacity onPress={() => setEditProfileVisible(true)}>
-                <EditProfileIcon />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={handleSignOut}>
-                <ExitIcon />
-              </TouchableOpacity>
+            <View style={styles.containerButtons}>
+              <View style={styles.actionButtonsProfileLeft}>
+                <TouchableOpacity
+                  onPress={() => navigate(Screens.NOTIFICATION)}>
+                  <BellIcon size={24} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigate(Screens.NOTIFICATION)}>
+                  <StarIcon size={24} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.actionButtonsProfileRight}>
+                <TouchableOpacity onPress={() => setEditProfileVisible(true)}>
+                  <EditIcon size={24} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSignOut}>
+                  <ExitIcon size={24} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.profileInfo}>

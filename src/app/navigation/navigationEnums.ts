@@ -14,8 +14,9 @@ export enum Screens {
   PROJECT = 'Project',
   SEARCH = 'Search',
   PROJECT_REQUESTS = 'ProjectRequests',
-  PROJECT_LIST_REQUESTS='ProjectListRequests',
+  PROJECT_LIST_REQUESTS = 'ProjectListRequests',
   VIEW_PROFILE = 'ViewProfile',
+  NOTIFICATION = 'Notifications',
 }
 
 export type AllRoutes = Screens | Stacks;

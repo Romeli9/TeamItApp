@@ -2,10 +2,11 @@ import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Button,
   Image,
   KeyboardAvoidingView,
+  Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -18,7 +19,7 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 import {LoginPagestyles as styles} from './Login.styles';
 
 export const LoginPage = () => {
-  const {navigate, isAuthenticated} = useAppNavigation(); // Используем информацию об авторизации
+  const {navigate, isAuthenticated} = useAppNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,18 +31,16 @@ export const LoginPage = () => {
         params: {screen: Screens.PROFILE},
       });
     }
-  }, [isAuthenticated, navigate]); // Перенаправление, если пользователь уже авторизован
+  }, [isAuthenticated, navigate]);
 
   const SignIn = async () => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(FIREBASE_AUTH, email, password).then(
-        () =>
-          navigate(Stacks.MAIN, {
-            screen: Stacks.PROFILE_TAB,
-            params: {screen: Screens.PROFILE},
-          }),
-      );
+      await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      navigate(Stacks.MAIN, {
+        screen: Stacks.PROFILE_TAB,
+        params: {screen: Screens.PROFILE},
+      });
     } catch (error: any) {
       Alert.alert('Sign In failed: ' + error.message);
     } finally {
@@ -62,6 +61,7 @@ export const LoginPage = () => {
           style={{width: 150, height: 150}}
         />
       </View>
+
       <KeyboardAvoidingView behavior="padding">
         <TextInput
           value={email}
@@ -84,8 +84,19 @@ export const LoginPage = () => {
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
           <>
-            <Button color="#B783EC" title="Login" onPress={SignIn} />
-            <Button color="#B783EC" title="Register" onPress={goToRegister} />
+            <TouchableOpacity
+              style={styles.button}
+              activeOpacity={0.8}
+              onPress={SignIn}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, styles.button]}
+              activeOpacity={0.8}
+              onPress={goToRegister}>
+              <Text style={styles.buttonText}>Go to Register</Text>
+            </TouchableOpacity>
           </>
         )}
       </KeyboardAvoidingView>

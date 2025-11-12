@@ -13,15 +13,11 @@ import {
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import {Skill, SkillsInput} from 'components';
-import {
-  DocumentReference,
-  collection,
-  getDocs,
-  updateDoc,
-} from 'firebase/firestore';
+import {DocumentReference, updateDoc} from 'firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
 import {setProfileData} from 'redux/slices/userSlice';
 import {RootState} from 'redux/store';
+import {requiredMock} from 'shared/assets/consts/Required';
 
 import {EditProfileStyles as styles} from './EditProfile.styles';
 
@@ -29,7 +25,6 @@ export const EditProfile: React.FC<{
   onModalClose: () => void;
   userDocRef: DocumentReference;
 }> = ({onModalClose, userDocRef}) => {
-  // Состояния компонента
   const [isModalVisible, setModalVisible] = useState(true);
   const [aboutMeInput, setAboutMeInput] = useState('');
   const [experienceInput, setExperienceInput] = useState('');
@@ -37,13 +32,9 @@ export const EditProfile: React.FC<{
   const [loading, setLoading] = useState(false);
   const [selectedHardSkills, setSelectedHardSkills] = useState<Skill[]>([]);
   const [selectedSoftSkills, setSelectedSoftSkills] = useState<Skill[]>([]);
-
   const [rolesSelected, setRolesSelected] = useState<string[]>([]);
   const [rolesOpen, setRolesOpen] = useState(false);
 
-  const [rolesData, setRolesData] = useState<string[]>([]);
-
-  // Получаем данные из Redux store
   const {aboutMe, experience, HardSkills, SoftSkills, telegramm, roles} =
     useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
@@ -56,8 +47,6 @@ export const EditProfile: React.FC<{
   }, [HardSkills, SoftSkills]);
 
   useEffect(() => {
-    fetchData();
-
     setRolesSelected(roles || []);
     setAboutMeInput(aboutMe || '');
     setExperienceInput(experience || '');
@@ -66,7 +55,6 @@ export const EditProfile: React.FC<{
 
   useEffect(() => {
     if (!skills || skills.length === 0) return;
-
     try {
       setSelectedHardSkills(JSON.parse(HardSkills));
       setSelectedSoftSkills(JSON.parse(SoftSkills));
@@ -77,21 +65,8 @@ export const EditProfile: React.FC<{
     }
   }, [skills]);
 
-  const fetchData = async () => {
-    let tempRoles: string[] = [];
-
-    const querySnapshotRoles = await getDocs(collection(FIREBASE_DB, 'role'));
-    querySnapshotRoles.forEach(doc => {
-      if (doc.data().name && doc.data().name.length > 0)
-        tempRoles.push(doc.data().name);
-    });
-
-    setRolesData(tempRoles);
-  };
-
   const handleSave = async () => {
     setLoading(true);
-
     const allSkills = [...selectedHardSkills, ...selectedSoftSkills];
 
     if (allSkills.length === 0) {
@@ -144,7 +119,7 @@ export const EditProfile: React.FC<{
         onModalClose();
       }}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{flex: 1}}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -159,7 +134,8 @@ export const EditProfile: React.FC<{
 
             <ScrollView
               contentContainerStyle={styles.scrollContent}
-              keyboardShouldPersistTaps="handled">
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled>
               <Text style={styles.sectionTitle}>О себе</Text>
               <TextInput
                 value={aboutMeInput}
@@ -206,6 +182,7 @@ export const EditProfile: React.FC<{
                 keyboardType="url"
               />
 
+              {/* === РОЛИ === */}
               <View style={styles.project__container_with_plus}>
                 <Text style={styles.project__text_2}>Роли:</Text>
                 <View style={styles.fdrow}>
@@ -214,6 +191,7 @@ export const EditProfile: React.FC<{
                     onPress={toggleRoles}>
                     <Text style={styles.plus1}>+</Text>
                   </TouchableOpacity>
+
                   {rolesSelected.map(item => (
                     <View key={item} style={styles.selectedItem}>
                       <Text style={styles.selectedItemText}>{item}</Text>
@@ -227,12 +205,16 @@ export const EditProfile: React.FC<{
                     </View>
                   ))}
                 </View>
+
                 {rolesOpen && (
-                  <ScrollView style={styles.dropdownContainer}>
-                    <View style={styles.dropdownWrapper}>
-                      {rolesData &&
-                        rolesData.length > 0 &&
-                        rolesData.map((item, ix) => (
+                  <View style={styles.dropdownOuter}>
+                    <ScrollView
+                      style={styles.dropdownContainer}
+                      nestedScrollEnabled
+                      keyboardShouldPersistTaps="handled"
+                      showsVerticalScrollIndicator>
+                      <View style={styles.dropdownWrapper}>
+                        {requiredMock.map((item, ix) => (
                           <TouchableOpacity
                             key={ix}
                             style={[
@@ -251,10 +233,12 @@ export const EditProfile: React.FC<{
                             </View>
                           </TouchableOpacity>
                         ))}
-                    </View>
-                  </ScrollView>
+                      </View>
+                    </ScrollView>
+                  </View>
                 )}
               </View>
+
               <View style={styles.fixedBottom}>
                 <TouchableOpacity
                   style={styles.saveButton}

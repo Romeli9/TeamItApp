@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
-  FlatList,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -18,8 +17,7 @@ import {getSkills, getToken, uploadFile} from 'api';
 import {Skill} from 'components';
 import * as ImagePicker from 'expo-image-picker';
 import {LinearGradient} from 'expo-linear-gradient';
-import {addDoc, collection, getDocs} from 'firebase/firestore';
-import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
+import {addDoc, collection, doc, updateDoc} from 'firebase/firestore';
 import {useDispatch, useSelector} from 'react-redux';
 import {ProjectType, setYourProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
@@ -27,17 +25,19 @@ import {categoriesMock} from 'shared/assets/consts/Categories';
 import {requiredMock} from 'shared/assets/consts/Required';
 import {PhotoIcon} from 'shared/assets/icons/icons';
 
-import {FIREBASE_DB, FIREBASE_STORAGE} from '../../app/FireBaseConfig';
+import {FIREBASE_DB} from '../../app/FireBaseConfig';
 import {styles} from './styles';
 
 interface ProjectModalProps {
   isModalVisible: boolean;
   setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  projectToEdit?: ProjectType | null;
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({
   isModalVisible,
   setModalVisible,
+  projectToEdit = null,
 }) => {
   const [members, setMembers] = useState<string[]>([]);
   const [requiredSelected, setRequiredSelected] = useState<string[]>([]);
@@ -63,6 +63,26 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const {userName, userId} = useSelector((state: RootState) => state.user);
   const {yourProjects} = useSelector((state: RootState) => state.projects);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (projectToEdit) {
+      setProjectName(projectToEdit.name);
+      setProjectDescRaw(projectToEdit.description);
+      setRequiredSelected(projectToEdit.required);
+      setCategoriesSelected(projectToEdit.categories);
+      setSelectedImage(projectToEdit.photo);
+      setHardSkills(
+        typeof projectToEdit.HardSkills === 'string'
+          ? JSON.parse(projectToEdit.HardSkills)
+          : projectToEdit.HardSkills,
+      );
+      setSoftSkills(
+        typeof projectToEdit.SoftSkills === 'string'
+          ? JSON.parse(projectToEdit.SoftSkills)
+          : projectToEdit.SoftSkills,
+      );
+    }
+  }, [projectToEdit]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -256,10 +276,42 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       setMembers([]);
       setHardSkills([]);
       setSoftSkills([]);
-      setLoading(false);
       setModalVisible(false);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditProject = async () => {
+    if (!projectToEdit) return;
+
+    try {
+      setLoading(true);
+
+      let imageUrl = projectToEdit.photo;
+      if (pickerResponse && !pickerResponse.canceled) {
+        const uploaded = await uploadImageToFirebase();
+        if (uploaded) imageUrl = uploaded;
+      }
+
+      await updateDoc(doc(FIREBASE_DB, 'projects', projectToEdit.id), {
+        photo: imageUrl,
+        name: projectName,
+        description: projectDescRaw,
+        required: requiredSelected,
+        categories: categoriesSelected,
+        HardSkills: JSON.stringify(HardSkills),
+        SoftSkills: JSON.stringify(SoftSkills),
+      });
+
+      Alert.alert('Успешно', 'Проект обновлён');
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Ошибка редактирования проекта:', error);
+      Alert.alert('Ошибка', 'Не удалось обновить проект');
+    } finally {
       setLoading(false);
     }
   };
@@ -286,7 +338,9 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 onPress={() => setModalVisible(false)}>
                 <Image source={require('shared/assets/icons/cros.png')} />
               </TouchableOpacity>
-              <Text style={styles.modalTitle}>Создание проекта</Text>
+              <Text style={styles.modalTitle}>
+                {projectToEdit ? 'Редактирование проекта' : 'Создание проекта'}
+              </Text>
               <TouchableOpacity
                 style={styles.add_image__button}
                 onPress={onImageLibraryPress}>
@@ -498,10 +552,12 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               </View>
 
               <TouchableOpacity
-                disabled={loading}
+                onPress={projectToEdit ? handleEditProject : сreateProject}
                 style={styles.project__button_create}
-                onPress={сreateProject}>
-                <Text style={styles.project__text_create}>Создать</Text>
+                disabled={loading}>
+                <Text style={styles.project__text_create}>
+                  {projectToEdit ? 'Сохранить изменения' : 'Создать проект'}
+                </Text>
               </TouchableOpacity>
             </ScrollView>
           </View>

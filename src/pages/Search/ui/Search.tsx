@@ -2,6 +2,7 @@ import {useNavigation} from '@react-navigation/native';
 import React, {useEffect} from 'react';
 import {Button, Text, TouchableOpacity, View} from 'react-native';
 
+import {getFileUrl} from 'api';
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import Checkbox from 'expo-checkbox';
 import {collection, getDocs, query, where} from 'firebase/firestore';
@@ -17,8 +18,8 @@ import {
 } from 'redux/slices/filterSlice';
 import {setOtherProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
-import {categories} from 'shared/assets/consts/Categories';
-import {required} from 'shared/assets/consts/Required';
+import {categoriesMock} from 'shared/assets/consts/Categories';
+import {requiredMock} from 'shared/assets/consts/Required';
 
 import {SearchStyles as styles} from './Search.styles';
 
@@ -61,6 +62,7 @@ export const Search: React.FC = () => {
       const querySnapshot = await getDocs(
         query(projectsRef, where('creator', '!=', userName)),
       );
+
       const projectsData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         creator: doc.data().creator,
@@ -73,7 +75,23 @@ export const Search: React.FC = () => {
         members: doc.data().members,
       }));
 
-      dispatch(setStateProjects(projectsData));
+      const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
+
+      const projectsWithPhotoUrl = await Promise.all(
+        projectsData.map(async project => {
+          if (project.photo) {
+            try {
+              const url = await getFileUrl(project.photo);
+              return {...project, photo: {uri: url}};
+            } catch (err) {
+              return {...project, photo: defaultPhoto};
+            }
+          }
+          return {...project, photo: defaultPhoto};
+        }),
+      );
+
+      dispatch(setStateProjects(projectsWithPhotoUrl));
     } catch (error) {
       console.error('Error fetching projects: ', error);
     }
@@ -108,7 +126,7 @@ export const Search: React.FC = () => {
         <View style={styles.boxesContainer}>
           <View style={styles.containerboxed1}>
             <Text style={styles.textStyle1}>Категории</Text>
-            {categories.map(category => (
+            {categoriesMock.map((category: any) => (
               <TouchableOpacity
                 key={category.key}
                 style={styles.checkboxContainer}
@@ -127,7 +145,7 @@ export const Search: React.FC = () => {
           </View>
           <View style={styles.containerboxed2}>
             <Text style={styles.textStyle1}>Роли</Text>
-            {required.map(requireded => (
+            {requiredMock.map((requireded: any) => (
               <TouchableOpacity
                 key={requireded.key}
                 style={styles.checkboxContainer}
