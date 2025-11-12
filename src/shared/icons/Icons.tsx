@@ -85,7 +85,7 @@ export const ArrowLeftIcon = (props: any) => (
 );
 export const UserAddIcon = (props: any) => (
   <AntDesign name="user-add" {...props} />
-)
+);
 export const ArrowRightIcon = (props: any) => (
   <Feather name="arrow-right" {...props} />
 );
@@ -97,12 +97,4 @@ export const EditIcon = (props: any) => (
 
 export const ExitIcon = (props: any) => (
   <MaterialIcons name="exit-to-app" size={36} color="black" />
-);
-
-export const UpCaretIcon = (props: any) => (
-  <AntDesign name="caretup" size={24} color="black" />
-);
-
-export const DownCaretIcon = (props: any) => (
-  <AntDesign name="caretdown" size={24} color="black" />
 );

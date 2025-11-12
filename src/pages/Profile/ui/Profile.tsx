@@ -45,7 +45,7 @@ import {
 } from 'redux/slices/userSlice';
 import {AppDispatch, RootState} from 'redux/store';
 import {BellIcon} from 'shared/assets/icons/icons';
-import {EditIcon, ExitIcon, PlusIcon} from 'shared/icons';
+import {EditIcon, ExitIcon, PlusIcon, StarIcon} from 'shared/icons';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
@@ -159,13 +159,19 @@ export const Profile = () => {
               status: doc.data().status ?? 'started',
             }));
 
+            const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
+
             const projectsWithPhotoUrl = await Promise.all(
               projectsData.map(async project => {
                 if (project.photo) {
-                  const url = await getFileUrl(project.photo);
-                  return {...project, photo: url};
+                  try {
+                    const url = await getFileUrl(project.photo);
+                    return {...project, photo: {uri: url}};
+                  } catch (err) {
+                    return {...project, photo: defaultPhoto};
+                  }
                 }
-                return project;
+                return {...project, photo: defaultPhoto};
               }),
             );
             setProjects(projectsWithPhotoUrl);
@@ -310,6 +316,10 @@ export const Profile = () => {
                 <TouchableOpacity
                   onPress={() => navigate(Screens.NOTIFICATION)}>
                   <BellIcon size={24} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigate(Screens.NOTIFICATION)}>
+                  <StarIcon size={24} />
                 </TouchableOpacity>
               </View>
               <View style={styles.actionButtonsProfileRight}>

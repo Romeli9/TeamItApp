@@ -54,6 +54,7 @@ export const ProfileStyles = StyleSheet.create({
   actionButtonsProfileLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 16,
   },
 
   actionButtonsProfileRight: {

@@ -141,7 +141,6 @@ export const Home = () => {
   const fetchUserProjects = async () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
-
       if (!user) return;
 
       const usersRef = collection(FIREBASE_DB, 'users');
@@ -153,12 +152,14 @@ export const Home = () => {
 
       const projectsRef = collection(FIREBASE_DB, 'projects');
 
-      // Проекты пользователя
+      // === Проекты пользователя ===
       const querySnapshot = await getDocs(
         query(projectsRef, where('creator', '==', userData.username)),
       );
 
-      if (!querySnapshot.empty) {
+      if (querySnapshot.empty) {
+        dispatch(setYourProjects([])); // <-- очистка, если ничего не пришло
+      } else {
         const yourProjectsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
           creator: doc.data().creator,
@@ -174,20 +175,28 @@ export const Home = () => {
           status: doc.data().status,
         }));
 
+        const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
+
         const yourProjectsWithPhotoUrl = await Promise.all(
           yourProjectsData.map(async project => {
             if (project.photo) {
-              const url = await getFileUrl(project.photo);
-              return {...project, photo: url};
+              try {
+                const url = await getFileUrl(project.photo);
+                return {...project, photo: {uri: url}};
+              } catch (err) {
+                return {...project, photo: defaultPhoto};
+              }
             }
-            return project;
+            return {...project, photo: defaultPhoto};
           }),
         );
 
         dispatch(setYourProjects(yourProjectsWithPhotoUrl));
+
+        dispatch(setYourProjects(yourProjectsWithPhotoUrl));
       }
 
-      // Другие проекты — оставляем только один != фильтр
+      // === Другие проекты ===
       const querySnapshot2 = await getDocs(
         query(
           projectsRef,
@@ -196,7 +205,10 @@ export const Home = () => {
         ),
       );
 
-      if (!querySnapshot2.empty) {
+      if (querySnapshot2.empty) {
+        dispatch(setOtherProjects([]));
+        dispatch(setAllOtherProjects([]));
+      } else {
         const otherProjectsData = querySnapshot2.docs
           .map(doc => ({
             id: doc.id,
@@ -212,16 +224,21 @@ export const Home = () => {
             SoftSkills: doc.data().SoftSkills || [],
             status: doc.data().status ?? 'started',
           }))
-          // фильтр по status на клиенте
           .filter(project => project.status !== 'completed');
+
+        const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
 
         const otherProjectsWithPhotoUrl = await Promise.all(
           otherProjectsData.map(async project => {
             if (project.photo) {
-              const url = await getFileUrl(project.photo);
-              return {...project, photo: url};
+              try {
+                const url = await getFileUrl(project.photo);
+                return {...project, photo: url};
+              } catch (err) {
+                return {...project, photo: defaultPhoto};
+              }
             }
-            return project;
+            return {...project, photo: defaultPhoto};
           }),
         );
 

@@ -13,11 +13,12 @@ import {
 
 export const useChatList = (userId: string) => {
   const [chats, setChats] = useState<Chat[]>([]);
-
-  // Кэш для картинок (ключ = storagePath, значение = https URL)
-  const imageCache = useRef<Record<string, string>>({});
+  const imageCache = useRef<Record<string, {uri: string} | any>>({});
 
   useEffect(() => {
+    if (!userId) return;
+
+    const defaultImage = require('../assets/icons/mqdefault.jpg');
     const chatsRef = collection(FIREBASE_DB, 'chats');
     const chatsQuery = query(
       chatsRef,
@@ -28,32 +29,48 @@ export const useChatList = (userId: string) => {
     const unsubscribe = onSnapshot(
       chatsQuery,
       async snapshot => {
-        let fetchedChats = snapshot.docs.map(doc => ({
+        const fetchedChats = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         })) as Chat[];
 
         await Promise.all(
           fetchedChats.map(async chat => {
-            if (chat.image) {
-              // если это уже готовый https-url → не трогаем
-              if (chat.image.startsWith('http')) {
+            try {
+              // если нет изображения → дефолт
+              if (!chat.image) {
+                chat.image = defaultImage;
                 return;
               }
 
-              // если ссылка закэширована → берём из кэша
+              // если уже https-ссылка → оставляем как есть
+              if (
+                typeof chat.image === 'string' &&
+                chat.image.startsWith('http')
+              ) {
+                chat.image = chat.image;
+                return;
+              }
+
+              // если уже был закэширован
               if (imageCache.current[chat.image]) {
                 chat.image = imageCache.current[chat.image];
                 return;
               }
 
-              // иначе качаем и сохраняем в кэш
+              // иначе — пробуем получить URL из Firebase Storage
               const url = await getFileUrl(chat.image);
               imageCache.current[chat.image] = url;
               chat.image = url;
+            } catch (err: any) {
+              console.warn(
+                `⚠️ Не удалось загрузить изображение для чата ${chat.id}: ${err.message}`,
+              );
+              chat.image = defaultImage;
             }
           }),
         );
+
         setChats(fetchedChats);
       },
       error => {
