@@ -58,8 +58,6 @@ export const ProfileView = () => {
             ...doc.data(),
           }));
 
-          console.log('projects', projects);
-
           setUserProjects(projects);
         }
       } catch (error) {

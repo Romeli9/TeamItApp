@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {memo, useCallback, useMemo} from 'react';
 import {FlatList, View} from 'react-native';
 
 import {Screens} from 'app/navigation/navigationEnums';
@@ -12,11 +12,9 @@ import {ChatItem} from 'shared/ui';
 
 import {ChatListStyles as styles} from './ChatList.styles';
 
-export const ChatList = () => {
+export const ChatList = memo(() => {
   const {navigate} = useAppNavigation();
-
   const {userId} = useSelector((state: RootState) => state.user);
-
   const chats = useChatList(userId);
 
   const renderItem = ({item}: {item: Chat}) => {
@@ -38,16 +36,24 @@ export const ChatList = () => {
     );
   };
 
+  const keyExtractor = useCallback((item: Chat) => item.id.toString(), []);
+
+  const memoizedChats = useMemo(() => chats, [chats]);
+
   return (
     <View style={styles.ChatListContainer}>
       <HeaderMessenger />
       <FlatList
         style={styles.container}
-        data={chats}
+        data={memoizedChats}
         initialNumToRender={20}
+        maxToRenderPerBatch={20}
+        windowSize={10}
+        updateCellsBatchingPeriod={50}
+        removeClippedSubviews={true}
         renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={keyExtractor}
       />
     </View>
   );
-};
+});

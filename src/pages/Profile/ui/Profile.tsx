@@ -166,7 +166,7 @@ export const Profile = () => {
                 if (project.photo) {
                   try {
                     const url = await getFileUrl(project.photo);
-                    return {...project, photo: {uri: url}};
+                    return {...project, photo: url};
                   } catch (err) {
                     return {...project, photo: defaultPhoto};
                   }

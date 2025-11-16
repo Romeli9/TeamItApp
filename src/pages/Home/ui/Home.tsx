@@ -77,52 +77,6 @@ export const Home = () => {
   );
 
   useEffect(() => {
-    const createProjects = async () => {
-      const firestore = FIREBASE_DB;
-      const projectsCollection = collection(firestore, 'projects');
-
-      for (let i = 1; i <= 20; i++) {
-        const projectData = {
-          creator: 'qweABC',
-          creatorId: `Otl378VmD2e87sXGC4WYW3OV6P62ABC`, // добавляем ABC в конце
-          description: 'add',
-          name: `awe ${i}`,
-          photo: '017a5865610a3f591e6e51a46c86a2c2.jpg',
-          required: ['Backend разраб.', 'Дизайнер'],
-          categories: ['ПИВО', 'Desktop'],
-          members: ['Otl378VmD2e87sXGC4WYW3OV6P62', '-'],
-          HardSkills: [
-            {
-              id: 'KS1217P66NK6BW72M9FH',
-              infoUrl:
-                'https://lightcast.io/open-skills/skills/KS1217P66NK6BW72M9FH',
-              name: 'Customer Relationship Management',
-              type: {id: 'ST1', name: 'Specialized Skill'},
-            },
-          ],
-          SoftSkills: [
-            {
-              id: 'KS1203C6N9B52QGB4H67',
-              infoUrl:
-                'https://lightcast.io/open-skills/skills/KS1203C6N9B52QGB4H67',
-              name: 'Research',
-              type: {id: 'ST2', name: 'Common Skill'},
-            },
-          ],
-          status: 'completed1',
-        };
-
-        await addDoc(projectsCollection, projectData);
-        console.log(`Project ${i} created`);
-      }
-
-      console.log('All 20 projects created!');
-    };
-
-    // createProjects().catch(console.error);
-  }, []);
-
-  useEffect(() => {
     fetchUserProjects();
   }, []);
 
@@ -158,7 +112,7 @@ export const Home = () => {
       );
 
       if (querySnapshot.empty) {
-        dispatch(setYourProjects([])); // <-- очистка, если ничего не пришло
+        dispatch(setYourProjects([]));
       } else {
         const yourProjectsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -182,7 +136,7 @@ export const Home = () => {
             if (project.photo) {
               try {
                 const url = await getFileUrl(project.photo);
-                return {...project, photo: {uri: url}};
+                return {...project, photo: url};
               } catch (err) {
                 return {...project, photo: defaultPhoto};
               }
@@ -190,8 +144,6 @@ export const Home = () => {
             return {...project, photo: defaultPhoto};
           }),
         );
-
-        dispatch(setYourProjects(yourProjectsWithPhotoUrl));
 
         dispatch(setYourProjects(yourProjectsWithPhotoUrl));
       }
