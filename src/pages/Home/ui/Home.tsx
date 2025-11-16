@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -51,6 +51,8 @@ import {HomePagestyles as styles} from './Home.styles';
 const PAGE_SIZE = 10; // количество проектов на "страницу"
 let lastVisible: any = null; // последняя подгруженная запись
 
+const defaultPhoto = '../../../shared/assets/icons/mqdefault.jpg';
+
 export const Home = () => {
   const {navigate} = useAppNavigation();
 
@@ -62,7 +64,7 @@ export const Home = () => {
 
   const [error, setError] = useState('');
 
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState(defaultPhoto);
 
   const dispatch = useDispatch();
 
@@ -76,15 +78,30 @@ export const Home = () => {
     (state: RootState) => state.filter,
   );
 
+  const firstRenderRef = useRef(true);
   useEffect(() => {
-    fetchUserProjects();
-  }, []);
+    if (
+      firstRenderRef.current ||
+      ![...yourProjects, ...otherProjects].some(
+        item =>
+          item.photo &&
+          (item.photo.startsWith('http') || item.photo.startsWith('../')),
+      )
+    ) {
+      fetchUserProjects();
+      firstRenderRef.current = false;
+    }
+  }, [yourProjects, otherProjects]);
 
   useEffect(() => {
     async function loadUrls() {
       if (avatar) {
-        const url = await getFileUrl(avatar); // avatar = id
-        setAvatarUrl(url);
+        try {
+          const url = await getFileUrl(avatar);
+          setAvatarUrl(url);
+        } catch (error) {
+          setAvatarUrl(defaultPhoto);
+        }
       }
     }
     loadUrls();
@@ -128,8 +145,6 @@ export const Home = () => {
           SoftSkills: doc.data().SoftSkills || [],
           status: doc.data().status,
         }));
-
-        const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
 
         const yourProjectsWithPhotoUrl = await Promise.all(
           yourProjectsData.map(async project => {
@@ -177,8 +192,6 @@ export const Home = () => {
             status: doc.data().status ?? 'started',
           }))
           .filter(project => project.status !== 'completed');
-
-        const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
 
         const otherProjectsWithPhotoUrl = await Promise.all(
           otherProjectsData.map(async project => {
@@ -249,10 +262,14 @@ export const Home = () => {
       const projectsWithPhotoUrl: ProjectType[] = await Promise.all(
         projectsData.map(async project => {
           if (project.photo) {
-            const url = await getFileUrl(project.photo);
-            return {...project, photo: url};
+            try {
+              const url = await getFileUrl(project.photo);
+              return {...project, photo: url};
+            } catch (error) {
+              return {...project, photo: defaultPhoto};
+            }
           }
-          return project;
+          return {...project, photo: defaultPhoto};
         }),
       );
 

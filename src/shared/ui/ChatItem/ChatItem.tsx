@@ -19,7 +19,7 @@ type ChatItemProps = {
   onPress: (chatName: string) => void;
 };
 
-const defaultPhoto = require('../../assets/icons/mqdefault.jpg');
+const defaultPhoto = '../../assets/icons/mqdefault.jpg';
 
 export const ChatItem = memo(
   ({

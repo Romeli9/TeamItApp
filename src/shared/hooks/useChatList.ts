@@ -19,7 +19,7 @@ export const useChatList = (userId: string) => {
   useEffect(() => {
     if (!userId) return;
 
-    const defaultImage = require('../assets/icons/mqdefault.jpg');
+    const defaultImage = '../assets/icons/mqdefault.jpg';
     const chatsRef = collection(FIREBASE_DB, 'chats');
     const chatsQuery = query(
       chatsRef,

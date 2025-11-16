@@ -6,6 +6,8 @@ import {getUserById} from 'services/getUserById';
 
 import {MemberAvatarStyles as styles} from './MemberAvatar.styles';
 
+const defaultImage = '../../assets/icons/mqdefault.jpg';
+
 export const MemberAvatar: React.FC<{userId: string; num: number}> = ({
   userId,
   num,
@@ -14,11 +16,13 @@ export const MemberAvatar: React.FC<{userId: string; num: number}> = ({
 
   useEffect(() => {
     const fetchUserData = async () => {
+      let userData;
       try {
-        const userData = await getUserById(userId);
+        userData = await getUserById(userId);
         const imageUrl = await getFileUrl(userData.avatar);
         setUser({...userData, avatar: imageUrl});
       } catch (error) {
+        setUser({...userData, avatar: defaultImage});
         console.error('Ошибка при загрузке данных пользователя:', error);
       }
     };

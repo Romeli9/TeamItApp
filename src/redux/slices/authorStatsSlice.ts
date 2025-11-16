@@ -24,7 +24,9 @@ export const calculateAuthorStats = createAsyncThunk<
   async ({projects, reviews, authorId}, {rejectWithValue}) => {
     try {
       const authoredProjects = projects.filter(p => p.creatorId === authorId);
+
       const completed = authoredProjects.filter(p => p.status === 'completed');
+
       const authorReviews = reviews.filter(r => r.toUserId === authorId);
 
       const avg = (arr: number[]) =>
