@@ -2,6 +2,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 
 import {Profile, ProfileView} from 'pages';
+import {Achievements} from 'pages/Achievements/Achievements';
+import {NotificationsPage} from 'pages/NotificationsPage';
 import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {Screens} from '../navigationEnums';
@@ -23,6 +25,15 @@ export const ProfileStackNavigator = () => {
         name={Screens.VIEW_PROFILE}
         component={ProfileView}
         initialParams={{userId: undefined}}
+      />
+      <ProfileStack.Screen
+        name={Screens.ACHIEVEMENTS}
+        component={Achievements}
+      />
+      <ProfileStack.Screen
+        name={Screens.NOTIFICATION}
+        component={NotificationsPage}
+        options={{headerShown: false}}
       />
     </ProfileStack.Navigator>
   );

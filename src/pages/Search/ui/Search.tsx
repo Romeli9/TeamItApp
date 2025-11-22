@@ -75,7 +75,7 @@ export const Search: React.FC = () => {
         members: doc.data().members,
       }));
 
-      const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
+      const defaultPhoto = '../../../shared/assets/icons/mqdefault.jpg';
 
       const projectsWithPhotoUrl = await Promise.all(
         projectsData.map(async project => {
@@ -128,18 +128,17 @@ export const Search: React.FC = () => {
             <Text style={styles.textStyle1}>Категории</Text>
             {categoriesMock.map((category: any) => (
               <TouchableOpacity
-                key={category.key}
+                key={category}
                 style={styles.checkboxContainer}
-                onPress={() => handleCategoryChange(category.value)}>
+                onPress={() => handleCategoryChange(category)}>
                 <Checkbox
+                  key={category}
                   style={styles.checkbox}
-                  value={categoryes.includes(category.value)}
-                  onValueChange={() => handleCategoryChange(category.value)}
-                  color={
-                    categoryes.includes(category.value) ? '#4630EB' : undefined
-                  }
+                  value={categoryes.includes(category)}
+                  onValueChange={() => handleCategoryChange(category)}
+                  color={categoryes.includes(category) ? '#4630EB' : undefined}
                 />
-                <Text style={styles.textStyle2}>{category.value}</Text>
+                <Text style={styles.textStyle2}>{category}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -147,18 +146,17 @@ export const Search: React.FC = () => {
             <Text style={styles.textStyle1}>Роли</Text>
             {requiredMock.map((requireded: any) => (
               <TouchableOpacity
-                key={requireded.key}
+                key={requireded}
                 style={styles.checkboxContainer}
-                onPress={() => handleRequireChange(requireded.value)}>
+                onPress={() => handleRequireChange(requireded)}>
                 <Checkbox
+                  key={requireded}
                   style={styles.checkbox}
-                  value={requireds.includes(requireded.value)}
-                  onValueChange={() => handleRequireChange(requireded.value)}
-                  color={
-                    requireds.includes(requireded.value) ? '#4630EB' : undefined
-                  }
+                  value={requireds.includes(requireded)}
+                  onValueChange={() => handleRequireChange(requireded)}
+                  color={requireds.includes(requireded) ? '#4630EB' : undefined}
                 />
-                <Text style={styles.textStyle2}>{requireded.value}</Text>
+                <Text style={styles.textStyle2}>{requireded}</Text>
               </TouchableOpacity>
             ))}
           </View>

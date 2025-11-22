@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -51,6 +51,8 @@ import {HomePagestyles as styles} from './Home.styles';
 const PAGE_SIZE = 10; // количество проектов на "страницу"
 let lastVisible: any = null; // последняя подгруженная запись
 
+const defaultPhoto = '../../../shared/assets/icons/mqdefault.jpg';
+
 export const Home = () => {
   const {navigate} = useAppNavigation();
 
@@ -62,7 +64,7 @@ export const Home = () => {
 
   const [error, setError] = useState('');
 
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState(defaultPhoto);
 
   const dispatch = useDispatch();
 
@@ -76,61 +78,30 @@ export const Home = () => {
     (state: RootState) => state.filter,
   );
 
+  const firstRenderRef = useRef(true);
   useEffect(() => {
-    const createProjects = async () => {
-      const firestore = FIREBASE_DB;
-      const projectsCollection = collection(firestore, 'projects');
-
-      for (let i = 1; i <= 20; i++) {
-        const projectData = {
-          creator: 'qweABC',
-          creatorId: `Otl378VmD2e87sXGC4WYW3OV6P62ABC`, // добавляем ABC в конце
-          description: 'add',
-          name: `awe ${i}`,
-          photo: '017a5865610a3f591e6e51a46c86a2c2.jpg',
-          required: ['Backend разраб.', 'Дизайнер'],
-          categories: ['ПИВО', 'Desktop'],
-          members: ['Otl378VmD2e87sXGC4WYW3OV6P62', '-'],
-          HardSkills: [
-            {
-              id: 'KS1217P66NK6BW72M9FH',
-              infoUrl:
-                'https://lightcast.io/open-skills/skills/KS1217P66NK6BW72M9FH',
-              name: 'Customer Relationship Management',
-              type: {id: 'ST1', name: 'Specialized Skill'},
-            },
-          ],
-          SoftSkills: [
-            {
-              id: 'KS1203C6N9B52QGB4H67',
-              infoUrl:
-                'https://lightcast.io/open-skills/skills/KS1203C6N9B52QGB4H67',
-              name: 'Research',
-              type: {id: 'ST2', name: 'Common Skill'},
-            },
-          ],
-          status: 'completed1',
-        };
-
-        await addDoc(projectsCollection, projectData);
-        console.log(`Project ${i} created`);
-      }
-
-      console.log('All 20 projects created!');
-    };
-
-    // createProjects().catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    fetchUserProjects();
-  }, []);
+    if (
+      firstRenderRef.current ||
+      ![...yourProjects, ...otherProjects].some(
+        item =>
+          item.photo &&
+          (item.photo.startsWith('http') || item.photo.startsWith('../')),
+      )
+    ) {
+      fetchUserProjects();
+      firstRenderRef.current = false;
+    }
+  }, [yourProjects, otherProjects]);
 
   useEffect(() => {
     async function loadUrls() {
       if (avatar) {
-        const url = await getFileUrl(avatar); // avatar = id
-        setAvatarUrl(url);
+        try {
+          const url = await getFileUrl(avatar);
+          setAvatarUrl(url);
+        } catch (error) {
+          setAvatarUrl(defaultPhoto);
+        }
       }
     }
     loadUrls();
@@ -158,7 +129,7 @@ export const Home = () => {
       );
 
       if (querySnapshot.empty) {
-        dispatch(setYourProjects([])); // <-- очистка, если ничего не пришло
+        dispatch(setYourProjects([]));
       } else {
         const yourProjectsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -175,14 +146,12 @@ export const Home = () => {
           status: doc.data().status,
         }));
 
-        const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
-
         const yourProjectsWithPhotoUrl = await Promise.all(
           yourProjectsData.map(async project => {
             if (project.photo) {
               try {
                 const url = await getFileUrl(project.photo);
-                return {...project, photo: {uri: url}};
+                return {...project, photo: url};
               } catch (err) {
                 return {...project, photo: defaultPhoto};
               }
@@ -190,8 +159,6 @@ export const Home = () => {
             return {...project, photo: defaultPhoto};
           }),
         );
-
-        dispatch(setYourProjects(yourProjectsWithPhotoUrl));
 
         dispatch(setYourProjects(yourProjectsWithPhotoUrl));
       }
@@ -225,8 +192,6 @@ export const Home = () => {
             status: doc.data().status ?? 'started',
           }))
           .filter(project => project.status !== 'completed');
-
-        const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
 
         const otherProjectsWithPhotoUrl = await Promise.all(
           otherProjectsData.map(async project => {
@@ -297,10 +262,14 @@ export const Home = () => {
       const projectsWithPhotoUrl: ProjectType[] = await Promise.all(
         projectsData.map(async project => {
           if (project.photo) {
-            const url = await getFileUrl(project.photo);
-            return {...project, photo: url};
+            try {
+              const url = await getFileUrl(project.photo);
+              return {...project, photo: url};
+            } catch (error) {
+              return {...project, photo: defaultPhoto};
+            }
           }
-          return project;
+          return {...project, photo: defaultPhoto};
         }),
       );
 

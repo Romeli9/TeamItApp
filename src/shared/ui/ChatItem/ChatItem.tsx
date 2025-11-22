@@ -19,6 +19,8 @@ type ChatItemProps = {
   onPress: (chatName: string) => void;
 };
 
+const defaultPhoto = '../../assets/icons/mqdefault.jpg';
+
 export const ChatItem = memo(
   ({
     lastMessage,
@@ -38,7 +40,7 @@ export const ChatItem = memo(
       name: '',
       lastMessage,
       time: '',
-      imageUri: '',
+      imageUri: defaultPhoto,
     });
 
     useEffect(() => {
@@ -54,7 +56,7 @@ export const ChatItem = memo(
         switch (group) {
           case true: {
             if (name) {
-              let imageUri = image ?? '';
+              let imageUri = image ?? defaultPhoto;
               setChatData({name, time: formattedTime, imageUri, lastMessage});
               break;
             }

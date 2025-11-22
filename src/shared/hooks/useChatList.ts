@@ -14,11 +14,12 @@ import {
 export const useChatList = (userId: string) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const imageCache = useRef<Record<string, {uri: string} | any>>({});
+  const prevChatsRef = useRef<Chat[]>([]);
 
   useEffect(() => {
     if (!userId) return;
 
-    const defaultImage = require('../assets/icons/mqdefault.jpg');
+    const defaultImage = '../assets/icons/mqdefault.jpg';
     const chatsRef = collection(FIREBASE_DB, 'chats');
     const chatsQuery = query(
       chatsRef,
@@ -34,31 +35,34 @@ export const useChatList = (userId: string) => {
           ...doc.data(),
         })) as Chat[];
 
+        // Проверяем, действительно ли данные изменились
+        const hasChanges =
+          JSON.stringify(fetchedChats) !== JSON.stringify(prevChatsRef.current);
+
+        if (!hasChanges) {
+          return; // Данные не изменились, выходим
+        }
+
         await Promise.all(
           fetchedChats.map(async chat => {
             try {
-              // если нет изображения → дефолт
               if (!chat.image) {
                 chat.image = defaultImage;
                 return;
               }
 
-              // если уже https-ссылка → оставляем как есть
               if (
                 typeof chat.image === 'string' &&
                 chat.image.startsWith('http')
               ) {
-                chat.image = chat.image;
                 return;
               }
 
-              // если уже был закэширован
               if (imageCache.current[chat.image]) {
                 chat.image = imageCache.current[chat.image];
                 return;
               }
 
-              // иначе — пробуем получить URL из Firebase Storage
               const url = await getFileUrl(chat.image);
               imageCache.current[chat.image] = url;
               chat.image = url;
@@ -71,6 +75,7 @@ export const useChatList = (userId: string) => {
           }),
         );
 
+        prevChatsRef.current = fetchedChats;
         setChats(fetchedChats);
       },
       error => {

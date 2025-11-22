@@ -40,6 +40,8 @@ export const ProfileInfo = ({projects}: ProfileInfoProps) => {
   const authorStats = useSelector(selectAuthorStats);
   const badges = useSelector(selectAchievements);
 
+  const completed = badges.filter(b => b.progress >= 100);
+
   const renderProjectItem = ({item}: {item: ProjectType}) => (
     <TouchableOpacity
       onPress={() => navigate(Screens.PROJECT, {projectId: item.id})}>
@@ -112,7 +114,7 @@ export const ProfileInfo = ({projects}: ProfileInfoProps) => {
       </View>
 
       {/* 🔹 Рейтинг автора */}
-      <View style={styles.authorStats}>
+      <View style={styles.ratingBlock}>
         <Text style={styles.sectionTitle}>Рейтинг автора</Text>
         <Text>Завершённые проекты: {authorStats.completionRate}%</Text>
         <Text>Средняя оценка участников: {authorStats.avgTeamRating}/5</Text>
@@ -130,15 +132,17 @@ export const ProfileInfo = ({projects}: ProfileInfoProps) => {
       </View>
 
       {/* 🔹 Бейджи и ачивки */}
-      {badges.length > 0 && (
-        <View style={styles.badgesBlock}>
+      {completed.length > 0 && (
+        <View style={styles.ratingBlock}>
           <Text style={styles.sectionTitle}>Бейджи и ачивки</Text>
           <View style={styles.badgesRow}>
-            {badges.map(badge => (
-              <View key={badge.id} style={styles.badge}>
-                <Text style={styles.badgeText}>{badge.name}</Text>
-              </View>
-            ))}
+            {completed.map(badge => {
+              return (
+                <View key={badge.id} style={styles.badge}>
+                  <Text style={styles.badgeText}>{badge.name}</Text>
+                </View>
+              );
+            })}
           </View>
         </View>
       )}
@@ -150,7 +154,11 @@ export const ProfileInfo = ({projects}: ProfileInfoProps) => {
         renderItem={renderProjectItem}
         keyExtractor={item => item.id}
         numColumns={2}
-        columnWrapperStyle={{justifyContent: 'space-between'}}
+        columnWrapperStyle={{
+          justifyContent: 'space-between',
+          width: '100%',
+          gap: 8,
+        }}
       />
     </View>
   );
@@ -216,7 +224,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   projectImage: {
-    width: 175,
+    width: 155,
     height: 250,
     borderRadius: 20,
   },
@@ -225,7 +233,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontWeight: 'bold',
     textAlign: 'center',
-    width: 175,
   },
   text_project: {
     paddingTop: 10,

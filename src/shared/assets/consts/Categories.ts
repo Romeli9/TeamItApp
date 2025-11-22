@@ -1,5 +1,4 @@
 export const categoriesMock = [
-  'ПИВО',
   'Desktop',
   'Мобильные',
   'Web',

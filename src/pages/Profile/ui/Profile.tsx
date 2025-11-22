@@ -26,7 +26,7 @@ import {
 } from 'firebase/firestore';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {calculateAchievements} from 'redux/slices/achievementsSlice';
+import {fetchAchievements} from 'redux/slices/achievementsSlice';
 import {calculateAuthorStats} from 'redux/slices/authorStatsSlice';
 import {
   ProjectType,
@@ -50,6 +50,8 @@ import {useAppNavigation} from 'shared/libs/useAppNavigation';
 
 import {ProfileStyles as styles} from './Profile.styles';
 
+const defaultPhoto = '../../../shared/assets/icons/mqdefault.jpg';
+
 export const Profile = () => {
   const {navigate} = useAppNavigation();
   const dispatch = useDispatch<AppDispatch>();
@@ -72,31 +74,44 @@ export const Profile = () => {
 
   // После загрузки проектов и отзывов:
   useEffect(() => {
-    if (projects.length && reviews.length) {
+    if (projects.length) {
       dispatch(calculateAuthorStats({projects, reviews, authorId: userId}));
-      dispatch(calculateAchievements({projects, reviews, userId}));
+      dispatch(fetchAchievements({projects, reviews, userId}));
     }
   }, [projects, reviews, userId]);
 
   useEffect(() => {
     dispatch(fetchUserReviews(userId));
-  }, [userId]);
+  }, [userId, dispatch]);
 
   useEffect(() => {
     async function loadUrls() {
       if (avatar) {
-        const url = await getFileUrl(avatar);
-        setAvatarUrl(url);
+        try {
+          const url = await getFileUrl(avatar);
+          setAvatarUrl(url);
+        } catch (error) {
+          setAvatarUrl(defaultPhoto);
+        }
+      } else {
+        setAvatarUrl(defaultPhoto);
       }
+
       if (background) {
-        const url = await getFileUrl(background);
-        setBackgroundUrl(url);
+        try {
+          const url = await getFileUrl(background);
+          setBackgroundUrl(url);
+        } catch (error) {
+          setBackgroundUrl(defaultPhoto);
+        }
+      } else {
+        setBackgroundUrl(defaultPhoto);
       }
     }
     loadUrls();
   }, [avatar, background]);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
       if (!user) return;
@@ -119,18 +134,14 @@ export const Profile = () => {
     } catch (err) {
       console.error('Ошибка загрузки данных:', err);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, fetchUserData);
     return unsubscribe;
   }, [fetchUserData]);
 
-  useEffect(() => {
-    fetchUserProjects();
-  }, []);
-
-  const fetchUserProjects = async () => {
+  const fetchUserProjects = useCallback(async () => {
     try {
       const user = FIREBASE_AUTH.currentUser;
       if (user) {
@@ -159,14 +170,12 @@ export const Profile = () => {
               status: doc.data().status ?? 'started',
             }));
 
-            const defaultPhoto = require('../../../shared/assets/icons/mqdefault.jpg');
-
             const projectsWithPhotoUrl = await Promise.all(
               projectsData.map(async project => {
                 if (project.photo) {
                   try {
                     const url = await getFileUrl(project.photo);
-                    return {...project, photo: {uri: url}};
+                    return {...project, photo: url};
                   } catch (err) {
                     return {...project, photo: defaultPhoto};
                   }
@@ -182,13 +191,18 @@ export const Profile = () => {
     } catch (error) {
       console.error('Error fetching projects: ', error);
     }
-  };
+  }, [dispatch]);
+
+  useEffect(() => {
+    fetchUserProjects();
+  }, [fetchUserProjects]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchUserData();
+    await fetchUserProjects();
     setRefreshing(false);
-  }, [fetchUserData]);
+  }, [fetchUserData, fetchUserProjects]);
 
   const handleImageUpload = useCallback(
     async (field: 'avatar' | 'background') => {
@@ -245,6 +259,23 @@ export const Profile = () => {
           }),
         );
 
+        // Refresh URLs after upload
+        if (field === 'avatar') {
+          try {
+            const url = await getFileUrl(fileId);
+            setAvatarUrl(url);
+          } catch (error) {
+            setAvatarUrl(defaultPhoto);
+          }
+        } else {
+          try {
+            const url = await getFileUrl(fileId);
+            setBackgroundUrl(url);
+          } catch (error) {
+            setBackgroundUrl(defaultPhoto);
+          }
+        }
+
         Alert.alert(
           'Успешно',
           `${field === 'avatar' ? 'Аватар' : 'Фон'} обновлён.`,
@@ -289,7 +320,17 @@ export const Profile = () => {
               <TouchableOpacity
                 style={styles.background}
                 onPress={() => pickImage('background')}>
-                {backgroundUrl && <Image source={{uri: backgroundUrl}} />}
+                {backgroundUrl ? (
+                  <Image
+                    style={styles.backgroundImage}
+                    source={{uri: backgroundUrl}}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.placeholderBackground}>
+                    <PlusIcon size={30} />
+                  </View>
+                )}
               </TouchableOpacity>
 
               <View style={styles.profileHeader}>
@@ -301,7 +342,9 @@ export const Profile = () => {
                         source={{uri: avatarUrl}}
                       />
                     ) : (
-                      <PlusIcon size={30} />
+                      <View style={styles.placeholderAvatar}>
+                        <PlusIcon size={30} />
+                      </View>
                     )}
                   </TouchableOpacity>
                 </View>
@@ -318,7 +361,7 @@ export const Profile = () => {
                   <BellIcon size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => navigate(Screens.NOTIFICATION)}>
+                  onPress={() => navigate(Screens.ACHIEVEMENTS)}>
                   <StarIcon size={24} />
                 </TouchableOpacity>
               </View>

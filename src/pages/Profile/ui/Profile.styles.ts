@@ -70,4 +70,23 @@ export const ProfileStyles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'flex-start',
   },
+  backgroundImage: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderBackground: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+  },
+  placeholderAvatar: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 50, // or whatever your avatar borderRadius is
+  },
 });
