@@ -49,4 +49,6 @@ export type HomeStackParamsList = {
 export type ProfileStackParamsList = {
   [Screens.PROFILE]: undefined;
   [Screens.VIEW_PROFILE]: ProfileRouteParams;
+  [Screens.ACHIEVEMENTS]: undefined;
+  [Screens.NOTIFICATION]: undefined;
 };

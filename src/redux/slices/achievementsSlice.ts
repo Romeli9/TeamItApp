@@ -1,4 +1,5 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {getAchievements} from 'api/AchievementsService';
 import {RootState} from 'redux/store';
 import {Review} from 'services/reviewsService';
 
@@ -7,62 +8,43 @@ import {ProjectType} from './projectsSlice';
 export interface Achievement {
   id: string;
   name: string;
+  icon?: string;
   type: 'user' | 'author' | 'team';
+  progress: number; // 0-100%
+  secret?: boolean; // секретная ачивка
 }
 
 interface AchievementsState {
   badges: Achievement[];
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: AchievementsState = {
   badges: [],
+  loading: false,
+  error: null,
 };
 
-export const calculateAchievements = createAsyncThunk<
+export const fetchAchievements = createAsyncThunk<
   Achievement[],
-  {projects: ProjectType[]; reviews: Review[]; userId: string}
->('achievements/calculate', async ({projects, reviews, userId}) => {
-  const userReviews = reviews.filter(r => r.toUserId === userId);
+  {userId: string; projects: ProjectType[]; reviews: Review[]}
+>('achievements/fetch', async ({userId, projects, reviews}, thunkApi) => {
+  try {
+    const data = await getAchievements({userId, projects, reviews});
+    console.log(data);
 
-  const authoredProjects = projects.filter(p => p.creatorId === userId);
-  const completedProjects = authoredProjects.filter(
-    p => p.status === 'completed',
-  );
-
-  const avgRating =
-    userReviews.length > 0
-      ? userReviews.reduce((sum, r) => sum + (r.hardSkills ?? 0), 0) /
-        userReviews.length
-      : 0;
-
-  const badges: Achievement[] = [];
-
-  // 🔹 Участники
-  if (avgRating >= 4.5)
-    badges.push({id: 'reliable', name: 'Надёжный участник', type: 'user'});
-  if (completedProjects.length >= 3)
-    badges.push({
-      id: 'three_projects',
-      name: '3 завершённых проекта',
-      type: 'user',
-    });
-  if (
-    userReviews.filter(r => (r.comment || '').toLowerCase().includes('спасибо'))
-      .length >= 10
-  )
-    badges.push({
-      id: 'positive10',
-      name: '10 положительных отзывов',
-      type: 'user',
-    });
-
-  // 🔹 Авторы
-  if (completedProjects.length >= 5)
-    badges.push({id: 'leader5', name: 'Опытный лидер', type: 'author'});
-  if (avgRating >= 4.5)
-    badges.push({id: 'organizer', name: 'Хороший организатор', type: 'author'});
-
-  return badges;
+    return data.achievements.map((a: any) => ({
+      id: a.id,
+      name: a.title || a.name,
+      description: a.description || '',
+      type: a.type || 'user',
+      progress: a.progress ?? 0,
+      secret: a.secret ?? false,
+    }));
+  } catch (err: any) {
+    return thunkApi.rejectWithValue(err.message);
+  }
 });
 
 const achievementsSlice = createSlice({
@@ -70,12 +52,29 @@ const achievementsSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: builder => {
-    builder.addCase(calculateAchievements.fulfilled, (_, action) => ({
-      badges: action.payload,
-    }));
+    builder
+      .addCase(fetchAchievements.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAchievements.fulfilled, (state, action) => {
+        state.badges = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchAchievements.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
 export const selectAchievements = (state: RootState) =>
   state.achievements.badges;
+
+export const selectAchievementsLoading = (state: RootState) =>
+  state.achievements.loading;
+
+export const selectAchievementsError = (state: RootState) =>
+  state.achievements.error;
+
 export default achievementsSlice.reducer;

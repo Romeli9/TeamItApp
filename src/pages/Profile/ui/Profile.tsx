@@ -26,7 +26,7 @@ import {
 } from 'firebase/firestore';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
-import {calculateAchievements} from 'redux/slices/achievementsSlice';
+import {fetchAchievements} from 'redux/slices/achievementsSlice';
 import {calculateAuthorStats} from 'redux/slices/authorStatsSlice';
 import {
   ProjectType,
@@ -76,9 +76,9 @@ export const Profile = () => {
   useEffect(() => {
     if (projects.length) {
       dispatch(calculateAuthorStats({projects, reviews, authorId: userId}));
-      dispatch(calculateAchievements({projects, reviews, userId}));
+      dispatch(fetchAchievements({projects, reviews, userId}));
     }
-  }, [projects, reviews, userId, dispatch]);
+  }, [projects, reviews, userId]);
 
   useEffect(() => {
     dispatch(fetchUserReviews(userId));
@@ -361,7 +361,7 @@ export const Profile = () => {
                   <BellIcon size={24} />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => navigate(Screens.NOTIFICATION)}>
+                  onPress={() => navigate(Screens.ACHIEVEMENTS)}>
                   <StarIcon size={24} />
                 </TouchableOpacity>
               </View>

@@ -79,6 +79,6 @@ yarn-error.log
 android/
 ios/
 
-src/app/FireBaseConfig.ts
+# src/app/FireBaseConfig.ts
 
 .env
