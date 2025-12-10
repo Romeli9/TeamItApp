@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from 'redux/store';
-import { projectTypes } from 'shared/assets/consts/ProjectTypes';
+import { projectTypesMock } from 'shared/assets/consts/ProjectTypes';
 import {ProjectType} from './projectsSlice';
 
 export interface projectsState {

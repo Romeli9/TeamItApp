@@ -12,16 +12,33 @@ export const SearchStyles = StyleSheet.create({
   boxesContainer: {
     marginBottom: 20,
   },
-  filterBox: {
+  // Стили для блоков фильтров
+  containerboxed1: {
     backgroundColor: '#f5f5f5',
     padding: 16,
     borderRadius: 8,
     marginBottom: 12,
   },
-  sectionTitle: {
+  containerboxed2: {
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  containerboxed3: {
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  textStyle1: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
+    color: '#333',
+  },
+  textStyle2: {
+    fontSize: 16,
     color: '#333',
   },
   checkboxContainer: {
@@ -31,10 +48,6 @@ export const SearchStyles = StyleSheet.create({
   },
   checkbox: {
     marginRight: 8,
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: '#333',
   },
 
   // Стили для навыков

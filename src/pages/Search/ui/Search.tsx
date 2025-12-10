@@ -4,7 +4,7 @@ import {Button, Text, TouchableOpacity, View, ScrollView, TextInput} from 'react
 
 import {FIREBASE_DB} from 'app/FireBaseConfig';
 import Checkbox from 'expo-checkbox';
-import {collection, getDocs, query, where, orderBy, limit} from 'firebase/firestore';
+import {collection, getDocs, query, where} from 'firebase/firestore';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -20,36 +20,29 @@ import {
   resetAllFilters,
   addSearchSkill,
   removeSearchSkill,
-  toggleProjectType,
 } from 'redux/slices/filterSlice';
 import {setOtherProjects} from 'redux/slices/projectsSlice';
 import {RootState} from 'redux/store';
 import {categoriesMock} from 'shared/assets/consts/Categories';
 import {requiredMock} from 'shared/assets/consts/Required';
-import {projectTypes} from 'shared/assets/consts/ProjectTypes';
+import {projectTypesMock} from 'shared/assets/consts/ProjectTypes';
 
 import {SearchStyles as styles} from './Search.styles';
 
 export const Search: React.FC = () => {
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
 
-  const {
-    categoryes,
-    requireds,
-    projects,
-    projectTypes: selectedProjectTypes,
-    searchSkills,
-    sortBy
-  } = useSelector((state: RootState) => state.filter);
+  const {categoryes, requireds, projects, projectTypes: selectedProjectTypes, searchSkills, sortBy} = useSelector(
+    (state: RootState) => state.filter,
+  );
 
   const {allOtherProjects} = useSelector((state: RootState) => state.projects);
+
   const {userName, userSkills} = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
   const [skillInput, setSkillInput] = useState('');
 
-  // Обработчики для фильтров
   const handleCategoryChange = (category: string) => {
     if (categoryes.includes(category)) {
       dispatch(setCategory(categoryes.filter(item => item !== category)));
@@ -67,7 +60,11 @@ export const Search: React.FC = () => {
   };
 
   const handleProjectTypeChange = (type: string) => {
-    dispatch(toggleProjectType(type));
+    if (selectedProjectTypes.includes(type)) {
+      dispatch(setProjectTypes(selectedProjectTypes.filter(item => item !== type)));
+    } else {
+      dispatch(setProjectTypes([...selectedProjectTypes, type]));
+    }
   };
 
   const handleSkillAdd = () => {
@@ -87,16 +84,12 @@ export const Search: React.FC = () => {
     }
   };
 
-  // Загрузка проектов с улучшенной фильтрацией
   const fetchProjects = async () => {
     try {
       const projectsRef = collection(FIREBASE_DB, 'projects');
-      let projectsQuery = query(projectsRef, where('creator', '!=', userName));
-      
-      // Добавляем сортировку по активности (последние обновленные)
-      projectsQuery = query(projectsQuery, orderBy('updatedAt', 'desc'), limit(50));
-      
-      const querySnapshot = await getDocs(projectsQuery);
+      const querySnapshot = await getDocs(
+        query(projectsRef, where('creator', '!=', userName)),
+      );
       const projectsData = querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -108,109 +101,15 @@ export const Search: React.FC = () => {
           photo: data.photo,
           required: data.required || [],
           categories: data.categories || [],
-          projectType: data.projectType || 'Другое', // Добавляем тип проекта
+          projectType: data.projectType || 'Другое',
           members: data.members || [],
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
-          rating: data.rating || 0,
-          responsesCount: data.responsesCount || 0,
         };
       });
 
       dispatch(setStateProjects(projectsData));
-      dispatch(setOtherProjects(projectsData));
     } catch (error) {
       console.error('Error fetching projects: ', error);
     }
-  };
-
-  // Умная фильтрация с учетом всех критериев
-  const applySmartFiltering = () => {
-    let filtered = [...projects];
-
-    // Фильтрация по категориям
-    if (categoryes.length > 0) {
-      filtered = filtered.filter(project =>
-        project.categories.some((category: string) => categoryes.includes(category))
-      );
-    }
-
-    // Фильтрация по ролям
-    if (requireds.length > 0) {
-      filtered = filtered.filter(project =>
-        project.required.some((require: string) => requireds.includes(require))
-      );
-    }
-
-    // Фильтрация по типам проектов
-    if (selectedProjectTypes.length > 0) {
-      filtered = filtered.filter(project =>
-        selectedProjectTypes.includes(project.projectType)
-      );
-    }
-
-    // Фильтрация по навыкам (автоподбор)
-    if (searchSkills.length > 0) {
-      filtered = filtered.filter(project => {
-        const projectSkills = [...(project.required || []), ...(project.categories || [])];
-        return searchSkills.some(skill => 
-          projectSkills.some((projectSkill: string) => 
-            projectSkill.toLowerCase().includes(skill.toLowerCase())
-          )
-        );
-      });
-    }
-
-    // Сортировка
-    switch (sortBy) {
-      case 'date':
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
-      case 'popularity':
-        filtered.sort((a, b) => (b.responsesCount || 0) - (a.responsesCount || 0));
-        break;
-      case 'rating':
-        filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'relevance':
-      default:
-        // Сортировка по релевантности (совпадение навыков + активность)
-        filtered.sort((a, b) => {
-          const aMatchScore = calculateMatchScore(a);
-          const bMatchScore = calculateMatchScore(b);
-          return bMatchScore - aMatchScore;
-        });
-        break;
-    }
-
-    dispatch(setOtherProjects(filtered));
-  };
-
-  // Расчет релевантности проекта
-  const calculateMatchScore = (project: any) => {
-    let score = 0;
-    
-    // Совпадение навыков
-    if (searchSkills.length > 0) {
-      const projectSkills = [...(project.required || []), ...(project.categories || [])];
-      const matches = searchSkills.filter(skill =>
-        projectSkills.some((projectSkill: string) =>
-          projectSkill.toLowerCase().includes(skill.toLowerCase())
-        )
-      );
-      score += (matches.length / searchSkills.length) * 50;
-    }
-
-    // Активность проекта (недавно обновленные выше)
-    if (project.updatedAt) {
-      const daysSinceUpdate = (Date.now() - new Date(project.updatedAt).getTime()) / (1000 * 3600 * 24);
-      score += Math.max(0, 30 - daysSinceUpdate);
-    }
-
-    // Рейтинг автора
-    score += (project.rating || 0) * 2;
-
-    return score;
   };
 
   useEffect(() => {
@@ -218,17 +117,49 @@ export const Search: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    applySmartFiltering();
-  }, [categoryes, requireds, selectedProjectTypes, searchSkills, sortBy, projects]);
+    if (categoryes.length > 0 || requireds.length > 0 || selectedProjectTypes.length > 0 || searchSkills.length > 0) {
+      let filtered = projects.filter(project => {
+        const categoryMatch = categoryes.length === 0 || 
+          project.categories.some((category: string) => categoryes.includes(category));
+        
+        const requiredMatch = requireds.length === 0 ||
+          project.required.some((require: string) => requireds.includes(require));
+        
+        const projectTypeMatch = selectedProjectTypes.length === 0 ||
+          selectedProjectTypes.includes(project.projectType);
+        
+        const skillsMatch = searchSkills.length === 0 || 
+          searchSkills.some(skill => {
+            const projectSkills = [...(project.required || []), ...(project.categories || [])];
+            return projectSkills.some((projectSkill: string) => 
+              projectSkill.toLowerCase().includes(skill.toLowerCase())
+            );
+          });
+
+        return categoryMatch && requiredMatch && projectTypeMatch && skillsMatch;
+      });
+
+      // Простая сортировка по умолчанию
+      if (sortBy === 'date') {
+        // Можно добавить сортировку по дате, если есть поле createdAt
+      }
+
+      dispatch(setOtherProjects(filtered));
+    } else {
+      dispatch(setOtherProjects(allOtherProjects));
+    }
+  }, [categoryes, requireds, selectedProjectTypes, searchSkills, sortBy]);
+
+  const insets = useSafeAreaInsets();
 
   return (
     <SafeAreaProvider>
       <View style={[styles.container, {paddingTop: insets.top}]}>
         <ScrollView style={styles.scrollContainer}>
           
-          {/* Блок автоподбора навыков */}
+          {/* Блок навыков */}
           <View style={styles.skillsContainer}>
-            <Text style={styles.sectionTitle}>Навыки для поиска</Text>
+            <Text style={styles.textStyle1}>Навыки для поиска</Text>
             <View style={styles.skillInputContainer}>
               <TextInput
                 style={styles.skillInput}
@@ -242,7 +173,7 @@ export const Search: React.FC = () => {
             
             <View style={styles.skillsButtons}>
               <Button title="Загрузить из профиля" onPress={loadSkillsFromProfile} />
-              <Button title="Очистить навыки" onPress={() => dispatch(setSearchSkills([]))} />
+              <Button title="Очистить" onPress={() => dispatch(setSearchSkills([]))} />
             </View>
 
             <View style={styles.skillsList}>
@@ -260,102 +191,101 @@ export const Search: React.FC = () => {
 
           {/* Сортировка */}
           <View style={styles.sortContainer}>
-            <Text style={styles.sectionTitle}>Сортировка</Text>
+            <Text style={styles.textStyle1}>Сортировка</Text>
             <View style={styles.sortButtons}>
-              {[
-                {value: 'relevance', label: 'Релевантность'},
-                {value: 'date', label: 'По дате'},
-                {value: 'popularity', label: 'Популярность'},
-                {value: 'rating', label: 'Рейтинг'}
-              ].map(sortOption => (
-                <TouchableOpacity
-                  key={sortOption.value}
-                  style={[
-                    styles.sortButton,
-                    sortBy === sortOption.value && styles.sortButtonActive
-                  ]}
-                  onPress={() => dispatch(setSortBy(sortOption.value))}
-                >
-                  <Text style={[
-                    styles.sortButtonText,
-                    sortBy === sortOption.value && styles.sortButtonTextActive
-                  ]}>
-                    {sortOption.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              <TouchableOpacity
+                style={[styles.sortButton, sortBy === 'relevance' && styles.sortButtonActive]}
+                onPress={() => dispatch(setSortBy('relevance'))}
+              >
+                <Text style={[styles.sortButtonText, sortBy === 'relevance' && styles.sortButtonTextActive]}>
+                  Релевантность
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.sortButton, sortBy === 'date' && styles.sortButtonActive]}
+                onPress={() => dispatch(setSortBy('date'))}
+              >
+                <Text style={[styles.sortButtonText, sortBy === 'date' && styles.sortButtonTextActive]}>
+                  По дате
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.sortButton, sortBy === 'popularity' && styles.sortButtonActive]}
+                onPress={() => dispatch(setSortBy('popularity'))}
+              >
+                <Text style={[styles.sortButtonText, sortBy === 'popularity' && styles.sortButtonTextActive]}>
+                  Популярность
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
           <View style={styles.boxesContainer}>
-            
-            {/* Категории */}
-            <View style={styles.filterBox}>
-              <Text style={styles.sectionTitle}>Категории</Text>
+            <View style={styles.containerboxed1}>
+              <Text style={styles.textStyle1}>Категории</Text>
               {categoriesMock.map((category, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.checkboxContainer}
-                  onPress={() => handleCategoryChange(category)}
-                >
+                  onPress={() => handleCategoryChange(category)}>
                   <Checkbox
                     style={styles.checkbox}
                     value={categoryes.includes(category)}
                     onValueChange={() => handleCategoryChange(category)}
-                    color={categoryes.includes(category) ? '#4630EB' : undefined}
+                    color={
+                      categoryes.includes(category) ? '#4630EB' : undefined
+                    }
                   />
-                  <Text style={styles.checkboxLabel}>{category}</Text>
+                  <Text style={styles.textStyle2}>{category}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-
-            {/* Роли */}
-            <View style={styles.filterBox}>
-              <Text style={styles.sectionTitle}>Роли</Text>
+            <View style={styles.containerboxed2}>
+              <Text style={styles.textStyle1}>Роли</Text>
               {requiredMock.map((requireded, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.checkboxContainer}
-                  onPress={() => handleRequireChange(requireded)}
-                >
+                  onPress={() => handleRequireChange(requireded)}>
                   <Checkbox
                     style={styles.checkbox}
                     value={requireds.includes(requireded)}
                     onValueChange={() => handleRequireChange(requireded)}
-                    color={requireds.includes(requireded) ? '#4630EB' : undefined}
+                    color={
+                      requireds.includes(requireded) ? '#4630EB' : undefined
+                    }
                   />
-                  <Text style={styles.checkboxLabel}>{requireded}</Text>
+                  <Text style={styles.textStyle2}>{requireded}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-
-            {/* Типы проектов */}
-            <View style={styles.filterBox}>
-              <Text style={styles.sectionTitle}>Тип проекта</Text>
-              {projectTypes.map((type, index) => (
+            
+            {/* Новый блок - Типы проектов */}
+            <View style={styles.containerboxed3}>
+              <Text style={styles.textStyle1}>Тип проекта</Text>
+              {projectTypesMock.map((type, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.checkboxContainer}
-                  onPress={() => handleProjectTypeChange(type.value)}
-                >
+                  onPress={() => handleProjectTypeChange(type)}>
                   <Checkbox
                     style={styles.checkbox}
-                    value={selectedProjectTypes.includes(type.value)}
-                    onValueChange={() => handleProjectTypeChange(type.value)}
-                    color={selectedProjectTypes.includes(type.value) ? '#4630EB' : undefined}
+                    value={selectedProjectTypes.includes(type)}
+                    onValueChange={() => handleProjectTypeChange(type)}
+                    color={
+                      selectedProjectTypes.includes(type) ? '#4630EB' : undefined
+                    }
                   />
-                  <Text style={styles.checkboxLabel}>{type.value}</Text>
+                  <Text style={styles.textStyle2}>{type}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-
           </View>
 
           <View style={styles.actionButtons}>
             <Button title="Сбросить фильтры" onPress={() => dispatch(resetAllFilters())} />
-            <Button title="Применить поиск" onPress={() => navigation.goBack()} />
+            <Button title="Искать" onPress={() => navigation.goBack()} />
           </View>
-
         </ScrollView>
       </View>
     </SafeAreaProvider>

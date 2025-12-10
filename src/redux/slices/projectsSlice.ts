@@ -15,6 +15,7 @@ export type ProjectType = {
   HardSkills: Skill[];
   SoftSkills: Skill[];
   members: string[];
+  projectType: string; 
 };
 
 export interface projectsState {

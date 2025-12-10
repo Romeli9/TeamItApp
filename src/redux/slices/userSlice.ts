@@ -1,6 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 export interface userState {
+  userSkills: string[];
   userId: string;
   userName: string;
   email: string;
@@ -16,6 +17,7 @@ export interface userState {
 
 const initialState: userState = {
   userId: '',
+  userSkills: [],
   userName: '',
   email: '',
   avatar: '',
@@ -54,10 +56,16 @@ export const userSlice = createSlice({
       state.email = '';
       state.userName = '';
     },
+     setUserName: (state, action) => {
+      state.userName = action.payload;
+    },
+      setUserSkills: (state, action) => {
+      state.userSkills = action.payload;
+    },
   },
 });
 
-export const {setUserData, setProfileData, clearProfileData} =
+export const {setUserData, setProfileData, clearProfileData, setUserName, setUserSkills} =
   userSlice.actions;
 
 export default userSlice.reducer;
